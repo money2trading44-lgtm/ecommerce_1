@@ -21,24 +21,53 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
+
+        /* Optimisations mobiles */
+        @media (max-width: 640px) {
+            input, button {
+                font-size: 16px !important; /* Empêche le zoom sur iOS */
+            }
+        }
+
+        /* Breakpoint personnalisé pour très petits écrans */
+        @media (max-width: 375px) {
+            .text-2xl {
+                font-size: 1.5rem;
+            }
+            .text-xl {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Animation de focus améliorée */
+        input:focus {
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+        }
+
+        /* Bouton tactile optimisé */
+        button {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
     </style>
 </head>
-<body class="font-sans bg-gray-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full">
+<body class="font-sans bg-gray-100 min-h-screen flex items-center justify-center p-3 sm:p-4 lg:p-6">
+    <div class="max-w-md w-full mx-auto">
         <!-- Carte de connexion -->
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 lg:p-8">
             <!-- En-tête -->
-            <div class="text-center mb-8">
-                <div class="flex items-center justify-center gap-3 mb-4">
-                    <span class="material-symbols-outlined text-primary text-4xl">admin_panel_settings</span>
-                    <span class="text-2xl font-bold text-gray-900">DSG General Trading</span>
+            <div class="text-center mb-6 sm:mb-8">
+                <div class="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <span class="material-symbols-outlined text-primary text-3xl sm:text-4xl">admin_panel_settings</span>
+                    <span class="text-xl sm:text-2xl font-bold text-gray-900 truncate">DSG General Trading</span>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-2">Espace Administrateur</h1>
-                <p class="text-gray-600">Connectez-vous pour gérer votre boutique</p>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Espace Administrateur</h1>
+                <p class="text-sm sm:text-base text-gray-600">Connectez-vous pour gérer votre boutique</p>
             </div>
 
             <!-- Formulaire de connexion -->
-            <form method="post" class="space-y-6">
+            <form method="post" class="space-y-4 sm:space-y-6">
                 {% csrf_token %}
 
                 <!-- Champ Nom d'utilisateur -->
@@ -47,10 +76,11 @@
                         Nom d'utilisateur
                     </label>
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">person</span>
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-base sm:text-lg">person</span>
                         <input type="text" id="username" name="username" required
-                               class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                               placeholder="Votre nom d'utilisateur">
+                               class="w-full pl-10 sm:pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base"
+                               placeholder="Votre nom d'utilisateur"
+                               autocomplete="username">
                     </div>
                 </div>
 
@@ -60,32 +90,35 @@
                         Mot de passe
                     </label>
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">lock</span>
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-base sm:text-lg">lock</span>
                         <input type="password" id="password" name="password" required
-                               class="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                               placeholder="Votre mot de passe">
-                        <button type="button" id="togglePassword" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                            <span class="material-symbols-outlined">visibility</span>
+                               class="w-full pl-10 sm:pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 text-sm sm:text-base"
+                               placeholder="Votre mot de passe"
+                               autocomplete="current-password">
+                        <button type="button" id="togglePassword"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                                aria-label="Afficher/masquer le mot de passe">
+                            <span class="material-symbols-outlined text-base sm:text-lg">visibility</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Bouton de connexion -->
                 <button type="submit"
-                        class="w-full bg-primary text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined">login</span>
+                        class="w-full bg-primary text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base transform active:scale-95">
+                    <span class="material-symbols-outlined text-base">login</span>
                     Se connecter
                 </button>
             </form>
 
             <!-- Messages d'erreur -->
             {% if messages %}
-                <div class="mt-6 space-y-2">
+                <div class="mt-4 sm:mt-6 space-y-2">
                     {% for message in messages %}
-                        <div class="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                        <div class="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm">
                             <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-base">error</span>
-                                <span>{{ message }}</span>
+                                <span class="material-symbols-outlined text-base flex-shrink-0">error</span>
+                                <span class="break-words">{{ message }}</span>
                             </div>
                         </div>
                     {% endfor %}
@@ -93,20 +126,20 @@
             {% endif %}
 
             <!-- Information de sécurité -->
-            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div class="flex items-start gap-3">
-                    <span class="material-symbols-outlined text-blue-500 text-lg mt-0.5">shield</span>
-                    <div class="text-sm text-blue-700">
+            <div class="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start gap-2 sm:gap-3">
+                    <span class="material-symbols-outlined text-blue-500 text-base sm:text-lg mt-0.5 flex-shrink-0">shield</span>
+                    <div class="text-xs sm:text-sm text-blue-700">
                         <p class="font-medium mb-1">Accès sécurisé</p>
-                        <p>Cette interface est réservée aux administrateurs du site.</p>
+                        <p class="leading-relaxed">Cette interface est réservée aux administrateurs du site.</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Pied de page -->
-        <div class="text-center mt-6">
-            <p class="text-sm text-gray-500">
+        <div class="text-center mt-4 sm:mt-6">
+            <p class="text-xs sm:text-sm text-gray-500">
                 © 2025 DSG General Trading. Tous droits réservés.
             </p>
         </div>
@@ -119,12 +152,109 @@
             const passwordInput = document.getElementById('password');
             const visibilityIcon = togglePassword.querySelector('.material-symbols-outlined');
 
-            togglePassword.addEventListener('click', function() {
+            // Fonction pour basculer la visibilité du mot de passe
+            function togglePasswordVisibility() {
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
                 visibilityIcon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+
+                // Feedback visuel sur mobile
+                if (window.innerWidth <= 768) {
+                    togglePassword.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        togglePassword.style.transform = 'scale(1)';
+                    }, 150);
+                }
+            }
+
+            // Événement click
+            togglePassword.addEventListener('click', togglePasswordVisibility);
+
+            // Événement touch pour mobile
+            togglePassword.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                togglePasswordVisibility();
             });
+
+            // Auto-focus sur le champ username sur desktop
+            if (window.innerWidth > 768) {
+                document.getElementById('username').focus();
+            }
+
+            // Empêcher le zoom sur iOS pour les inputs
+            if (window.innerWidth <= 768) {
+                const inputs = document.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.addEventListener('focus', function() {
+                        window.scrollTo(0, 0);
+                        document.body.style.zoom = "1.0";
+                    });
+                });
+            }
+
+            // Gestion du loading du formulaire
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                const submitButton = this.querySelector('button[type="submit"]');
+                const originalText = submitButton.innerHTML;
+
+                // Afficher l'état de chargement
+                submitButton.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Connexion...';
+                submitButton.disabled = true;
+
+                // Timeout de sécurité
+                setTimeout(() => {
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                }, 5000);
+            });
+
+            // Animation d'entrée progressive
+            const card = document.querySelector('.bg-white');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
         });
+
+        // Animation de spin pour le chargement
+        const style = document.createElement('style');
+        style.textContent = `
+            .animate-spin {
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+
+            /* Optimisation pour très petits écrans */
+            @media (max-width: 320px) {
+                .p-4 {
+                    padding: 0.75rem;
+                }
+                .text-xl {
+                    font-size: 1.25rem;
+                }
+                .gap-2 {
+                    gap: 0.5rem;
+                }
+            }
+
+            /* Amélioration du contraste pour l'accessibilité */
+            @media (prefers-reduced-motion: reduce) {
+                * {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

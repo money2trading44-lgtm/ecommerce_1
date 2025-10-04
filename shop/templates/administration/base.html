@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Admin Panel - Tech & Home{% endblock %}</title>
+    <title>{% block title %}Admin - DSG General Trading{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
     <script>
@@ -12,7 +12,6 @@
                 extend: {
                     colors: {
                         primary: "#137fec",
-                        "background-light": "#f6f7f8",
                     }
                 }
             }
@@ -23,214 +22,384 @@
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
 
-        /* Styles pour la sidebar responsive */
-        .sidebar-mobile {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
+        /* Optimisations mobiles */
+        @media (max-width: 640px) {
+            input, button, select {
+                font-size: 16px !important; /* Empêche le zoom sur iOS */
+            }
         }
 
-        .sidebar-mobile.open {
-            transform: translateX(0);
+        /* Animation de focus améliorée */
+        input:focus, select:focus, textarea:focus {
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
         }
 
-        .mobile-overlay {
-            display: none;
-            background: rgba(0, 0, 0, 0.5);
+        /* Bouton tactile optimisé */
+        button, a[role="button"] {
+            min-height: 44px;
+            touch-action: manipulation;
         }
 
-        .mobile-overlay.open {
-            display: block;
+        /* Styles pour la navigation fixe */
+        .fixed-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
         }
 
-        /* Amélioration du scroll sur mobile */
-        .scroll-mobile {
-            -webkit-overflow-scrolling: touch;
+        .content-with-fixed-nav {
+            margin-top: 64px; /* Hauteur de la navigation */
+            min-height: calc(100vh - 64px);
+        }
+
+        /* Ajustement pour l'en-tête de page fixe */
+        .page-header-fixed {
+            position: sticky;
+            top: 64px; /* Sous la navigation */
+            z-index: 40;
         }
     </style>
-    {% block extra_css %}{% endblock %}
 </head>
 <body class="font-sans bg-gray-100">
-    <!-- Overlay mobile -->
-    <div class="mobile-overlay fixed inset-0 z-30 lg:hidden" id="mobileOverlay"></div>
+    <!-- Barre de navigation FIXE -->
+    <nav class="fixed-nav bg-white shadow-sm border-b border-gray-200">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo et titre -->
+                <div class="flex items-center">
+                    <a href="/administration/dashboard/" class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-2xl">admin_panel_settings</span>
+                        <span class="text-xl font-bold text-gray-900 hidden sm:block">DSG Admin</span>
+                    </a>
+                </div>
 
-    <div class="flex flex-col lg:flex-row min-h-screen">
-        <!-- Bouton menu mobile -->
-        <button class="lg:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg hover:bg-gray-100 transition-colors" id="mobileMenuButton">
-            <span class="material-symbols-outlined text-gray-700">menu</span>
-        </button>
+                <!-- Navigation desktop -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="/administration/dashboard/"
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/dashboard/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        Tableau de bord
+                    </a>
+                    <a href="/administration/products/"
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/products/' or request.path == '/administration/products/add/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                        Produits
+                    </a>
+                    <a href="/administration/orders/"
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                        Commandes
+                    </a>
+                    <a href="/administration/repairs/"
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                        <span class="material-symbols-outlined">build</span>
+                        Réparations
+                    </a>
+                </div>
 
-        <!-- Sidebar Responsive -->
-        <aside class="sidebar-mobile lg:transform-none fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white shadow-lg lg:shadow-sm border-r border-gray-200 flex flex-col lg:translate-x-0 transition-transform duration-300">
-            <!-- En-tête sidebar -->
-            <div class="p-4 lg:p-6 border-b border-gray-200 bg-white">
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-primary text-2xl">admin_panel_settings</span>
+                <!-- Menu utilisateur -->
+                <div class="flex items-center space-x-3">
+                    <span class="text-sm text-gray-700 hidden sm:block">Bonjour, {% if user.is_authenticated %}{{ user.username }}{% else %}Admin{% endif %}</span>
+                    <form method="post" action="/administration/logout/">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="text-gray-600 hover:text-red-600 transition-colors flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100">
+                            <span class="material-symbols-outlined">logout</span>
+                            <span class="hidden sm:block">Déconnexion</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation mobile -->
+        <div class="md:hidden border-t border-gray-200">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="/administration/dashboard/"
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/dashboard/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    Tableau de bord
+                </a>
+                <a href="/administration/products/"
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/products/' or request.path == '/administration/products/add/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                    Produits
+                </a>
+                <a href="/administration/orders/"
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    Commandes
+                </a>
+                <a href="/administration/repairs/"
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                    <span class="material-symbols-outlined">build</span>
+                    Réparations
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal avec marge pour la navigation fixe -->
+    <div class="content-with-fixed-nav">
+        <!-- En-tête de page FIXE -->
+        <div class="page-header-fixed bg-white shadow-sm border-b border-gray-200">
+            <div class="px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex-1 min-w-0">
-                        <h1 class="text-lg lg:text-xl font-bold text-gray-900 truncate">Admin Panel</h1>
-                        <p class="text-xs text-gray-500 truncate">Tech & Home</p>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
+                            {% block page_title %}Tableau de bord{% endblock %}
+                        </h1>
+                        <p class="text-sm sm:text-base text-gray-600 mt-1">
+                            {% block page_subtitle %}Vue d'ensemble de votre activité{% endblock %}
+                        </p>
                     </div>
-                    <!-- Bouton fermer mobile -->
-                    <button class="lg:hidden p-1 rounded hover:bg-gray-100 transition-colors" id="closeSidebar">
-                        <span class="material-symbols-outlined text-gray-500">close</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Navigation -->
-            <nav class="flex-1 p-4 space-y-1 overflow-y-auto scroll-mobile">
-                <a href="/administration/dashboard/" class="flex items-center gap-3 p-3 rounded-lg {% if request.path == '/administration/dashboard/' %}bg-primary text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors group">
-                    <span class="material-symbols-outlined flex-shrink-0">dashboard</span>
-                    <span class="flex-1 truncate">Tableau de bord</span>
-                </a>
-
-                <a href="/administration/products/" class="flex items-center gap-3 p-3 rounded-lg {% if request.path == '/administration/products/' %}bg-primary text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors group relative">
-                    <span class="material-symbols-outlined flex-shrink-0">inventory_2</span>
-                    <span class="flex-1 truncate">Produits</span>
-                </a>
-
-                <a href="/administration/orders/" class="flex items-center gap-3 p-3 rounded-lg {% if request.path == '/administration/orders/' %}bg-primary text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors group relative">
-                    <span class="material-symbols-outlined flex-shrink-0">receipt_long</span>
-                    <span class="flex-1 truncate">Commandes</span>
-                    {% with pending_orders_count=request.pending_orders_count %}
-                        {% if pending_orders_count > 0 %}
-                            <span class="absolute right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse flex-shrink-0">
-                                {{ pending_orders_count }}
-                            </span>
-                        {% endif %}
-                    {% endwith %}
-                </a>
-
-                <a href="/administration/repairs/" class="flex items-center gap-3 p-3 rounded-lg {% if request.path == '/administration/repairs/' %}bg-primary text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors group relative">
-                    <span class="material-symbols-outlined flex-shrink-0">build</span>
-                    <span class="flex-1 truncate">Réparations</span>
-                    {% with pending_repairs_count=request.pending_repairs_count %}
-                        {% if pending_repairs_count > 0 %}
-                            <span class="absolute right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse flex-shrink-0">
-                                {{ pending_repairs_count }}
-                            </span>
-                        {% endif %}
-                    {% endwith %}
-                </a>
-            </nav>
-
-            <!-- User info -->
-            <div class="p-4 border-t border-gray-200 bg-white">
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-8 h-8 lg:w-10 lg:h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                        <span class="material-symbols-outlined text-white text-sm">person</span>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">{{ request.user.username }}</p>
-                        <p class="text-xs text-gray-500 truncate">Administrateur</p>
+                    <div class="mt-4 sm:mt-0">
+                        {% block page_actions %}
+                        <!-- Actions spécifiques à la page (boutons, etc.) -->
+                        {% endblock %}
                     </div>
                 </div>
-                <a href="/administration/logout/" class="flex items-center gap-2 w-full p-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors">
-                    <span class="material-symbols-outlined text-base flex-shrink-0">logout</span>
-                    <span class="truncate">Déconnexion</span>
-                </a>
             </div>
-        </aside>
+        </div>
 
-        <!-- Main Content -->
-        <main class="flex-1 min-h-screen lg:ml-0 bg-gray-100">
-            <!-- Header responsive -->
-            <header class="bg-white shadow-sm border-b px-4 lg:px-8 py-4 lg:py-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3 lg:gap-4">
-                        <!-- Espace pour l'alignement sur mobile -->
-                        <div class="w-8 lg:hidden"></div>
-                        <div class="flex-1 min-w-0">
-                            <h2 class="text-lg lg:text-2xl font-bold text-gray-900 truncate">{% block page_title %}Tableau de bord{% endblock %}</h2>
-                            <p class="text-xs lg:text-sm text-gray-600 mt-1 truncate">{% block page_subtitle %}Vue d'ensemble de votre boutique{% endblock %}</p>
-                        </div>
-                    </div>
-
-                    <!-- Indicateur responsive -->
-                    <div class="hidden lg:block text-sm text-gray-500">
-                        {{ request.user.username }}
+        <!-- Contenu de la page -->
+        <main class="px-4 sm:px-6 lg:px-8 py-6">
+            <!-- Messages Django -->
+            {% if messages %}
+            <div class="mb-6 space-y-3">
+                {% for message in messages %}
+                <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700
+                                          {% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-700
+                                          {% elif message.tags == 'warning' %}bg-yellow-50 border border-yellow-200 text-yellow-700
+                                          {% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
+                    <div class="flex items-center">
+                        <span class="material-symbols-outlined mr-2 text-base">
+                            {% if message.tags == 'error' %}error
+                            {% elif message.tags == 'success' %}check_circle
+                            {% elif message.tags == 'warning' %}warning
+                            {% else %}info{% endif %}
+                        </span>
+                        <span class="text-sm">{{ message }}</span>
                     </div>
                 </div>
-            </header>
-
-            <!-- Contenu principal avec padding responsive -->
-            <div class="p-3 lg:p-6 xl:p-8">
-                {% if messages %}
-                    <div class="mb-4 lg:mb-6 space-y-2">
-                        {% for message in messages %}
-                            <div class="p-3 lg:p-4 rounded-lg {% if message.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% elif message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
-                                <div class="flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-base flex-shrink-0">
-                                        {% if message.tags == 'success' %}check_circle
-                                        {% elif message.tags == 'error' %}error
-                                        {% else %}info{% endif %}
-                                    </span>
-                                    <span class="flex-1 text-sm lg:text-base">{{ message }}</span>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% block content %}
-                {% endblock %}
+                {% endfor %}
             </div>
+            {% endif %}
+
+            <!-- Contenu spécifique de la page -->
+            {% block content %}
+            <!-- Le contenu spécifique à chaque page viendra ici -->
+            {% endblock %}
         </main>
     </div>
 
+    <!-- Scripts supplémentaires -->
     {% block extra_js %}
+    <!-- Scripts spécifiques aux pages -->
+    {% endblock %}
+
+    <!-- Scripts globaux -->
     <script>
-    // Gestion du menu mobile
+    // Fonctions globales pour l'administration
     document.addEventListener('DOMContentLoaded', function() {
-        const mobileMenuButton = document.getElementById('mobileMenuButton');
-        const closeSidebar = document.getElementById('closeSidebar');
-        const sidebar = document.querySelector('.sidebar-mobile');
-        const mobileOverlay = document.getElementById('mobileOverlay');
-
-        function openSidebar() {
-            sidebar.classList.add('open');
-            mobileOverlay.classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeSidebarFunc() {
-            sidebar.classList.remove('open');
-            mobileOverlay.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-
-        if (mobileMenuButton) {
-            mobileMenuButton.addEventListener('click', openSidebar);
-        }
-
-        if (closeSidebar) {
-            closeSidebar.addEventListener('click', closeSidebarFunc);
-        }
-
-        if (mobileOverlay) {
-            mobileOverlay.addEventListener('click', closeSidebarFunc);
-        }
-
-        // Fermer le menu en redimensionnant vers desktop
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 1024) {
-                closeSidebarFunc();
-            }
-        });
-
-        // Animation pour les cartes au chargement
-        const cards = document.querySelectorAll('.bg-white');
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
+        // Animation au chargement des pages
+        const mainContent = document.querySelector('main');
+        if (mainContent) {
+            mainContent.style.opacity = '0';
+            mainContent.style.transform = 'translateY(10px)';
 
             setTimeout(() => {
-                card.style.transition = 'all 0.5s ease';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, index * 100);
+                mainContent.style.transition = 'all 0.3s ease';
+                mainContent.style.opacity = '1';
+                mainContent.style.transform = 'translateY(0)';
+            }, 100);
+        }
+
+        // Optimisation mobile
+        if (window.innerWidth <= 768) {
+            // Empêcher le zoom sur les inputs
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.style.fontSize = '16px';
+                });
+            });
+
+            // Feedback tactile pour les boutons
+            const buttons = document.querySelectorAll('button, a[role="button"]');
+            buttons.forEach(button => {
+                if (!button.disabled) {
+                    button.addEventListener('touchstart', function() {
+                        this.style.transform = 'scale(0.98)';
+                    });
+                    button.addEventListener('touchend', function() {
+                        this.style.transform = 'scale(1)';
+                    });
+                }
+            });
+        }
+
+        // Gestion des formulaires avec indicateur de chargement
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitButton = this.querySelector('button[type="submit"]');
+                if (submitButton && !submitButton.disabled) {
+                    const originalHTML = submitButton.innerHTML;
+                    submitButton.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Traitement...';
+                    submitButton.disabled = true;
+
+                    // Timeout de sécurité
+                    setTimeout(() => {
+                        if (submitButton.disabled) {
+                            submitButton.innerHTML = originalHTML;
+                            submitButton.disabled = false;
+                        }
+                    }, 10000);
+                }
+            });
         });
+
+        // Fonction de confirmation améliorée
+        window.confirmAction = function(message, callback) {
+            if (window.innerWidth <= 768) {
+                // Sur mobile, utiliser une confirmation native
+                if (confirm(message)) {
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                    return true;
+                }
+                return false;
+            } else {
+                // Sur desktop, on garde le comportement par défaut
+                if (typeof callback === 'function') {
+                    callback();
+                }
+                return true;
+            }
+        };
+
+        // Ajustement dynamique de la hauteur pour le contenu
+        function adjustContentHeight() {
+            const navHeight = document.querySelector('.fixed-nav').offsetHeight;
+            const headerHeight = document.querySelector('.page-header-fixed').offsetHeight;
+            const content = document.querySelector('.content-with-fixed-nav');
+
+            if (content) {
+                content.style.marginTop = navHeight + 'px';
+                content.style.minHeight = `calc(100vh - ${navHeight}px)`;
+            }
+        }
+
+        // Ajuster la hauteur au chargement et au redimensionnement
+        adjustContentHeight();
+        window.addEventListener('resize', adjustContentHeight);
     });
+
+    // Fonction utilitaire pour formater les prix
+    window.formatPrice = function(price) {
+        return new Intl.NumberFormat('fr-FR', {
+            style: 'currency',
+            currency: 'EUR'
+        }).format(price);
+    };
+
+    // Fonction pour formater les dates
+    window.formatDate = function(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
     </script>
-    {% endblock %}
+
+    <style>
+    /* Breakpoint personnalisé pour très petits écrans */
+    @media (max-width: 475px) {
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+        .text-xl {
+            font-size: 1.25rem;
+        }
+    }
+
+    /* Animation de spin pour le chargement */
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Amélioration de l'accessibilité */
+    @media (prefers-reduced-motion: reduce) {
+        * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    /* Style pour les états désactivés */
+    button:disabled, a[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Optimisation pour très petits écrans */
+    @media (max-width: 320px) {
+        .px-4 {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+        .gap-3 {
+            gap: 0.5rem;
+        }
+    }
+
+    /* Amélioration de la lisibilité sur mobile */
+    @media (max-width: 640px) {
+        .bg-gray-50 {
+            background-color: #f9fafb;
+        }
+
+        .leading-relaxed {
+            line-height: 1.5;
+        }
+
+        /* Ajustement spécifique mobile pour la navigation fixe */
+        .content-with-fixed-nav {
+            margin-top: 56px; /* Hauteur réduite sur mobile */
+        }
+
+        .page-header-fixed {
+            top: 56px; /* Ajusté pour mobile */
+        }
+    }
+
+    /* Styles pour le scroll fluide */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Ombre portée pour la navigation fixe */
+    .fixed-nav {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Ombre pour l'en-tête de page fixe */
+    .page-header-fixed {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    </style>
 </body>
 </html>

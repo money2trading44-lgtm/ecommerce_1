@@ -6,103 +6,309 @@
 {% block page_subtitle %}Demande #{{ repair.id }}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-6 space-y-4 sm:space-y-6">
     <!-- Carte principale -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Réparation #{{ repair.id }}</h3>
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Réparation #{{ repair.id }}</h3>
                     <p class="text-sm text-gray-600">Créée le {{ repair.created_at|date:"d/m/Y à H:i" }}</p>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                <div class="flex items-center justify-between sm:justify-end space-x-3">
+                    <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium
                                 {% if repair.status == 'PENDING' %}bg-yellow-100 text-yellow-800
                                 {% elif repair.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800
                                 {% elif repair.status == 'COMPLETED' %}bg-green-100 text-green-800
                                 {% else %}bg-red-100 text-red-800{% endif %}">
                         {{ repair.get_status_display }}
                     </span>
-                    <a href="/administration/repairs/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                        Retour
+                    <a href="/administration/repairs/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base">
+                        <span class="material-symbols-outlined text-base">arrow_back</span>
+                        <span class="hidden xs:inline">Retour</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Informations client -->
-        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <h4 class="font-semibold text-gray-900 mb-3">Informations client</h4>
-                <div class="space-y-2">
-                    <p><strong>Nom complet :</strong> {{ repair.full_name }}</p>
-                    <p><strong>Email :</strong> {{ repair.email }}</p>
-                    <p><strong>Téléphone :</strong> {{ repair.phone_number }}</p>
+        <!-- Informations client et appareil -->
+        <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <!-- Informations client -->
+            <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-900 mb-3 text-sm sm:text-base">Informations client</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-24 sm:w-32 flex-shrink-0">Nom complet :</strong>
+                        <span class="text-gray-900 break-words">{{ repair.full_name }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-24 sm:w-32 flex-shrink-0">Email :</strong>
+                        <a href="mailto:{{ repair.email }}" class="text-blue-600 hover:text-blue-800 break-all">
+                            {{ repair.email }}
+                        </a>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-24 sm:w-32 flex-shrink-0">Téléphone :</strong>
+                        <a href="tel:{{ repair.phone_number }}" class="text-blue-600 hover:text-blue-800">
+                            {{ repair.phone_number }}
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div>
-                <h4 class="font-semibold text-gray-900 mb-3">Informations appareil</h4>
-                <div class="space-y-2">
-                    <p><strong>Modèle :</strong> {{ repair.device_model }}</p>
-                    <p><strong>Type de panne :</strong> {{ repair.get_issue_type_display }}</p>
-                    <p><strong>Statut :</strong> {{ repair.get_status_display }}</p>
+
+            <!-- Informations appareil -->
+            <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-900 mb-3 text-sm sm:text-base">Informations appareil</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-24 sm:w-32 flex-shrink-0">Modèle :</strong>
+                        <span class="text-gray-900 break-words">{{ repair.device_model }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-24 sm:w-32 flex-shrink-0">Type de panne :</strong>
+                        <span class="text-gray-900">{{ repair.get_issue_type_display }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-24 sm:w-32 flex-shrink-0">Dernière mise à jour :</strong>
+                        <span class="text-gray-900">{{ repair.updated_at|date:"d/m/Y H:i" }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Description de la panne -->
-        <div class="px-6 py-4 border-t border-gray-200">
-            <h4 class="font-semibold text-gray-900 mb-3">Description de la panne</h4>
-            <div class="bg-gray-50 p-4 rounded-lg">
-                <p class="text-gray-700 whitespace-pre-wrap">{{ repair.description }}</p>
+        <div class="px-4 sm:px-6 py-4 border-t border-gray-200">
+            <h4 class="font-semibold text-gray-900 mb-3 text-sm sm:text-base">Description de la panne</h4>
+            <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                <p class="text-gray-700 whitespace-pre-wrap text-sm sm:text-base leading-relaxed">{{ repair.description }}</p>
             </div>
         </div>
     </div>
 
     <!-- Actions -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h4 class="font-semibold text-gray-900 mb-4">Actions</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h4 class="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Actions</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <!-- Modifier statut -->
-            <form method="post" action="/administration/repairs/{{ repair.id }}/update-status/">
-                {% csrf_token %}
-                <div class="flex gap-2">
-                    <select name="status" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary">
-                        <option value="PENDING" {% if repair.status == 'PENDING' %}selected{% endif %}>En attente</option>
-                        <option value="IN_PROGRESS" {% if repair.status == 'IN_PROGRESS' %}selected{% endif %}>En cours</option>
-                        <option value="COMPLETED" {% if repair.status == 'COMPLETED' %}selected{% endif %}>Terminée</option>
-                        <option value="CANCELLED" {% if repair.status == 'CANCELLED' %}selected{% endif %}>Annulée</option>
-                    </select>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        <span class="material-symbols-outlined">save</span>
-                    </button>
-                </div>
-            </form>
+            <div class="md:col-span-2">
+                <form method="post" action="/administration/repairs/{{ repair.id }}/update-status/">
+                    {% csrf_token %}
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <select name="status"
+                                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                            <option value="PENDING" {% if repair.status == 'PENDING' %}selected{% endif %}>En attente</option>
+                            <option value="IN_PROGRESS" {% if repair.status == 'IN_PROGRESS' %}selected{% endif %}>En cours</option>
+                            <option value="COMPLETED" {% if repair.status == 'COMPLETED' %}selected{% endif %}>Terminée</option>
+                            <option value="CANCELLED" {% if repair.status == 'CANCELLED' %}selected{% endif %}>Annulée</option>
+                        </select>
+                        <button type="submit"
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                            <span class="material-symbols-outlined text-base">save</span>
+                            <span class="hidden xs:inline">Mettre à jour</span>
+                            <span class="xs:hidden">OK</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
 
             <!-- Marquer comme terminée -->
             {% if repair.status != 'COMPLETED' %}
             <form method="post" action="/administration/repairs/{{ repair.id }}/complete/">
                 {% csrf_token %}
-                <button type="submit" 
-                        class="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined">check_circle</span>
-                    Marquer comme terminée
+                <button type="submit"
+                        class="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    <span class="hidden xs:inline">Marquer comme terminée</span>
+                    <span class="xs:hidden">Terminer</span>
                 </button>
             </form>
+            {% else %}
+            <div class="w-full bg-gray-100 text-gray-500 px-4 py-3 rounded-lg flex items-center justify-center gap-2 text-sm sm:text-base cursor-not-allowed">
+                <span class="material-symbols-outlined text-base">check_circle</span>
+                <span class="hidden xs:inline">Déjà terminée</span>
+                <span class="xs:hidden">Terminée</span>
+            </div>
             {% endif %}
 
             <!-- Supprimer -->
             <form method="post" action="/administration/repairs/{{ repair.id }}/delete/">
                 {% csrf_token %}
-                <button type="submit" 
+                <button type="submit"
                         onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette demande de réparation ?')"
-                        class="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined">delete</span>
-                    Supprimer
+                        class="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                    <span class="hidden xs:inline">Supprimer</span>
+                    <span class="xs:hidden">Supprimer</span>
                 </button>
             </form>
         </div>
     </div>
+
+    <!-- Historique des statuts (optionnel) -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <h4 class="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Historique</h4>
+        <div class="space-y-3">
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900">Demande créée</p>
+                    <p class="text-xs text-gray-500">{{ repair.created_at|date:"d/m/Y à H:i" }}</p>
+                </div>
+            </div>
+            {% if repair.updated_at != repair.created_at %}
+            <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900">Dernière modification</p>
+                    <p class="text-xs text-gray-500">{{ repair.updated_at|date:"d/m/Y à H:i" }}</p>
+                    <p class="text-xs text-gray-600">Statut : {{ repair.get_status_display }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animation au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'apparition progressive
+    const cards = document.querySelectorAll('.bg-white');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Optimisation pour mobile
+    if (window.innerWidth <= 768) {
+        // Empêcher le zoom sur les selects
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.addEventListener('focus', function() {
+                this.style.fontSize = '16px';
+            });
+        });
+
+        // Feedback tactile pour les boutons
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            });
+            button.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Amélioration de la confirmation de suppression
+        const deleteButton = document.querySelector('button[onclick*="confirm"]');
+        if (deleteButton) {
+            deleteButton.addEventListener('touchstart', function(e) {
+                // Prévenir le double déclenchement
+                e.preventDefault();
+                setTimeout(() => {
+                    const confirmed = confirm('Êtes-vous sûr de vouloir supprimer cette demande de réparation ?');
+                    if (confirmed) {
+                        this.closest('form').submit();
+                    }
+                }, 100);
+            });
+        }
+    }
+});
+
+// Fonction pour confirmer les actions importantes
+function confirmAction(message, callback) {
+    if (window.innerWidth <= 768) {
+        // Sur mobile, utiliser une confirmation native
+        if (confirm(message)) {
+            callback();
+        }
+    } else {
+        // Sur desktop, on garde le comportement par défaut
+        callback();
+    }
+}
+</script>
+
+<style>
+/* Breakpoint personnalisé pour très petits écrans */
+@media (max-width: 475px) {
+    .xs\:hidden {
+        display: none;
+    }
+    .xs\:inline {
+        display: inline;
+    }
+}
+
+/* Amélioration de la lisibilité sur mobile */
+@media (max-width: 640px) {
+    .bg-gray-50 {
+        background-color: #f9fafb;
+    }
+
+    .leading-relaxed {
+        line-height: 1.5;
+    }
+
+    /* Optimisation des boutons pour le tactile */
+    button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    select, input, textarea {
+        font-size: 16px !important; /* Empêche le zoom sur iOS */
+    }
+}
+
+/* Animation de feedback tactile */
+button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+}
+
+/* Amélioration de l'accessibilité */
+@media (max-width: 375px) {
+    .text-sm {
+        font-size: 0.8rem;
+    }
+
+    .text-xs {
+        font-size: 0.7rem;
+    }
+
+    .p-4 {
+        padding: 0.75rem;
+    }
+
+    .gap-3 {
+        gap: 0.5rem;
+    }
+}
+
+/* Style pour les liens de contact */
+a[href^="mailto:"], a[href^="tel:"] {
+    word-break: break-all;
+}
+
+/* Amélioration de l'affichage des longs textes */
+.break-words {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.break-all {
+    word-break: break-all;
+}
+</style>
 {% endblock %}

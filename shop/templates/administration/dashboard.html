@@ -3,234 +3,200 @@
 {% block title %}Tableau de bord - Admin{% endblock %}
 
 {% block page_title %}Tableau de bord{% endblock %}
-{% block page_subtitle %}Vue d'ensemble de votre boutique{% endblock %}
+{% block page_subtitle %}Vue d'ensemble de votre activité{% endblock %}
 
 {% block content %}
-<div class="space-y-4 lg:space-y-6 xl:space-y-8">
-    <!-- Cartes de statistiques responsive -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 lg:gap-4 xl:gap-6">
-        <!-- Ventes totales -->
-        <div class="bg-white p-4 lg:p-5 xl:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
+<div class="space-y-4 sm:space-y-6 lg:space-y-8">
+    <!-- Cartes de statistiques principales -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <!-- Chiffre d'affaires total -->
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Ventes totales</p>
-                    <p class="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 mt-1 truncate">{{ total_sales|floatformat:2 }} €</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">CA Total</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ total_sales|floatformat:2 }} €</p>
+                    <p class="text-xs text-green-600 mt-1">Toutes périodes</p>
                 </div>
-                <div class="w-8 h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-blue-600 text-sm lg:text-base">euro</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-blue-600 text-sm sm:text-base">euro</span>
                 </div>
-            </div>
-            <div class="mt-2 lg:mt-3 flex items-center text-xs">
-                <span class="text-green-500 flex items-center">
-                    <span class="material-symbols-outlined text-xs lg:text-sm mr-1">trending_up</span>
-                    {{ monthly_sales_increase }}
-                </span>
-                <span class="text-gray-500 ml-2 truncate">ce mois</span>
             </div>
         </div>
 
         <!-- Commandes en attente -->
-        <div class="bg-white p-4 lg:p-5 xl:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Commandes en attente</p>
-                    <p class="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 mt-1">{{ pending_orders }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">En attente</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ pending_orders }}</p>
+                    <p class="text-xs text-orange-600 mt-1">À traiter</p>
                 </div>
-                <div class="w-8 h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-orange-600 text-sm lg:text-base">schedule</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-orange-600 text-sm sm:text-base">schedule</span>
                 </div>
-            </div>
-            <div class="mt-2 lg:mt-3 flex items-center text-xs">
-                <span class="text-orange-500 flex items-center">
-                    <span class="material-symbols-outlined text-xs lg:text-sm mr-1">pending</span>
-                    À traiter
-                </span>
             </div>
         </div>
 
         <!-- Réparations en cours -->
-        <div class="bg-white p-4 lg:p-5 xl:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Réparations en cours</p>
-                    <p class="text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 mt-1">{{ in_progress_repairs }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Réparations</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ in_progress_repairs }}</p>
+                    <p class="text-xs text-purple-600 mt-1">En cours</p>
                 </div>
-                <div class="w-8 h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-purple-600 text-sm lg:text-base">build</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-purple-600 text-sm sm:text-base">build</span>
                 </div>
-            </div>
-            <div class="mt-2 lg:mt-3 flex items-center text-xs">
-                <span class="text-purple-500 flex items-center">
-                    <span class="material-symbols-outlined text-xs lg:text-sm mr-1">engineering</span>
-                    En atelier
-                </span>
             </div>
         </div>
 
-        <!-- Produit populaire -->
-        <div class="bg-white p-4 lg:p-5 xl:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
+        <!-- Produit le plus vendu -->
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Produit populaire</p>
-                    <p class="text-base lg:text-lg xl:text-xl font-bold text-gray-900 mt-1 truncate" title="{{ best_selling_product }}">
-                        {{ best_selling_product|truncatechars:20 }}
-                    </p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Top vente</p>
+                    <p class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mt-1 sm:mt-2 truncate">{{ best_selling_product }}</p>
+                    <p class="text-xs text-green-600 mt-1">Populaire</p>
                 </div>
-                <div class="w-8 h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-green-600 text-sm lg:text-base">star</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-green-600 text-sm sm:text-base">trending_up</span>
                 </div>
-            </div>
-            <div class="mt-2 lg:mt-3 flex items-center text-xs">
-                <span class="text-green-500 flex items-center">
-                    <span class="material-symbols-outlined text-xs lg:text-sm mr-1">trending_up</span>
-                    Meilleure vente
-                </span>
             </div>
         </div>
     </div>
 
-    <!-- Graphiques et actions rapides - Layout responsive -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 lg:gap-6">
+    <!-- Graphique et aperçu rapide -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <!-- Graphique des ventes -->
-        <div class="xl:col-span-2 bg-white p-4 lg:p-5 xl:p-6 rounded-xl shadow-sm border border-gray-200">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-3 mb-3 lg:mb-4 xl:mb-6">
-                <h3 class="text-base lg:text-lg xl:text-xl font-semibold text-gray-900">Ventes mensuelles</h3>
-                <div class="flex items-center gap-2">
-                    <span class="text-base lg:text-lg xl:text-xl font-bold text-gray-900">{{ monthly_sales_increase }}</span>
-                    <span class="text-xs lg:text-sm text-green-500 bg-green-50 px-2 py-1 rounded-full">Ce mois-ci</span>
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Ventes des 6 derniers mois</h3>
+            <div class="h-64 sm:h-80">
+                <!-- Graphique simplifié -->
+                <div class="flex items-end justify-between h-48 sm:h-56 gap-2 sm:gap-4 mt-4">
+                    {% for month_data in monthly_sales_data.data %}
+                    <div class="flex flex-col items-center flex-1">
+                        <div class="w-full bg-blue-100 rounded-t-lg transition-all duration-300 hover:bg-blue-200"
+                             style="height: {{ month_data|default:0 }}%">
+                        </div>
+                        <span class="text-xs text-gray-600 mt-2">{{ monthly_sales_data.labels.forloop.counter0 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-600">Évolution du chiffre d'affaires mensuel</p>
                 </div>
             </div>
+        </div>
 
-            <!-- Graphique responsive -->
-            <div class="h-40 lg:h-48 xl:h-56 relative">
-                <div class="absolute inset-0 flex flex-col justify-end">
-                    <div class="flex items-end justify-between h-28 lg:h-32 xl:h-36 px-1 lg:px-2 xl:px-4 pb-3 lg:pb-4 gap-1 lg:gap-2">
-                        {% for data_point in monthly_sales_data.data %}
-                        <div class="flex flex-col items-center flex-1">
-                            <div class="w-3 lg:w-4 xl:w-6 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t transition-all duration-300 hover:from-blue-600 hover:to-blue-500 relative group cursor-pointer"
-                                 style="height: {% widthratio data_point monthly_sales_data.max_value 70 %}%; min-height: 4px;"
-                                 title="{{ data_point|floatformat:2 }} €">
-                                <div class="absolute -top-6 lg:-top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
-                                    {{ data_point|floatformat:2 }} €
-                                </div>
-                            </div>
-                            <span class="text-xs text-gray-500 mt-1 lg:mt-2 truncate">{{ monthly_sales_data.labels.forloop.counter0|slice:":3" }}</span>
+        <!-- Aperçu rapide -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Aperçu rapide</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span class="text-sm text-gray-600">Produits actifs</span>
+                    <span class="font-semibold text-gray-900">{{ active_products }}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span class="text-sm text-gray-600">Clients ce mois</span>
+                    <span class="font-semibold text-gray-900">{{ unique_customers_this_month }}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span class="text-sm text-gray-600">Taux satisfaction</span>
+                    <span class="font-semibold text-green-600">{{ satisfaction_rate }}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span class="text-sm text-gray-600">CA ce mois</span>
+                    <span class="font-semibold text-gray-900">{{ monthly_sales|floatformat:2 }} €</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activités récentes -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <!-- Dernières activités -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Activités récentes</h3>
+            <div class="space-y-3">
+                {% for activity in recent_activities %}
+                <div class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <span class="material-symbols-outlined text-base mt-0.5 flex-shrink-0
+                                {% if activity.type == 'order' %}text-blue-600
+                                {% else %}text-green-600{% endif %}">
+                        {% if activity.type == 'order' %}receipt_long{% else %}build{% endif %}
+                    </span>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium text-gray-900 text-sm">{{ activity.title }}</p>
+                        <p class="text-xs text-gray-600 truncate">{{ activity.description }}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs
+                                        {% if activity.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                                        {% elif activity.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800
+                                        {% elif activity.status == 'COMPLETED' %}bg-green-100 text-green-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ activity.status_display }}
+                            </span>
+                            <span class="text-xs text-gray-500">{{ activity.time|date:"d/m H:i" }}</span>
                         </div>
-                        {% endfor %}
                     </div>
                 </div>
-            </div>
-
-            <!-- Légende responsive -->
-            <div class="flex justify-between text-xs text-gray-500 mt-3 lg:mt-4 px-1 lg:px-2 xl:px-4">
-                {% for month in monthly_sales_data.labels %}
-                    <span class="{% if forloop.last %}text-blue-600 font-medium{% endif %} truncate" title="{{ month }}">
-                        {{ month|slice:":3" }}
-                    </span>
+                {% empty %}
+                <div class="text-center py-8">
+                    <span class="material-symbols-outlined text-4xl text-gray-300 mb-2">notifications</span>
+                    <p class="text-gray-500">Aucune activité récente</p>
+                </div>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- Actions rapides et statistiques -->
-        <div class="space-y-3 lg:space-y-4 xl:space-y-6">
-            <!-- Actions rapides -->
-            <div class="bg-white p-4 lg:p-5 xl:p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 class="text-base lg:text-lg xl:text-xl font-semibold text-gray-900 mb-3 lg:mb-4">Actions rapides</h3>
-                <div class="space-y-2 lg:space-y-3">
-                    <a href="/administration/products/" class="flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg hover:bg-gray-50 transition-colors group">
-                        <div class="w-8 h-8 lg:w-10 lg:h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors flex-shrink-0">
-                            <span class="material-symbols-outlined text-blue-600 text-sm lg:text-base">inventory_2</span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="font-medium text-gray-900 text-sm lg:text-base truncate">Gérer les produits</p>
-                            <p class="text-xs lg:text-sm text-gray-500 truncate">{{ active_products }} produits actifs</p>
-                        </div>
-                        <span class="material-symbols-outlined text-gray-400 text-sm lg:text-base flex-shrink-0">chevron_right</span>
-                    </a>
-
-                    <a href="/administration/orders/" class="flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg hover:bg-gray-50 transition-colors group">
-                        <div class="w-8 h-8 lg:w-10 lg:h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors flex-shrink-0">
-                            <span class="material-symbols-outlined text-green-600 text-sm lg:text-base">receipt_long</span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="font-medium text-gray-900 text-sm lg:text-base truncate">Voir les commandes</p>
-                            <p class="text-xs lg:text-sm text-gray-500 truncate">{{ pending_orders }} en attente</p>
-                        </div>
-                        <span class="material-symbols-outlined text-gray-400 text-sm lg:text-base flex-shrink-0">chevron_right</span>
-                    </a>
-
-                    <a href="/administration/repairs/" class="flex items-center gap-2 lg:gap-3 p-2 lg:p-3 rounded-lg hover:bg-gray-50 transition-colors group">
-                        <div class="w-8 h-8 lg:w-10 lg:h-10 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors flex-shrink-0">
-                            <span class="material-symbols-outlined text-orange-600 text-sm lg:text-base">build</span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="font-medium text-gray-900 text-sm lg:text-base truncate">Réparations</p>
-                            <p class="text-xs lg:text-sm text-gray-500 truncate">{{ in_progress_repairs }} en cours</p>
-                        </div>
-                        <span class="material-symbols-outlined text-gray-400 text-sm lg:text-base flex-shrink-0">chevron_right</span>
-                    </a>
+        <!-- Statistiques avancées -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Performances</h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm text-gray-600">Croissance mensuelle</span>
+                        <span class="text-sm font-semibold text-green-600">{{ monthly_sales_increase }}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-green-600 h-2 rounded-full" style="width: 75%"></div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Statistiques rapides -->
-            <div class="bg-white p-4 lg:p-5 xl:p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 class="text-base lg:text-lg xl:text-xl font-semibold text-gray-900 mb-3 lg:mb-4">Aperçu rapide</h3>
-                <div class="space-y-2 lg:space-y-3 xl:space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600 truncate">Produits actifs</span>
-                        <span class="font-semibold text-gray-900 text-sm lg:text-base">{{ active_products }}</span>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm text-gray-600">Taux de conversion</span>
+                        <span class="text-sm font-semibold text-blue-600">85%</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600 truncate">Clients ce mois</span>
-                        <span class="font-semibold text-gray-900 text-sm lg:text-base">{{ unique_customers_this_month }}</span>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full" style="width: 85%"></div>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-gray-600 truncate">Taux de satisfaction</span>
-                        <span class="font-semibold text-green-600 text-sm lg:text-base">{{ satisfaction_rate }}</span>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm text-gray-600">Satisfaction client</span>
+                        <span class="text-sm font-semibold text-purple-600">{{ satisfaction_rate }}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-purple-600 h-2 rounded-full" style="width: 90%"></div>
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="pt-4 border-t border-gray-200">
+                    <h4 class="font-medium text-gray-900 mb-3">Actions rapides</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="/administration/orders/" class="bg-blue-600 text-white text-center py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                            Voir commandes
+                        </a>
+                        <a href="/administration/products/" class="bg-green-600 text-white text-center py-2 px-3 rounded-lg hover:bg-green-700 transition-colors text-sm">
+                            Gérer produits
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Dernières activités -->
-    <div class="bg-white p-4 lg:p-5 xl:p-6 rounded-xl shadow-sm border border-gray-200">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 lg:gap-3 mb-3 lg:mb-4 xl:mb-6">
-            <h3 class="text-base lg:text-lg xl:text-xl font-semibold text-gray-900">Activités récentes</h3>
-            <a href="/administration/orders/" class="text-sm text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap">Voir tout</a>
-        </div>
-
-        <div class="space-y-2 lg:space-y-3 xl:space-y-4">
-            {% for activity in recent_activities %}
-            <div class="flex items-center gap-2 lg:gap-3 xl:gap-4 p-3 lg:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center flex-shrink-0
-                          {% if activity.type == 'order' %}bg-green-100 text-green-600
-                          {% else %}bg-blue-100 text-blue-600{% endif %}">
-                    <span class="material-symbols-outlined text-xs lg:text-sm">
-                        {% if activity.type == 'order' %}shopping_cart{% else %}build{% endif %}
-                    </span>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 text-sm lg:text-base truncate">{{ activity.title }}</p>
-                    <p class="text-xs lg:text-sm text-gray-500 truncate">{{ activity.description }}</p>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-900 whitespace-nowrap">{{ activity.time|timesince }}</p>
-                    <span class="inline-block px-2 py-1 text-xs rounded-full whitespace-nowrap mt-1
-                                {% if activity.status == 'COMPLETED' or activity.status == 'DELIVERED' %}bg-green-100 text-green-800
-                                {% elif activity.status == 'PENDING' %}bg-yellow-100 text-yellow-800
-                                {% elif activity.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800
-                                {% else %}bg-gray-100 text-gray-800{% endif %}">
-                        {{ activity.status_display }}
-                    </span>
-                </div>
-            </div>
-            {% empty %}
-            <div class="text-center py-6 lg:py-8 text-gray-500">
-                <span class="material-symbols-outlined text-3xl lg:text-4xl mb-2">notifications</span>
-                <p class="text-sm lg:text-base">Aucune activité récente</p>
-            </div>
-            {% endfor %}
         </div>
     </div>
 </div>

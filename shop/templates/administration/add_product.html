@@ -6,17 +6,17 @@
 {% block page_subtitle %}Créez un nouveau produit dans votre catalogue{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto">
+<div class="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <!-- En-tête -->
-        <div class="px-6 py-4 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Nouveau produit</h3>
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Nouveau produit</h3>
                     <p class="text-sm text-gray-600">Remplissez les informations du produit</p>
                 </div>
-                <a href="/administration/products/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2">
-                    <span class="material-symbols-outlined">arrow_back</span>
+                <a href="/administration/products/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start">
+                    <span class="material-symbols-outlined text-base">arrow_back</span>
                     Retour à la liste
                 </a>
             </div>
@@ -24,14 +24,14 @@
 
         <!-- Messages d'alerte -->
         {% if messages %}
-            <div class="mx-6 mt-4">
+            <div class="mx-4 sm:mx-6 mt-4">
                 {% for message in messages %}
-                    <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% else %}bg-green-100 text-green-700 border border-green-200{% endif %}">
+                    <div class="p-3 sm:p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% else %}bg-green-100 text-green-700 border border-green-200{% endif %}">
                         <div class="flex items-center">
-                            <span class="material-symbols-outlined mr-2">
+                            <span class="material-symbols-outlined mr-2 text-sm sm:text-base">
                                 {% if message.tags == 'error' %}error{% else %}check_circle{% endif %}
                             </span>
-                            {{ message }}
+                            <span class="text-sm sm:text-base">{{ message }}</span>
                         </div>
                     </div>
                 {% endfor %}
@@ -39,16 +39,16 @@
         {% endif %}
 
         <!-- Formulaire -->
-        <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
+        <form method="post" enctype="multipart/form-data" class="p-4 sm:p-6 space-y-4 sm:space-y-6">
             {% csrf_token %}
 
             <!-- Informations de base -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <!-- Nom du produit -->
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nom du produit *</label>
                     <input type="text" id="name" name="name" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                            placeholder="Ex: Draps en coton bio"
                            value="{{ request.POST.name }}">
                 </div>
@@ -57,7 +57,7 @@
                 <div>
                     <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Prix (€) *</label>
                     <input type="number" id="price" name="price" step="0.01" min="0" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                            placeholder="0.00"
                            value="{{ request.POST.price }}">
                 </div>
@@ -67,51 +67,51 @@
             <div>
                 <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description *</label>
                 <textarea id="description" name="description" required rows="4"
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none"
                           placeholder="Décrivez le produit en détail...">{{ request.POST.description }}</textarea>
             </div>
 
             <!-- Type de produit -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Type de produit *</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="product-type-selector">
-                    <label class="relative flex cursor-pointer rounded-lg border border-gray-300 p-4 focus:outline-none product-type-option transition-all duration-200">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4" id="product-type-selector">
+                    <label class="relative flex cursor-pointer rounded-lg border border-gray-300 p-3 sm:p-4 focus:outline-none product-type-option transition-all duration-200">
                         <input type="radio" name="product_type" value="SHEET" class="sr-only" required
                                {% if request.POST.product_type == 'SHEET' %}checked{% endif %}>
                         <div class="flex w-full items-center justify-between">
                             <div class="flex items-center">
-                                <div class="text-sm">
+                                <div class="text-xs sm:text-sm">
                                     <span class="font-medium text-gray-900">Draps</span>
-                                    <p class="text-gray-500">Literie et linge de maison</p>
+                                    <p class="text-gray-500 hidden xs:block">Literie et linge de maison</p>
                                 </div>
                             </div>
-                            <span class="material-symbols-outlined text-gray-400">bed</span>
+                            <span class="material-symbols-outlined text-gray-400 text-base sm:text-lg">bed</span>
                         </div>
                     </label>
 
-                    <label class="relative flex cursor-pointer rounded-lg border border-gray-300 p-4 focus:outline-none product-type-option transition-all duration-200">
+                    <label class="relative flex cursor-pointer rounded-lg border border-gray-300 p-3 sm:p-4 focus:outline-none product-type-option transition-all duration-200">
                         <input type="radio" name="product_type" value="PHONE" class="sr-only" required
                                {% if request.POST.product_type == 'PHONE' %}checked{% endif %}>
                         <div class="flex w-full items-center justify-between">
                             <div class="flex items-center">
-                                <div class="text-sm">
+                                <div class="text-xs sm:text-sm">
                                     <span class="font-medium text-gray-900">Téléphone</span>
-                                    <p class="text-gray-500">Smartphones et accessoires</p>
+                                    <p class="text-gray-500 hidden xs:block">Smartphones et accessoires</p>
                                 </div>
                             </div>
-                            <span class="material-symbols-outlined text-gray-400">smartphone</span>
+                            <span class="material-symbols-outlined text-gray-400 text-base sm:text-lg">smartphone</span>
                         </div>
                     </label>
                 </div>
             </div>
 
             <!-- Stock et promotion -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <!-- Stock -->
                 <div>
                     <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stock *</label>
                     <input type="number" id="stock" name="stock" min="0" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                            placeholder="0"
                            value="{{ request.POST.stock }}">
                 </div>
@@ -120,21 +120,21 @@
                 <div>
                     <label for="discount_percentage" class="block text-sm font-medium text-gray-700 mb-2">Promotion (%)</label>
                     <input type="number" id="discount_percentage" name="discount_percentage" min="0" max="100"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                            placeholder="0"
                            value="{{ request.POST.discount_percentage|default:'0' }}">
                 </div>
             </div>
 
             <!-- Spécifications pour les DRAPS -->
-            <div id="sheet-specs" class="hidden space-y-6 p-4 bg-blue-50 rounded-lg">
-                <h4 class="font-semibold text-blue-900">Spécifications des draps</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="sheet-specs" class="hidden space-y-4 sm:space-y-6 p-3 sm:p-4 bg-blue-50 rounded-lg">
+                <h4 class="font-semibold text-blue-900 text-sm sm:text-base">Spécifications des draps</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <!-- Taille -->
                     <div>
                         <label for="sheet_size" class="block text-sm font-medium text-gray-700 mb-2">Taille *</label>
                         <select id="sheet_size" name="sheet_size"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                             <option value="">Sélectionnez une taille</option>
                             <option value="SIMPLE" {% if request.POST.sheet_size == 'SIMPLE' %}selected{% endif %}>Simple (90x190cm)</option>
                             <option value="DOUBLE" {% if request.POST.sheet_size == 'DOUBLE' %}selected{% endif %}>Double (140x190cm)</option>
@@ -147,7 +147,7 @@
                     <div>
                         <label for="color" class="block text-sm font-medium text-gray-700 mb-2">Couleur *</label>
                         <select id="color" name="color"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                             <option value="">Sélectionnez une couleur</option>
                             <option value="WHITE" {% if request.POST.color == 'WHITE' %}selected{% endif %}>Blanc</option>
                             <option value="GRAY" {% if request.POST.color == 'GRAY' %}selected{% endif %}>Gris</option>
@@ -162,7 +162,7 @@
                     <div class="md:col-span-2">
                         <label for="material" class="block text-sm font-medium text-gray-700 mb-2">Matière</label>
                         <input type="text" id="material" name="material"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: Coton 100%, Polyester..."
                                value="{{ request.POST.material }}">
                     </div>
@@ -170,14 +170,14 @@
             </div>
 
             <!-- Spécifications pour les TÉLÉPHONES -->
-            <div id="phone-specs" class="hidden space-y-6 p-4 bg-green-50 rounded-lg">
-                <h4 class="font-semibold text-green-900">Spécifications du téléphone</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="phone-specs" class="hidden space-y-4 sm:space-y-6 p-3 sm:p-4 bg-green-50 rounded-lg">
+                <h4 class="font-semibold text-green-900 text-sm sm:text-base">Spécifications du téléphone</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <!-- Marque -->
                     <div>
                         <label for="phone_brand" class="block text-sm font-medium text-gray-700 mb-2">Marque *</label>
                         <select id="phone_brand" name="phone_brand"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                             <option value="">Sélectionnez une marque</option>
                             <option value="TECHGIANT" {% if request.POST.phone_brand == 'TECHGIANT' %}selected{% endif %}>TechGiant</option>
                             <option value="GALAXY" {% if request.POST.phone_brand == 'GALAXY' %}selected{% endif %}>Galaxy</option>
@@ -192,7 +192,7 @@
                     <div>
                         <label for="phone_category" class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
                         <select id="phone_category" name="phone_category"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                             <option value="">Sélectionnez une catégorie</option>
                             <option value="BESTSELLER" {% if request.POST.phone_category == 'BESTSELLER' %}selected{% endif %}>Meilleures ventes</option>
                             <option value="OFFER" {% if request.POST.phone_category == 'OFFER' %}selected{% endif %}>Offres spéciales</option>
@@ -205,7 +205,7 @@
                     <div>
                         <label for="storage" class="block text-sm font-medium text-gray-700 mb-2">Stockage</label>
                         <input type="text" id="storage" name="storage"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: 128GB, 256GB..."
                                value="{{ request.POST.storage }}">
                     </div>
@@ -214,7 +214,7 @@
                     <div>
                         <label for="screen_size" class="block text-sm font-medium text-gray-700 mb-2">Taille écran</label>
                         <input type="text" id="screen_size" name="screen_size"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: 6.1 pouces"
                                value="{{ request.POST.screen_size }}">
                     </div>
@@ -223,7 +223,7 @@
                     <div>
                         <label for="processor" class="block text-sm font-medium text-gray-700 mb-2">Processeur</label>
                         <input type="text" id="processor" name="processor"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: Snapdragon 8 Gen 2"
                                value="{{ request.POST.processor }}">
                     </div>
@@ -232,7 +232,7 @@
                     <div>
                         <label for="ram" class="block text-sm font-medium text-gray-700 mb-2">Mémoire RAM</label>
                         <input type="text" id="ram" name="ram"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: 8GB, 12GB..."
                                value="{{ request.POST.ram }}">
                     </div>
@@ -241,7 +241,7 @@
                     <div class="md:col-span-2">
                         <label for="camera" class="block text-sm font-medium text-gray-700 mb-2">Appareil photo</label>
                         <input type="text" id="camera" name="camera"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: Triple caméra 50MP + 12MP + 12MP"
                                value="{{ request.POST.camera }}">
                     </div>
@@ -250,7 +250,7 @@
                     <div>
                         <label for="battery" class="block text-sm font-medium text-gray-700 mb-2">Batterie</label>
                         <input type="text" id="battery" name="battery"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: 5000 mAh"
                                value="{{ request.POST.battery }}">
                     </div>
@@ -259,7 +259,7 @@
                     <div>
                         <label for="operating_system" class="block text-sm font-medium text-gray-700 mb-2">Système d'exploitation</label>
                         <input type="text" id="operating_system" name="operating_system"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: Android 14, iOS 17..."
                                value="{{ request.POST.operating_system }}">
                     </div>
@@ -268,7 +268,7 @@
                     <div class="md:col-span-2">
                         <label for="connectivity" class="block text-sm font-medium text-gray-700 mb-2">Connectivité</label>
                         <input type="text" id="connectivity" name="connectivity"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: 5G, Wi-Fi 6, Bluetooth 5.3..."
                                value="{{ request.POST.connectivity }}">
                     </div>
@@ -281,12 +281,12 @@
                     Image du produit <span class="text-red-500">*</span>
                 </label>
 
-                <!-- Input file simple qui fonctionne -->
+                <!-- Input file responsive -->
                 <input type="file" id="image" name="image"
-                       class="block w-full text-sm text-gray-500
-                              file:mr-4 file:py-3 file:px-4
+                       class="block w-full text-xs sm:text-sm text-gray-500
+                              file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
                               file:rounded-lg file:border-0
-                              file:text-sm file:font-semibold
+                              file:text-xs sm:file:text-sm file:font-semibold
                               file:bg-primary file:text-white
                               hover:file:bg-primary-dark transition-colors
                               border border-gray-300 rounded-lg"
@@ -297,14 +297,14 @@
                 <p class="mt-1 text-xs text-gray-500">Formats supportés: JPG, PNG, GIF (max 10MB)</p>
 
                 <!-- Aperçu de l'image -->
-                <div id="image-preview" class="mt-3 hidden p-4 bg-gray-50 rounded-lg">
+                <div id="image-preview" class="mt-3 hidden p-3 sm:p-4 bg-gray-50 rounded-lg">
                     <p class="text-sm font-medium text-gray-700 mb-2">Aperçu :</p>
-                    <div class="flex items-center space-x-4">
-                        <img id="preview" class="h-20 w-20 object-cover rounded-lg border border-gray-300">
-                        <div>
-                            <p id="file-name" class="text-sm font-medium text-gray-900"></p>
+                    <div class="flex flex-col xs:flex-row xs:items-center space-y-3 xs:space-y-0 xs:space-x-4">
+                        <img id="preview" class="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded-lg border border-gray-300 mx-auto xs:mx-0">
+                        <div class="text-center xs:text-left">
+                            <p id="file-name" class="text-sm font-medium text-gray-900 break-words"></p>
                             <p id="file-size" class="text-xs text-gray-500"></p>
-                            <button type="button" onclick="removeImage()" class="mt-1 text-xs text-red-600 hover:text-red-800 flex items-center gap-1">
+                            <button type="button" onclick="removeImage()" class="mt-1 text-xs text-red-600 hover:text-red-800 flex items-center gap-1 justify-center xs:justify-start">
                                 <span class="material-symbols-outlined text-sm">delete</span>
                                 Changer l'image
                             </button>
@@ -313,17 +313,18 @@
                 </div>
 
                 <!-- Message d'erreur -->
-                <p class="mt-1 text-sm text-red-600 hidden" id="image-error"></p>
+                <p class="mt-1 text-xs sm:text-sm text-red-600 hidden" id="image-error"></p>
             </div>
 
             <!-- Boutons -->
-            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                <a href="/administration/products/" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:space-x-4 pt-6 border-t border-gray-200">
+                <a href="/administration/products/" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-center text-sm sm:text-base">
                     Annuler
                 </a>
-                <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
-                    <span class="material-symbols-outlined">save</span>
-                    Créer le produit
+                <button type="submit" class="bg-primary text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    <span class="hidden xs:inline">Créer le produit</span>
+                    <span class="xs:hidden">Créer</span>
                 </button>
             </div>
         </form>
@@ -379,6 +380,15 @@
         // Écouter les changements de type de produit
         productTypeRadios.forEach(radio => {
             radio.addEventListener('change', updateSpecifications);
+
+            // Ajouter le support tactile pour mobile
+            radio.addEventListener('touchstart', function() {
+                this.closest('.product-type-option').style.transform = 'scale(0.98)';
+            });
+
+            radio.addEventListener('touchend', function() {
+                this.closest('.product-type-option').style.transform = 'scale(1)';
+            });
         });
 
         // Mise à jour initiale
@@ -421,7 +431,7 @@
 
             reader.onload = function(e) {
                 preview.src = e.target.result;
-                fileName.textContent = file.name;
+                fileName.textContent = file.name.length > 30 ? file.name.substring(0, 30) + '...' : file.name;
                 fileSize.textContent = formatFileSize(file.size);
                 previewContainer.classList.remove('hidden');
             }
@@ -488,17 +498,118 @@
 
         // Si erreurs, afficher et bloquer
         if (errorMessages.length > 0) {
-            alert('ERREURS:\n' + errorMessages.join('\n'));
+            // Utiliser une alerte native plus adaptée au mobile
+            if (window.innerWidth <= 768) {
+                // Sur mobile, utiliser une alerte plus simple
+                alert('Veuillez corriger les erreurs dans le formulaire');
+            } else {
+                alert('ERREURS:\n' + errorMessages.join('\n'));
+            }
             return false;
         }
 
         // Si tout est valide, soumettre
         const submitButton = document.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
         submitButton.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Création en cours...';
         submitButton.disabled = true;
 
-        // Soumettre le formulaire
-        this.submit();
+        // Timeout pour permettre l'affichage du loading
+        setTimeout(() => {
+            this.submit();
+        }, 100);
     });
+
+    // Optimisation pour mobile : empêcher le zoom sur les inputs
+    if (window.innerWidth <= 768) {
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.fontSize = '16px'; // Empêche le zoom sur iOS
+            });
+        });
+    }
 </script>
+
+<style>
+/* Breakpoint personnalisé pour très petits écrans */
+@media (max-width: 475px) {
+    .xs\:hidden {
+        display: none;
+    }
+    .xs\:inline {
+        display: inline;
+    }
+    .xs\:block {
+        display: block;
+    }
+    .xs\:flex-row {
+        flex-direction: row;
+    }
+    .xs\:justify-start {
+        justify-content: flex-start;
+    }
+    .xs\:text-left {
+        text-align: left;
+    }
+    .xs\:mx-0 {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .xs\:space-x-4 > * + * {
+        margin-left: 1rem;
+    }
+    .xs\:space-y-0 > * + * {
+        margin-top: 0;
+    }
+}
+
+/* Amélioration de l'accessibilité tactile */
+.product-type-option:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+}
+
+/* Optimisation des champs de formulaire sur mobile */
+@media (max-width: 640px) {
+    input, select, textarea {
+        font-size: 16px !important; /* Empêche le zoom sur iOS */
+    }
+
+    .file\:py-2 {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .file\:px-3 {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
+/* Animation de loading */
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Amélioration de la lisibilité sur petits écrans */
+@media (max-width: 375px) {
+    .p-4 {
+        padding: 0.75rem;
+    }
+
+    .gap-3 {
+        gap: 0.5rem;
+    }
+
+    .text-xs {
+        font-size: 0.7rem;
+    }
+}
+</style>
 {% endblock %}

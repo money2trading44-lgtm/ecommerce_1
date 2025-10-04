@@ -6,53 +6,53 @@
 {% block page_subtitle %}Suivez et gérez les demandes de réparation{% endblock %}
 
 {% block content %}
-<div class="space-y-6 lg:space-y-8">
+<div class="space-y-4 sm:space-y-6 lg:space-y-8">
     <!-- En-tête avec statistiques -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
-        <div class="bg-white p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Total réparations</p>
-                    <p class="text-xl lg:text-3xl font-bold text-gray-900 mt-1 lg:mt-2">{{ repairs.count }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Total réparations</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ repairs.count }}</p>
                 </div>
-                <div class="w-8 h-8 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-blue-600 text-sm lg:text-base">build</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-blue-600 text-sm sm:text-base">build</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">En attente</p>
-                    <p class="text-xl lg:text-3xl font-bold text-gray-900 mt-1 lg:mt-2">{{ pending_repairs.count }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">En attente</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ pending_repairs.count }}</p>
                 </div>
-                <div class="w-8 h-8 lg:w-12 lg:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-orange-600 text-sm lg:text-base">schedule</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-orange-600 text-sm sm:text-base">schedule</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">En cours</p>
-                    <p class="text-xl lg:text-3xl font-bold text-gray-900 mt-1 lg:mt-2">{{ in_progress_repairs.count }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">En cours</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ in_progress_repairs.count }}</p>
                 </div>
-                <div class="w-8 h-8 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-purple-600 text-sm lg:text-base">engineering</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-purple-600 text-sm sm:text-base">engineering</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Terminées</p>
-                    <p class="text-xl lg:text-3xl font-bold text-gray-900 mt-1 lg:mt-2">{{ completed_repairs.count }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Terminées</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ completed_repairs.count }}</p>
                 </div>
-                <div class="w-8 h-8 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-green-600 text-sm lg:text-base">check_circle</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-green-600 text-sm sm:text-base">check_circle</span>
                 </div>
             </div>
         </div>
@@ -60,68 +60,69 @@
 
     <!-- Tableau des réparations -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
+        <!-- Version Desktop (table) -->
+        <div class="hidden lg:block overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appareil</th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type de panne</th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                        <th class="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Appareil</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type de panne</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for repair in repairs %}
-                    <tr class="hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 hover:shadow-sm">
+                    <tr class="hover:bg-gray-50 transition-all duration-200">
                         <!-- Client -->
-                        <td class="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ repair.full_name }}</div>
                             <div class="text-xs text-gray-500">{{ repair.phone_number }}</div>
                             <div class="text-xs text-gray-500">{{ repair.email }}</div>
                         </td>
 
                         <!-- Appareil -->
-                        <td class="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ repair.device_model }}</div>
-                            <div class="text-xs text-gray-500">{{ repair.description|truncatewords:5 }}</div>
+                            <div class="text-xs text-gray-500 max-w-xs">{{ repair.description|truncatewords:5 }}</div>
                         </td>
 
                         <!-- Type de panne -->
-                        <td class="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200
-                                {% if repair.issue_type == 'SCREEN' %}bg-red-100 text-red-800 hover:bg-red-200
-                                {% elif repair.issue_type == 'BATTERY' %}bg-orange-100 text-orange-800 hover:bg-orange-200
-                                {% elif repair.issue_type == 'CHARGE' %}bg-yellow-100 text-yellow-800 hover:bg-yellow-200
-                                {% elif repair.issue_type == 'WATER' %}bg-blue-100 text-blue-800 hover:bg-blue-200
-                                {% else %}bg-gray-100 text-gray-800 hover:bg-gray-200{% endif %}">
+                                {% if repair.issue_type == 'SCREEN' %}bg-red-100 text-red-800
+                                {% elif repair.issue_type == 'BATTERY' %}bg-orange-100 text-orange-800
+                                {% elif repair.issue_type == 'CHARGE' %}bg-yellow-100 text-yellow-800
+                                {% elif repair.issue_type == 'WATER' %}bg-blue-100 text-blue-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
                                 {{ repair.get_issue_type_display }}
                             </span>
                         </td>
 
                         <!-- Date -->
-                        <td class="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ repair.created_at|date:"d/m/Y" }}</div>
                             <div class="text-xs text-gray-500">{{ repair.created_at|date:"H:i" }}</div>
                         </td>
 
                         <!-- Statut -->
-                        <td class="px-4 lg:px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200
-                                {% if repair.status == 'PENDING' %}bg-yellow-100 text-yellow-800 hover:bg-yellow-200
-                                {% elif repair.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800 hover:bg-blue-200
-                                {% elif repair.status == 'COMPLETED' %}bg-green-100 text-green-800 hover:bg-green-200
-                                {% elif repair.status == 'CANCELLED' %}bg-red-100 text-red-800 hover:bg-red-200
-                                {% else %}bg-gray-100 text-gray-800 hover:bg-gray-200{% endif %}">
+                                {% if repair.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                                {% elif repair.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800
+                                {% elif repair.status == 'COMPLETED' %}bg-green-100 text-green-800
+                                {% elif repair.status == 'CANCELLED' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
                                 {{ repair.get_status_display }}
                             </span>
                         </td>
 
                         <!-- Actions -->
-                        <td class="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center space-x-2">
-                                <a href="/administration/repairs/{{ repair.id }}/" class="text-blue-600 hover:text-blue-900 transition-all duration-200 transform hover:scale-125" title="Voir détails">
+                                <a href="/administration/repairs/{{ repair.id }}/" class="text-blue-600 hover:text-blue-900 transition-all duration-200" title="Voir détails">
                                     <span class="material-symbols-outlined text-base">visibility</span>
                                 </a>
 
@@ -129,7 +130,7 @@
                                 <form method="post" action="/administration/repairs/{{ repair.id }}/update-status/" class="inline">
                                     {% csrf_token %}
                                     <input type="hidden" name="status" value="IN_PROGRESS">
-                                    <button type="submit" class="text-green-600 hover:text-green-900 transition-all duration-200 transform hover:scale-125" title="Démarrer">
+                                    <button type="submit" class="text-green-600 hover:text-green-900 transition-all duration-200" title="Démarrer">
                                         <span class="material-symbols-outlined text-base">play_arrow</span>
                                     </button>
                                 </form>
@@ -138,7 +139,7 @@
                                 {% if repair.status == 'IN_PROGRESS' %}
                                 <form method="post" action="/administration/repairs/{{ repair.id }}/complete/" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="text-green-600 hover:text-green-900 transition-all duration-200 transform hover:scale-125" title="Terminer">
+                                    <button type="submit" class="text-green-600 hover:text-green-900 transition-all duration-200" title="Terminer">
                                         <span class="material-symbols-outlined text-base">check</span>
                                     </button>
                                 </form>
@@ -146,7 +147,7 @@
 
                                 <form method="post" action="/administration/repairs/{{ repair.id }}/delete/" class="inline">
                                     {% csrf_token %}
-                                    <button type="submit" onclick="return confirm('Supprimer cette demande de réparation ?')" class="text-red-600 hover:text-red-900 transition-all duration-200 transform hover:scale-125" title="Supprimer">
+                                    <button type="submit" onclick="return confirm('Supprimer cette demande de réparation ?')" class="text-red-600 hover:text-red-900 transition-all duration-200" title="Supprimer">
                                         <span class="material-symbols-outlined text-base">delete</span>
                                     </button>
                                 </form>
@@ -167,54 +168,164 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Version Mobile (cards) -->
+        <div class="lg:hidden space-y-4 p-3 sm:p-4">
+            {% for repair in repairs %}
+            <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200 hover:shadow-md transition-all duration-200">
+                <!-- En-tête de la carte -->
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-semibold text-gray-900 text-sm sm:text-base">{{ repair.full_name }}</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                {% if repair.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                                {% elif repair.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800
+                                {% elif repair.status == 'COMPLETED' %}bg-green-100 text-green-800
+                                {% elif repair.status == 'CANCELLED' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ repair.get_status_display }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-600">{{ repair.created_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+
+                <!-- Informations client -->
+                <div class="mb-3">
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-xs text-gray-600">Téléphone</p>
+                            <p class="font-medium text-gray-900 text-sm">{{ repair.phone_number }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-600">Email</p>
+                            <p class="font-medium text-gray-900 text-sm truncate">{{ repair.email }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appareil et panne -->
+                <div class="mb-4">
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-xs text-gray-600">Appareil</p>
+                            <p class="font-medium text-gray-900 text-sm">{{ repair.device_model }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-600">Type de panne</p>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                {% if repair.issue_type == 'SCREEN' %}bg-red-100 text-red-800
+                                {% elif repair.issue_type == 'BATTERY' %}bg-orange-100 text-orange-800
+                                {% elif repair.issue_type == 'CHARGE' %}bg-yellow-100 text-yellow-800
+                                {% elif repair.issue_type == 'WATER' %}bg-blue-100 text-blue-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ repair.get_issue_type_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mt-2">
+                        <p class="text-xs text-gray-600">Description</p>
+                        <p class="text-xs text-gray-900 mt-1 line-clamp-2">{{ repair.description }}</p>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-between items-center pt-3 border-t border-gray-200">
+                    <div class="text-xs text-gray-500">
+                        ID: {{ repair.id }}
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <a href="/administration/repairs/{{ repair.id }}/" class="text-blue-600 hover:text-blue-900 transition-all duration-200" title="Voir détails">
+                            <span class="material-symbols-outlined text-lg">visibility</span>
+                        </a>
+
+                        {% if repair.status == 'PENDING' %}
+                        <form method="post" action="/administration/repairs/{{ repair.id }}/update-status/" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="IN_PROGRESS">
+                            <button type="submit" class="text-green-600 hover:text-green-900 transition-all duration-200" title="Démarrer">
+                                <span class="material-symbols-outlined text-lg">play_arrow</span>
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        {% if repair.status == 'IN_PROGRESS' %}
+                        <form method="post" action="/administration/repairs/{{ repair.id }}/complete/" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-green-600 hover:text-green-900 transition-all duration-200" title="Terminer">
+                                <span class="material-symbols-outlined text-lg">check</span>
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        <form method="post" action="/administration/repairs/{{ repair.id }}/delete/" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" onclick="return confirm('Supprimer cette demande de réparation ?')" class="text-red-600 hover:text-red-900 transition-all duration-200" title="Supprimer">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8">
+                <span class="material-symbols-outlined text-4xl mb-2 text-gray-300">build</span>
+                <p class="text-lg font-medium text-gray-500">Aucune réparation trouvée</p>
+                <p class="text-sm text-gray-400">Les demandes de réparation apparaîtront ici</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
     <!-- Statistiques par type de panne -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <div class="bg-white p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Écrans cassés</p>
-                    <p class="text-xl lg:text-3xl font-bold text-gray-900 mt-1 lg:mt-2">{{ screen_repairs.count }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Écrans cassés</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ screen_repairs.count }}</p>
                 </div>
-                <div class="w-8 h-8 lg:w-12 lg:h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-red-600 text-sm lg:text-base">smartphone</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-red-600 text-sm sm:text-base">smartphone</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Problèmes batterie</p>
-                    <p class="text-xl lg:text-3xl font-bold text-gray-900 mt-1 lg:mt-2">{{ battery_repairs.count }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Problèmes batterie</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ battery_repairs.count }}</p>
                 </div>
-                <div class="w-8 h-8 lg:w-12 lg:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-orange-600 text-sm lg:text-base">battery_alert</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-orange-600 text-sm sm:text-base">battery_alert</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Problèmes charge</p>
-                    <p class="text-xl lg:text-3xl font-bold text-gray-900 mt-1 lg:mt-2">{{ charge_repairs.count }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Problèmes charge</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ charge_repairs.count }}</p>
                 </div>
-                <div class="w-8 h-8 lg:w-12 lg:h-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-yellow-600 text-sm lg:text-base">power</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-yellow-600 text-sm sm:text-base">power</span>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
             <div class="flex items-center justify-between">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs lg:text-sm font-medium text-gray-600 truncate">Dégâts des eaux</p>
-                    <p class="text-xl lg:text-3xl font-bold text-gray-900 mt-1 lg:mt-2">{{ water_repairs.count }}</p>
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Dégâts des eaux</p>
+                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ water_repairs.count }}</p>
                 </div>
-                <div class="w-8 h-8 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-3">
-                    <span class="material-symbols-outlined text-blue-600 text-sm lg:text-base">water_drop</span>
+                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
+                    <span class="material-symbols-outlined text-blue-600 text-sm sm:text-base">water_drop</span>
                 </div>
             </div>
         </div>
@@ -238,6 +349,46 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.transform = 'translateY(0)';
         }, index * 100);
     });
+
+    // Optimisation mobile : empêcher le zoom sur les interactions
+    if (window.innerWidth <= 768) {
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.95)';
+            });
+            button.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    }
 });
 </script>
+
+<style>
+/* Utilitaire pour limiter le texte à 2 lignes */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Amélioration de la lisibilité sur mobile */
+@media (max-width: 640px) {
+    .bg-gray-50 {
+        background-color: #f9fafb;
+    }
+
+    .material-symbols-outlined {
+        font-size: 1.25rem;
+    }
+}
+
+/* Animation de feedback tactile */
+button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+}
+</style>
 {% endblock %}

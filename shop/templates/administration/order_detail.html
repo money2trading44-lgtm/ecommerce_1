@@ -6,17 +6,17 @@
 {% block page_subtitle %}Commande #{{ order.order_number }}{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 space-y-4 sm:space-y-6">
     <!-- En-tête de la commande -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Commande #{{ order.order_number }}</h3>
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Commande #{{ order.order_number }}</h3>
                     <p class="text-sm text-gray-600">Passée le {{ order.created_at|date:"d/m/Y à H:i" }}</p>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                <div class="flex items-center justify-between sm:justify-end space-x-3">
+                    <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium
                                 {% if order.status == 'PENDING' %}bg-yellow-100 text-yellow-800
                                 {% elif order.status == 'CONFIRMED' %}bg-blue-100 text-blue-800
                                 {% elif order.status == 'SHIPPED' %}bg-purple-100 text-purple-800
@@ -32,30 +32,55 @@
                                     {% else %}bg-gray-600{% endif %}"></span>
                         {{ order.get_status_display }}
                     </span>
-                    <a href="/administration/orders/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                        Retour
+                    <a href="/administration/orders/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base">
+                        <span class="material-symbols-outlined text-base">arrow_back</span>
+                        <span class="hidden xs:inline">Retour</span>
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- Informations client -->
-        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <h4 class="font-semibold text-gray-900 mb-3">Informations client</h4>
-                <div class="space-y-2">
-                    <p><strong>Nom :</strong> {{ order.full_name }}</p>
-                    <p><strong>Email :</strong> {{ order.email }}</p>
-                    <p><strong>Téléphone :</strong> {{ order.phone_number }}</p>
+        <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <!-- Informations client -->
+            <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-900 mb-3 text-sm sm:text-base">Informations client</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-20 sm:w-24 flex-shrink-0">Nom :</strong>
+                        <span class="text-gray-900 break-words">{{ order.full_name }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-20 sm:w-24 flex-shrink-0">Email :</strong>
+                        <a href="mailto:{{ order.email }}" class="text-blue-600 hover:text-blue-800 break-all">
+                            {{ order.email }}
+                        </a>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-20 sm:w-24 flex-shrink-0">Téléphone :</strong>
+                        <a href="tel:{{ order.phone_number }}" class="text-blue-600 hover:text-blue-800">
+                            {{ order.phone_number }}
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div>
-                <h4 class="font-semibold text-gray-900 mb-3">Adresse de livraison</h4>
-                <div class="space-y-2">
-                    <p><strong>Adresse :</strong> {{ order.address }}</p>
-                    <p><strong>Ville :</strong> {{ order.city }}</p>
-                    <p><strong>Pays :</strong> {{ order.country }}</p>
+
+            <!-- Adresse de livraison -->
+            <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-900 mb-3 text-sm sm:text-base">Adresse de livraison</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-20 sm:w-24 flex-shrink-0">Adresse :</strong>
+                        <span class="text-gray-900 break-words">{{ order.address }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-20 sm:w-24 flex-shrink-0">Ville :</strong>
+                        <span class="text-gray-900">{{ order.city }}</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-start">
+                        <strong class="text-gray-700 w-20 sm:w-24 flex-shrink-0">Pays :</strong>
+                        <span class="text-gray-900">{{ order.country }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,35 +88,35 @@
 
     <!-- Articles de la commande -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Articles commandés</h3>
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900 text-sm sm:text-base">Articles commandés</h3>
         </div>
-        <div class="p-6">
-            <div class="space-y-4">
+        <div class="p-4 sm:p-6">
+            <div class="space-y-3 sm:space-y-4">
                 {% for item in order.items.all %}
-                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div class="flex items-center space-x-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border border-gray-200 rounded-lg gap-3 sm:gap-4">
+                    <div class="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                         <!-- Image du produit avec fallback -->
-                        <div class="relative">
+                        <div class="flex-shrink-0">
                             {% if item.product.image %}
-                                <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" class="w-16 h-16 object-cover rounded-lg">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" class="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg">
                             {% else %}
                                 <!-- Image par défaut stylisée -->
-                                <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center border border-gray-200">
+                                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center border border-gray-200">
                                     {% if item.product.product_type == 'SHEET' %}
-                                        <span class="material-symbols-outlined text-blue-600 text-2xl">bed</span>
+                                        <span class="material-symbols-outlined text-blue-600 text-lg sm:text-2xl">bed</span>
                                     {% elif item.product.product_type == 'PHONE' %}
-                                        <span class="material-symbols-outlined text-purple-600 text-2xl">smartphone</span>
+                                        <span class="material-symbols-outlined text-purple-600 text-lg sm:text-2xl">smartphone</span>
                                     {% else %}
-                                        <span class="material-symbols-outlined text-gray-600 text-2xl">shopping_bag</span>
+                                        <span class="material-symbols-outlined text-gray-600 text-lg sm:text-2xl">shopping_bag</span>
                                     {% endif %}
                                 </div>
                             {% endif %}
                         </div>
 
-                        <div>
-                            <h4 class="font-medium text-gray-900">{{ item.product_name }}</h4>
-                            <p class="text-sm text-gray-600">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-gray-900 text-sm sm:text-base break-words">{{ item.product_name }}</h4>
+                            <p class="text-xs sm:text-sm text-gray-600 mt-1">
                                 {% if item.product %}
                                     {% if item.product.product_type == 'SHEET' %}
                                         {{ item.product.get_sheet_size_display }} • {{ item.product.get_color_display }}
@@ -105,15 +130,15 @@
                                     <span class="text-orange-600">Produit supprimé</span>
                                 {% endif %}
                             </p>
-                            <div class="flex items-center gap-2 mt-1">
+                            <div class="flex flex-wrap items-center gap-2 mt-2">
                                 <p class="text-xs text-gray-500">Ref: {{ item.product.id }}</p>
                                 <p class="text-xs text-gray-500">Prix: {{ item.product_price }} €</p>
                             </div>
                         </div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right flex-shrink-0">
                         <p class="text-sm text-gray-600">{{ item.quantity }} × {{ item.product_price }} €</p>
-                        <p class="text-lg font-bold text-gray-900">{{ item.get_total_price|floatformat:2 }} €</p>
+                        <p class="text-base sm:text-lg font-bold text-gray-900">{{ item.get_total_price|floatformat:2 }} €</p>
                         {% if item.product.discount_percentage > 0 %}
                         <p class="text-xs text-green-600">Promo: -{{ item.product.discount_percentage }}%</p>
                         {% endif %}
@@ -128,8 +153,8 @@
             </div>
 
             <!-- Total de la commande -->
-            <div class="mt-6 pt-6 border-t border-gray-200">
-                <div class="flex justify-between items-center text-lg font-semibold">
+            <div class="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+                <div class="flex justify-between items-center text-base sm:text-lg font-semibold">
                     <span>Total de la commande:</span>
                     <span>{{ order.total_price|floatformat:2 }} €</span>
                 </div>
@@ -138,11 +163,11 @@
     </div>
 
     <!-- Résumé et actions -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <!-- Résumé financier -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h4 class="font-semibold text-gray-900 mb-4">Résumé</h4>
-            <div class="space-y-3">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h4 class="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Résumé</h4>
+            <div class="space-y-2 sm:space-y-3 text-sm sm:text-base">
                 <div class="flex justify-between">
                     <span class="text-gray-600">Sous-total</span>
                     <span class="font-medium">{{ order.total_price|floatformat:2 }} €</span>
@@ -151,7 +176,7 @@
                     <span class="text-gray-600">Livraison</span>
                     <span class="font-medium text-green-600">Gratuite</span>
                 </div>
-                <div class="border-t pt-3 flex justify-between text-lg font-bold">
+                <div class="border-t pt-2 sm:pt-3 flex justify-between font-bold">
                     <span>Total</span>
                     <span>{{ order.total_price|floatformat:2 }} €</span>
                 </div>
@@ -159,67 +184,78 @@
         </div>
 
         <!-- Actions -->
-        <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h4 class="font-semibold text-gray-900 mb-4">Actions</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <h4 class="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Actions</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <!-- Changer statut -->
+                <div class="sm:col-span-2">
+                    <form method="post" action="/administration/orders/{{ order.id }}/update-status/">
+                        {% csrf_token %}
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <select name="status"
+                                    class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                                <option value="PENDING" {% if order.status == 'PENDING' %}selected{% endif %}>En attente</option>
+                                <option value="CONFIRMED" {% if order.status == 'CONFIRMED' %}selected{% endif %}>Confirmée</option>
+                                <option value="SHIPPED" {% if order.status == 'SHIPPED' %}selected{% endif %}>Expédiée</option>
+                                <option value="DELIVERED" {% if order.status == 'DELIVERED' %}selected{% endif %}>Livrée</option>
+                                <option value="CANCELLED" {% if order.status == 'CANCELLED' %}selected{% endif %}>Annulée</option>
+                            </select>
+                            <button type="submit"
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                                <span class="material-symbols-outlined text-base">save</span>
+                                <span class="hidden xs:inline">Mettre à jour</span>
+                                <span class="xs:hidden">OK</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- Confirmer - seulement si en attente -->
                 {% if order.status == 'PENDING' %}
                 <form method="post" action="/administration/orders/{{ order.id }}/confirm/">
                     {% csrf_token %}
                     <button type="submit"
-                            class="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined">check_circle</span>
-                        Confirmer la commande
+                            class="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                        <span class="material-symbols-outlined text-base">check_circle</span>
+                        <span class="hidden xs:inline">Confirmer</span>
+                        <span class="xs:hidden">OK</span>
                     </button>
                 </form>
                 {% else %}
-                <button disabled class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg cursor-not-allowed flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined">check_circle</span>
-                    Déjà confirmée
+                <button disabled class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    <span class="hidden xs:inline">Déjà confirmée</span>
+                    <span class="xs:hidden">Confirmée</span>
                 </button>
                 {% endif %}
-
-                <!-- Changer statut -->
-                <form method="post" action="/administration/orders/{{ order.id }}/update-status/">
-                    {% csrf_token %}
-                    <div class="flex gap-2">
-                        <select name="status" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary">
-                            <option value="PENDING" {% if order.status == 'PENDING' %}selected{% endif %}>En attente</option>
-                            <option value="CONFIRMED" {% if order.status == 'CONFIRMED' %}selected{% endif %}>Confirmée</option>
-                            <option value="SHIPPED" {% if order.status == 'SHIPPED' %}selected{% endif %}>Expédiée</option>
-                            <option value="DELIVERED" {% if order.status == 'DELIVERED' %}selected{% endif %}>Livrée</option>
-                            <option value="CANCELLED" {% if order.status == 'CANCELLED' %}selected{% endif %}>Annulée</option>
-                        </select>
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                            <span class="material-symbols-outlined">save</span>
-                        </button>
-                    </div>
-                </form>
 
                 <!-- Annuler - seulement si pas annulée ou livrée -->
                 {% if order.status != 'CANCELLED' and order.status != 'DELIVERED' %}
                 <form method="post" action="/administration/orders/{{ order.id }}/cancel/">
                     {% csrf_token %}
                     <button type="submit"
-                            onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ? Le stock sera réapprovisionné.')"
-                            class="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined">cancel</span>
-                        Annuler la commande
+                            onclick="return confirmAction('Êtes-vous sûr de vouloir annuler cette commande ? Le stock sera réapprovisionné.', this)"
+                            class="w-full bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                        <span class="material-symbols-outlined text-base">cancel</span>
+                        <span class="hidden xs:inline">Annuler</span>
+                        <span class="xs:hidden">Annuler</span>
                     </button>
                 </form>
                 {% else %}
-                <button disabled class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg cursor-not-allowed flex items-center justify-center gap-2">
-                    <span class="material-symbols-outlined">cancel</span>
-                    Non annulable
+                <button disabled class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <span class="material-symbols-outlined text-base">cancel</span>
+                    <span class="hidden xs:inline">Non annulable</span>
+                    <span class="xs:hidden">Bloqué</span>
                 </button>
                 {% endif %}
 
                 <!-- Exporter -->
                 <a href="/administration/orders/{{ order.id }}/export/"
-                   class="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                   class="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                    target="_blank">
-                    <span class="material-symbols-outlined">download</span>
-                    Exporter en PDF
+                    <span class="material-symbols-outlined text-base">download</span>
+                    <span class="hidden xs:inline">Exporter PDF</span>
+                    <span class="xs:hidden">PDF</span>
                 </a>
             </div>
         </div>
@@ -227,40 +263,230 @@
 
     <!-- Historique des modifications -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Historique</h3>
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900 text-sm sm:text-base">Historique</h3>
         </div>
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             <div class="space-y-3">
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-3">
-                        <span class="material-symbols-outlined text-green-600">add_shopping_cart</span>
-                        <div>
-                            <p class="font-medium">Commande créée</p>
-                            <p class="text-sm text-gray-600">Par le client</p>
+                    <div class="flex items-center space-x-3 flex-1 min-w-0">
+                        <span class="material-symbols-outlined text-green-600 flex-shrink-0">add_shopping_cart</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-sm sm:text-base">Commande créée</p>
+                            <p class="text-xs sm:text-sm text-gray-600 truncate">Par le client</p>
                         </div>
                     </div>
-                    <span class="text-sm text-gray-500">{{ order.created_at|date:"d/m/Y H:i" }}</span>
+                    <span class="text-xs sm:text-sm text-gray-500 flex-shrink-0 ml-2">{{ order.created_at|date:"d/m/Y H:i" }}</span>
                 </div>
                 {% if order.status != 'PENDING' %}
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-3">
-                        <span class="material-symbols-outlined
+                    <div class="flex items-center space-x-3 flex-1 min-w-0">
+                        <span class="material-symbols-outlined flex-shrink-0
                                     {% if order.status == 'CONFIRMED' %}text-blue-600
                                     {% elif order.status == 'SHIPPED' %}text-purple-600
                                     {% elif order.status == 'DELIVERED' %}text-green-600
                                     {% elif order.status == 'CANCELLED' %}text-red-600
                                     {% else %}text-gray-600{% endif %}">event_available</span>
-                        <div>
-                            <p class="font-medium">Statut modifié: {{ order.get_status_display }}</p>
-                            <p class="text-sm text-gray-600">Par l'administrateur</p>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-sm sm:text-base">Statut modifié: {{ order.get_status_display }}</p>
+                            <p class="text-xs sm:text-sm text-gray-600 truncate">Par l'administrateur</p>
                         </div>
                     </div>
-                    <span class="text-sm text-gray-500">{{ order.updated_at|date:"d/m/Y H:i" }}</span>
+                    <span class="text-xs sm:text-sm text-gray-500 flex-shrink-0 ml-2">{{ order.updated_at|date:"d/m/Y H:i" }}</span>
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animation au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'apparition progressive
+    const cards = document.querySelectorAll('.bg-white');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Optimisation pour mobile
+    if (window.innerWidth <= 768) {
+        // Empêcher le zoom sur les selects
+        const selects = document.querySelectorAll('select');
+        selects.forEach(select => {
+            select.addEventListener('focus', function() {
+                this.style.fontSize = '16px';
+            });
+        });
+
+        // Feedback tactile pour les boutons
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                if (!this.disabled) {
+                    this.style.transform = 'scale(0.98)';
+                }
+            });
+            button.addEventListener('touchend', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Optimisation des liens d'export
+        const exportLink = document.querySelector('a[href*="/export/"]');
+        if (exportLink) {
+            exportLink.addEventListener('touchstart', function() {
+                this.style.opacity = '0.8';
+            });
+            exportLink.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+            });
+        }
+    }
+});
+
+// Fonction de confirmation adaptative
+function confirmAction(message, button) {
+    if (window.innerWidth <= 768) {
+        // Sur mobile, utiliser une confirmation native optimisée
+        if (confirm(message)) {
+            // Afficher un indicateur de chargement
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Traitement...';
+            button.disabled = true;
+
+            // Soumettre le formulaire après un court délai
+            setTimeout(() => {
+                button.closest('form').submit();
+            }, 100);
+            return false;
+        }
+        return false;
+    } else {
+        // Sur desktop, garder le comportement par défaut
+        return confirm(message);
+    }
+}
+
+// Gestion du chargement des formulaires
+document.addEventListener('submit', function(e) {
+    const form = e.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    if (submitButton && !submitButton.disabled) {
+        const originalHTML = submitButton.innerHTML;
+        submitButton.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Traitement...';
+        submitButton.disabled = true;
+
+        // Timeout de sécurité pour éviter les blocages
+        setTimeout(() => {
+            submitButton.innerHTML = originalHTML;
+            submitButton.disabled = false;
+        }, 10000); // 10 secondes max
+    }
+});
+</script>
+
+<style>
+/* Breakpoint personnalisé pour très petits écrans */
+@media (max-width: 475px) {
+    .xs\:hidden {
+        display: none;
+    }
+    .xs\:inline {
+        display: inline;
+    }
+}
+
+/* Amélioration de la lisibilité sur mobile */
+@media (max-width: 640px) {
+    .bg-gray-50 {
+        background-color: #f9fafb;
+    }
+
+    /* Optimisation des boutons pour le tactile */
+    button, a[role="button"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    select, input, textarea {
+        font-size: 16px !important; /* Empêche le zoom sur iOS */
+    }
+
+    /* Amélioration de l'affichage des articles */
+    .break-words {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+}
+
+/* Animation de feedback tactile */
+button:active, a[role="button"]:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+}
+
+/* Animation de spin pour le chargement */
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Amélioration de l'accessibilité */
+@media (max-width: 375px) {
+    .text-sm {
+        font-size: 0.8rem;
+    }
+
+    .text-xs {
+        font-size: 0.7rem;
+    }
+
+    .p-4 {
+        padding: 0.75rem;
+    }
+
+    .gap-3 {
+        gap: 0.5rem;
+    }
+
+    .w-12 {
+        width: 2.5rem;
+    }
+
+    .h-12 {
+        height: 2.5rem;
+    }
+}
+
+/* Style pour les liens de contact */
+a[href^="mailto:"], a[href^="tel:"] {
+    word-break: break-all;
+}
+
+/* Amélioration de l'affichage des longs textes */
+.break-all {
+    word-break: break-all;
+}
+
+/* Optimisation des images produits */
+img {
+    max-width: 100%;
+    height: auto;
+}
+</style>
 {% endblock %}
