@@ -1,0 +1,501 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}Tech & Home{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-background-light font-display text-slate-800">
+<div class="flex flex-col min-h-screen">
+
+    <!-- HEADER RESPONSIVE -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo et navigation -->
+                <div class="flex items-center gap-4 lg:gap-8">
+                    <a class="flex items-center gap-2" href="{% url 'shop:home' %}">
+                        <img src="{% static 'shop/images/logo.jpg' %}"
+                             alt="Tech & Home"
+                             class="h-10 sm:h-12 lg:h-14 w-auto">
+                    </a>
+
+                    <!-- Navigation Desktop -->
+                    <nav class="hidden lg:flex items-center gap-6">
+                        <a class="text-sm font-medium {% if request.resolver_match.url_name == 'home' %}text-primary font-semibold{% else %}text-slate-600 hover:text-primary{% endif %} transition-colors"
+                           href="{% url 'shop:home' %}">
+                            Accueil
+                        </a>
+                        <a class="text-sm font-medium {% if request.resolver_match.url_name == 'phones_list' %}text-primary font-semibold{% else %}text-slate-600 hover:text-primary{% endif %} transition-colors"
+                           href="{% url 'shop:phones_list' %}">
+                            Téléphones
+                        </a>
+                        <a class="text-sm font-medium {% if request.resolver_match.url_name == 'sheets_list' %}text-primary font-semibold{% else %}text-slate-600 hover:text-primary{% endif %} transition-colors"
+                           href="{% url 'shop:sheets_list' %}">
+                            Draps
+                        </a>
+                        <a class="text-sm font-medium text-slate-600 hover:text-primary transition-colors"
+                           href="{% url 'shop:repair_request' %}">
+                            Réparations
+                        </a>
+                        <a class="text-sm font-medium {% if request.resolver_match.url_name == 'order_history' %}text-primary font-semibold{% else %}text-slate-600 hover:text-primary{% endif %} transition-colors" href="{% url 'shop:order_history' %}">
+                            Mes Commandes
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Barre de recherche et panier -->
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <!-- Barre de recherche Responsive - VERSION PROFESSIONNELLE -->
+                    <div class="relative">
+                        <form method="get" action="{% url 'shop:search_products' %}" class="flex items-center">
+                            {% csrf_token %}
+                            <!-- Barre de recherche unique qui s'adapte progressivement -->
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                                <input
+                                    name="q"
+                                    value="{{ request.GET.q }}"
+                                    class="w-32 sm:w-48 md:w-56 lg:w-64 xl:w-72 pl-9 pr-3 sm:pl-10 sm:pr-4 py-2 rounded-lg bg-slate-100 border border-transparent focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm placeholder-slate-500"
+                                    placeholder="Rechercher..."
+                                    type="search"
+                                />
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Panier -->
+                    <a href="{% url 'shop:cart_detail' %}" class="relative p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                        {% with cart_total=request.cart.get_total_quantity %}
+                            {% if cart_total and cart_total > 0 %}
+                                <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-white"
+                                      id="cart-counter">
+                                    {{ cart_total }}
+                                </span>
+                            {% else %}
+                                <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-white"
+                                      id="cart-counter" style="display: none;">
+                                    0
+                                </span>
+                            {% endif %}
+                        {% endwith %}
+                    </a>
+
+                    <!-- Menu mobile -->
+                    <div class="lg:hidden">
+                        <button id="mobile-menu-button" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
+                            <span class="material-symbols-outlined">menu</span>
+                        </button>
+
+                        <!-- Menu mobile déroulant -->
+                        <div id="mobile-menu" class="hidden absolute top-16 left-0 right-0 bg-white border-b border-slate-200 shadow-lg z-50">
+                            <div class="container mx-auto px-4 py-4">
+                                <div class="flex flex-col gap-3">
+                                    <a class="text-sm font-medium py-2 px-3 rounded-lg {% if request.resolver_match.url_name == 'home' %}bg-primary text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %} transition-colors"
+                                       href="{% url 'shop:home' %}">
+                                        Accueil
+                                    </a>
+                                    <a class="text-sm font-medium py-2 px-3 rounded-lg {% if request.resolver_match.url_name == 'phones_list' %}bg-primary text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %} transition-colors"
+                                       href="{% url 'shop:phones_list' %}">
+                                        Téléphones
+                                    </a>
+                                    <a class="text-sm font-medium py-2 px-3 rounded-lg {% if request.resolver_match.url_name == 'sheets_list' %}bg-primary text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %} transition-colors"
+                                       href="{% url 'shop:sheets_list' %}">
+                                        Draps
+                                    </a>
+                                    <a class="text-sm font-medium py-2 px-3 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+                                       href="{% url 'shop:repair_request' %}">
+                                        Réparations
+                                    </a>
+                                    <a class="text-sm font-medium py-2 px-3 rounded-lg {% if request.resolver_match.url_name == 'order_history' %}bg-primary text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %} transition-colors"
+                                       href="{% url 'shop:order_history' %}">
+                                        Mes Commandes
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="flex-grow">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- FOOTER RESPONSIVE -->
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+                <!-- Logo et description -->
+                <div class="sm:col-span-2">
+                    <div class="flex items-center gap-2 mb-3">
+                        <img src="{% static 'shop/images/logo.jpg' %}"
+                             alt="Tech & Home"
+                             class="h-16 lg:h-20 w-auto">
+                        <div>
+                            <div class="text-lg font-bold text-slate-900">DSD General Trading</div>
+                            <div class="text-xs text-slate-500">Confort • Technologie • Réparation</div>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 text-sm max-w-md">
+                        Votre destination unique pour les téléphones high-tech, les draps de qualité
+                        et le service de réparation expert. Confort et technologie réunis.
+                    </p>
+                </div>
+
+                <!-- Liens rapides -->
+                <div>
+                    <h3 class="font-semibold text-slate-900 mb-3 text-sm">Navigation</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="{% url 'shop:home' %}" class="text-slate-600 hover:text-primary transition-colors">Accueil</a></li>
+                        <li><a href="{% url 'shop:phones_list' %}" class="text-slate-600 hover:text-primary transition-colors">Téléphones</a></li>
+                        <li><a href="{% url 'shop:sheets_list' %}" class="text-slate-600 hover:text-primary transition-colors">Draps</a></li>
+                        <li><a href="{% url 'shop:repair_request' %}" class="text-slate-600 hover:text-primary transition-colors">Réparations</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h3 class="font-semibold text-slate-900 mb-3 text-sm">Contact</h3>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">phone</span>
+                            <span>01 23 45 67 89</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">mail</span>
+                            <span>contact@techhome.fr</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">location_on</span>
+                            <span>Abidjan, Côte d'Ivoire</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-slate-200 mt-6 pt-4 text-center">
+                <p class="text-xs text-slate-500">
+                    © 2025 DSD General Trading. Tous droits réservés.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+
+
+<script>
+// Classe pour gérer les fonctionnalités AJAX du panier
+class CartAjax {
+    static async addToCart(productId, quantity = 1) {
+        try {
+            const formData = new FormData();
+            formData.append('quantity', quantity.toString());
+
+            // Récupérer le token CSRF
+            const csrfToken = this.getCSRFToken();
+            if (csrfToken) {
+                formData.append('csrfmiddlewaretoken', csrfToken);
+            }
+
+            const response = await fetch(`/panier/ajouter/${productId}/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Mettre à jour le compteur du panier
+                this.updateCartCounter(data.cart_total);
+                this.showNotification(data.message, 'success');
+                return data;
+            } else {
+                this.showNotification(data.error || 'Erreur lors de l\'ajout au panier', 'error');
+                throw new Error(data.error || 'Erreur inconnue');
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            this.showNotification('Erreur de connexion. Veuillez réessayer.', 'error');
+            throw error;
+        }
+    }
+
+    static getCSRFToken() {
+        // Chercher le token CSRF dans n'importe quel formulaire de la page
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfInput) {
+            return csrfInput.value;
+        }
+        return '';
+    }
+
+    static updateCartCounter(count) {
+        const counter = document.getElementById('cart-counter');
+        if (counter) {
+            if (count > 0) {
+                counter.textContent = count;
+                counter.style.display = 'flex';
+                localStorage.setItem('cartQuantity', count.toString());
+            } else {
+                counter.style.display = 'none';
+                localStorage.removeItem('cartQuantity');
+            }
+        }
+    }
+
+    static showNotification(message, type) {
+        // Supprimer les notifications existantes
+        document.querySelectorAll('.cart-notification').forEach(notif => notif.remove());
+
+        // Créer une nouvelle notification
+        const toast = document.createElement('div');
+        toast.className = `cart-notification fixed top-4 right-4 z-50 p-4 rounded-lg text-white font-medium transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
+        toast.textContent = message;
+        toast.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+        toast.style.transform = 'translateX(100%)';
+
+        document.body.appendChild(toast);
+
+        // Animation d'entrée
+        setTimeout(() => {
+            toast.style.transform = 'translateX(0)';
+        }, 10);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }, 3000);
+    }
+}
+
+// Gestion des boutons "Ajouter au panier"
+let cartButtonsInitialized = false;
+
+function initAddToCartButtons() {
+    // Éviter l'initialisation multiple
+    if (cartButtonsInitialized) {
+        return;
+    }
+
+    // Supprimer tous les écouteurs existants
+    document.querySelectorAll('[data-add-to-cart]').forEach(button => {
+        button.removeEventListener('click', handleAddToCartClick);
+    });
+
+    // Ajouter les nouveaux écouteurs
+    document.querySelectorAll('[data-add-to-cart]').forEach(button => {
+        button.addEventListener('click', handleAddToCartClick);
+    });
+
+    cartButtonsInitialized = true;
+}
+
+// Gestionnaire d'événement unique
+async function handleAddToCartClick(event) {
+    const button = event.currentTarget;
+    const productId = button.getAttribute('data-product-id');
+
+    // Empêcher les clics multiples
+    if (button.disabled) {
+        return;
+    }
+
+    // Sauvegarder le contenu original
+    const originalHTML = button.innerHTML;
+    const originalText = button.textContent;
+
+    // Désactiver le bouton et montrer le spinner
+    button.disabled = true;
+    button.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span>';
+    button.style.opacity = '0.7';
+    button.style.cursor = 'not-allowed';
+
+    try {
+        await CartAjax.addToCart(productId, 1);
+    } catch (error) {
+        console.error('Erreur AJAX:', error);
+        // Fallback: méthode classique
+        fallbackAddToCart(productId);
+    } finally {
+        // Réactiver le bouton après un délai
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalHTML;
+            button.style.opacity = '1';
+            button.style.cursor = 'pointer';
+        }, 1000);
+    }
+}
+
+// Fallback en cas d'échec AJAX
+function fallbackAddToCart(productId) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/panier/ajouter/${productId}/`;
+    form.style.display = 'none';
+
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = CartAjax.getCSRFToken();
+
+    const quantityInput = document.createElement('input');
+    quantityInput.type = 'hidden';
+    quantityInput.name = 'quantity';
+    quantityInput.value = '1';
+
+    form.appendChild(csrfInput);
+    form.appendChild(quantityInput);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Menu mobile
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Fermer le menu en cliquant à l'extérieur
+        document.addEventListener('click', function(event) {
+            if (!mobileMenu.contains(event.target) && !mobileMenuButton.contains(event.target)) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    }
+
+    // Initialiser le compteur du panier au chargement de la page
+    const serverQuantity = {{ request.cart.get_total_quantity|default:0 }};
+    const storedQuantity = localStorage.getItem('cartQuantity');
+
+    const finalQuantity = storedQuantity ? parseInt(storedQuantity) : serverQuantity;
+
+    const counter = document.getElementById('cart-counter');
+    if (counter) {
+        if (finalQuantity > 0) {
+            counter.textContent = finalQuantity;
+            counter.style.display = 'flex';
+        } else {
+            counter.style.display = 'none';
+        }
+    }
+
+    // Initialiser les boutons une seule fois
+    setTimeout(() => {
+        initAddToCartButtons();
+    }, 100);
+});
+
+// Fonction pour forcer la mise à jour du compteur
+function forceCartReset() {
+    if (typeof CartAjax !== 'undefined') {
+        CartAjax.updateCartCounter(0);
+    }
+    localStorage.removeItem('cartQuantity');
+
+    const counter = document.getElementById('cart-counter');
+    if (counter) {
+        counter.style.display = 'none';
+        counter.textContent = '0';
+    }
+}
+
+// Exposer les fonctions globalement
+window.CartAjax = CartAjax;
+window.initAddToCartButtons = initAddToCartButtons;
+window.forceCartReset = forceCartReset;
+</script>
+
+<style>
+.cart-notification {
+    opacity: 1;
+    transition: all 0.3s ease;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Ajustements responsive supplémentaires */
+@media (max-width: 640px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Pour les très petits écrans, on réduit légèrement la barre */
+@media (max-width: 480px) {
+    .relative .input {
+        width: 28rem;
+    }
+}
+
+/* Transition fluide pour la barre de recherche */
+.relative input {
+    transition: width 0.3s ease;
+}
+</style>
+
+{% block extra_js %}
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,139 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Tech & Home - Confirmation de commande{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div class="max-w-2xl mx-auto text-center">
+        <!-- Icône de succès -->
+        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <span class="material-symbols-outlined text-green-500 text-3xl sm:text-4xl">check_circle</span>
+        </div>
+
+        <!-- Message de confirmation -->
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-3 sm:mb-4">Commande confirmée !</h1>
+        <p class="text-base sm:text-lg text-slate-600 mb-2">Merci pour votre commande <strong>{{ order.full_name }}</strong></p>
+        <p class="text-slate-500 mb-6 sm:mb-8 text-sm sm:text-base">Votre commande a été enregistrée avec succès.</p>
+
+        <!-- Détails de la commande -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6 mb-6 sm:mb-8 text-left">
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-3 sm:mb-4">Détails de votre commande</h2>
+
+            <div class="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Numéro de commande:</span>
+                    <span class="font-medium text-slate-900">{{ order.order_number }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Date:</span>
+                    <span class="font-medium text-slate-900">{{ order.created_at|date:"d/m/Y à H:i" }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Total:</span>
+                    <span class="font-bold text-slate-900">{{ order.total_price|floatformat:2 }} €</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prochaines étapes - SIMPLIFIÉ -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+            <h3 class="text-base sm:text-lg font-semibold text-slate-900 mb-3">Prochaines étapes</h3>
+            <div class="space-y-2 text-xs sm:text-sm text-slate-700 text-left">
+                <div class="flex items-start sm:items-center gap-3">
+                    <span class="material-symbols-outlined text-blue-500 text-sm sm:text-base flex-shrink-0 mt-0.5 sm:mt-0">notifications</span>
+                    <span>Nous vous contacterons sous 24h au <strong>{{ order.phone_number }}</strong></span>
+                </div>
+                <div class="flex items-start sm:items-center gap-3">
+                    <span class="material-symbols-outlined text-blue-500 text-sm sm:text-base flex-shrink-0 mt-0.5 sm:mt-0">chat</span>
+                    <span>Par <strong>WhatsApp</strong> ou <strong>téléphone</strong> pour confirmer les détails</span>
+                </div>
+                <div class="flex items-start sm:items-center gap-3">
+                    <span class="material-symbols-outlined text-blue-500 text-sm sm:text-base flex-shrink-0 mt-0.5 sm:mt-0">local_shipping</span>
+                    <span>Nous convenons ensemble de la date et heure de livraison</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact rapide -->
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+            <h3 class="text-base sm:text-lg font-semibold text-slate-900 mb-3">Contact rapide</h3>
+            <p class="text-xs sm:text-sm text-slate-700 mb-3 sm:mb-4">Vous pouvez aussi nous contacter directement :</p>
+            <div class="flex flex-col gap-3">
+                <a href="https://wa.me/{{ order.phone_number|cut:' '|cut:'+' }}?text=Bonjour%20Tech%20%26%20Home,%20je%20viens%20de%20passer%20la%20commande%20{{ order.order_number }}"
+                   class="inline-flex items-center justify-center gap-2 bg-green-500 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-green-600 transition-colors text-sm sm:text-base">
+                    <span>💬</span>
+                    Nous écrire sur WhatsApp
+                </a>
+                <a href="mailto:contact@techhome.fr"
+                   class="inline-flex items-center justify-center gap-2 bg-slate-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-slate-700 transition-colors text-sm sm:text-base">
+                    <span>📧</span>
+                    Nous envoyer un email
+                </a>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="{% url 'shop:home' %}"
+               class="bg-primary text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base text-center">
+                Retour à l'accueil
+            </a>
+            <a href="{% url 'shop:order_history' %}"
+               class="bg-white border border-slate-300 text-slate-700 font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-slate-50 transition-colors text-sm sm:text-base text-center">
+                📋 Voir mes commandes
+            </a>
+            <a href="{% url 'shop:phones_list' %}"
+               class="bg-white border border-slate-300 text-slate-700 font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-slate-50 transition-colors text-sm sm:text-base text-center">
+                Continuer mes achats
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Réinitialiser le compteur du panier après une commande réussie
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Réinitialisation du panier après commande...');
+
+    // Méthode 1: Utiliser CartAjax si disponible
+    if (typeof CartAjax !== 'undefined') {
+        CartAjax.updateCartCounter(0);
+        console.log('Compteur réinitialisé via CartAjax');
+    }
+
+    // Méthode 2: Nettoyer le localStorage
+    localStorage.removeItem('cartQuantity');
+    console.log('LocalStorage nettoyé');
+
+    // Méthode 3: Forcer la mise à jour visuelle directe
+    const counter = document.getElementById('cart-counter');
+    if (counter) {
+        counter.style.display = 'none';
+        counter.textContent = '0';
+        console.log('Compteur visuel mis à jour');
+    }
+
+    // Méthode 4: Déclencher un événement de mise à jour
+    window.dispatchEvent(new Event('cartUpdated'));
+
+    console.log('Réinitialisation du panier terminée');
+});
+
+// Écouter les changements de localStorage depuis d'autres onglets
+window.addEventListener('storage', function(e) {
+    if (e.key === 'cartQuantity') {
+        const counter = document.getElementById('cart-counter');
+        if (counter) {
+            if (e.newValue && parseInt(e.newValue) > 0) {
+                counter.textContent = e.newValue;
+                counter.style.display = 'flex';
+            } else {
+                counter.style.display = 'none';
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

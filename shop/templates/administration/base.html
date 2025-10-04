@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel - Tech & Home{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#137fec",
+                        "background-light": "#f6f7f8",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Styles pour la sidebar responsive */
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+
+        .mobile-overlay {
+            display: none;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .mobile-overlay.open {
+            display: block;
+        }
+
+        /* Amélioration du scroll sur mobile */
+        .scroll-mobile {
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="font-sans bg-gray-100">
+    <!-- Overlay mobile -->
+    <div class="mobile-overlay fixed inset-0 z-30 lg:hidden" id="mobileOverlay"></div>
+
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        <!-- Bouton menu mobile -->
+        <button class="lg:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg hover:bg-gray-100 transition-colors" id="mobileMenuButton">
+            <span class="material-symbols-outlined text-gray-700">menu</span>
+        </button>
+
+        <!-- Sidebar Responsive -->
+        <aside class="sidebar-mobile lg:transform-none fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white shadow-lg lg:shadow-sm border-r border-gray-200 flex flex-col lg:translate-x-0 transition-transform duration-300">
+            <!-- En-tête sidebar -->
+            <div class="p-4 lg:p-6 border-b border-gray-200 bg-white">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary text-2xl">admin_panel_settings</span>
+                    <div class="flex-1 min-w-0">
+                        <h1 class="text-lg lg:text-xl font-bold text-gray-900 truncate">Admin Panel</h1>
+                        <p class="text-xs text-gray-500 truncate">Tech & Home</p>
+                    </div>
+                    <!-- Bouton fermer mobile -->
+                    <button class="lg:hidden p-1 rounded hover:bg-gray-100 transition-colors" id="closeSidebar">
+                        <span class="material-symbols-outlined text-gray-500">close</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-1 overflow-y-auto scroll-mobile">
+                <a href="/administration/dashboard/" class="flex items-center gap-3 p-3 rounded-lg {% if request.path == '/administration/dashboard/' %}bg-primary text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors group">
+                    <span class="material-symbols-outlined flex-shrink-0">dashboard</span>
+                    <span class="flex-1 truncate">Tableau de bord</span>
+                </a>
+
+                <a href="/administration/products/" class="flex items-center gap-3 p-3 rounded-lg {% if request.path == '/administration/products/' %}bg-primary text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors group relative">
+                    <span class="material-symbols-outlined flex-shrink-0">inventory_2</span>
+                    <span class="flex-1 truncate">Produits</span>
+                </a>
+
+                <a href="/administration/orders/" class="flex items-center gap-3 p-3 rounded-lg {% if request.path == '/administration/orders/' %}bg-primary text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors group relative">
+                    <span class="material-symbols-outlined flex-shrink-0">receipt_long</span>
+                    <span class="flex-1 truncate">Commandes</span>
+                    {% with pending_orders_count=request.pending_orders_count %}
+                        {% if pending_orders_count > 0 %}
+                            <span class="absolute right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse flex-shrink-0">
+                                {{ pending_orders_count }}
+                            </span>
+                        {% endif %}
+                    {% endwith %}
+                </a>
+
+                <a href="/administration/repairs/" class="flex items-center gap-3 p-3 rounded-lg {% if request.path == '/administration/repairs/' %}bg-primary text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %} transition-colors group relative">
+                    <span class="material-symbols-outlined flex-shrink-0">build</span>
+                    <span class="flex-1 truncate">Réparations</span>
+                    {% with pending_repairs_count=request.pending_repairs_count %}
+                        {% if pending_repairs_count > 0 %}
+                            <span class="absolute right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse flex-shrink-0">
+                                {{ pending_repairs_count }}
+                            </span>
+                        {% endif %}
+                    {% endwith %}
+                </a>
+            </nav>
+
+            <!-- User info -->
+            <div class="p-4 border-t border-gray-200 bg-white">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 lg:w-10 lg:h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-white text-sm">person</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate">{{ request.user.username }}</p>
+                        <p class="text-xs text-gray-500 truncate">Administrateur</p>
+                    </div>
+                </div>
+                <a href="/administration/logout/" class="flex items-center gap-2 w-full p-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-base flex-shrink-0">logout</span>
+                    <span class="truncate">Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 min-h-screen lg:ml-0 bg-gray-100">
+            <!-- Header responsive -->
+            <header class="bg-white shadow-sm border-b px-4 lg:px-8 py-4 lg:py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3 lg:gap-4">
+                        <!-- Espace pour l'alignement sur mobile -->
+                        <div class="w-8 lg:hidden"></div>
+                        <div class="flex-1 min-w-0">
+                            <h2 class="text-lg lg:text-2xl font-bold text-gray-900 truncate">{% block page_title %}Tableau de bord{% endblock %}</h2>
+                            <p class="text-xs lg:text-sm text-gray-600 mt-1 truncate">{% block page_subtitle %}Vue d'ensemble de votre boutique{% endblock %}</p>
+                        </div>
+                    </div>
+
+                    <!-- Indicateur responsive -->
+                    <div class="hidden lg:block text-sm text-gray-500">
+                        {{ request.user.username }}
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenu principal avec padding responsive -->
+            <div class="p-3 lg:p-6 xl:p-8">
+                {% if messages %}
+                    <div class="mb-4 lg:mb-6 space-y-2">
+                        {% for message in messages %}
+                            <div class="p-3 lg:p-4 rounded-lg {% if message.tags == 'success' %}bg-green-50 border border-green-200 text-green-700{% elif message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-base flex-shrink-0">
+                                        {% if message.tags == 'success' %}check_circle
+                                        {% elif message.tags == 'error' %}error
+                                        {% else %}info{% endif %}
+                                    </span>
+                                    <span class="flex-1 text-sm lg:text-base">{{ message }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% block content %}
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+
+    {% block extra_js %}
+    <script>
+    // Gestion du menu mobile
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebar = document.querySelector('.sidebar-mobile');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            mobileOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebarFunc() {
+            sidebar.classList.remove('open');
+            mobileOverlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', openSidebar);
+        }
+
+        if (closeSidebar) {
+            closeSidebar.addEventListener('click', closeSidebarFunc);
+        }
+
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', closeSidebarFunc);
+        }
+
+        // Fermer le menu en redimensionnant vers desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 1024) {
+                closeSidebarFunc();
+            }
+        });
+
+        // Animation pour les cartes au chargement
+        const cards = document.querySelectorAll('.bg-white');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+    </script>
+    {% endblock %}
+</body>
+</html>

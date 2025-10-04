@@ -1,0 +1,205 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Tech & Home - Commande{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+    <!-- Fil d'ariane -->
+    <nav class="mb-6">
+        <div class="flex items-center gap-2 text-sm text-slate-500">
+            <a href="{% url 'shop:home' %}" class="hover:text-primary transition-colors">Accueil</a>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+            <a href="{% url 'shop:cart_detail' %}" class="hover:text-primary transition-colors">Panier</a>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+            <span class="text-slate-800 font-medium">Commande</span>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 lg:mb-8">Finaliser votre commande</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <!-- Formulaire de commande -->
+            <div class="lg:col-span-1">
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Informations personnelles -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-4">Informations personnelles</h2>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label for="full_name" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Nom complet *
+                                </label>
+                                <input type="text" id="full_name" name="full_name" required
+                                       class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm sm:text-base"
+                                       placeholder="Votre nom complet">
+                            </div>
+
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Adresse email *
+                                </label>
+                                <input type="email" id="email" name="email" required
+                                       class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm sm:text-base"
+                                       placeholder="votre@email.com">
+                            </div>
+
+                            <div>
+                                <label for="phone_number" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Numéro de téléphone *
+                                </label>
+                                <input type="tel" id="phone_number" name="phone_number" required
+                                       class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm sm:text-base"
+                                       placeholder="Votre numéro de téléphone">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Adresse de livraison -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-4">Adresse de livraison</h2>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label for="address" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Adresse complète *
+                                </label>
+                                <textarea id="address" name="address" required rows="3"
+                                          class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none text-sm sm:text-base"
+                                          placeholder="Numéro, rue, appartement..."></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="city" class="block text-sm font-medium text-slate-700 mb-2">
+                                        Ville *
+                                    </label>
+                                    <input type="text" id="city" name="city" required
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-sm sm:text-base"
+                                           placeholder="Votre ville">
+                                </div>
+
+                                <div>
+                                    <label for="country" class="block text-sm font-medium text-slate-700 mb-2">
+                                        Pays
+                                    </label>
+                                    <input type="text" id="country" name="country" value="Côte d'Ivoire"
+                                           class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors bg-slate-50 text-sm sm:text-base"
+                                           readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations de contact -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-blue-500 text-lg mt-0.5 flex-shrink-0">info</span>
+                            <div class="text-sm text-blue-700">
+                                <p class="font-medium mb-1">Comment procéderons-nous ?</p>
+                                <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm">
+                                    <li>Nous vous contacterons par téléphone pour confirmer votre commande</li>
+                                    <li>Paiement à la livraison ou par virement bancaire</li>
+                                    <li>Livraison sous 2-3 jours ouvrés</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bouton de confirmation -->
+                    <button type="submit"
+                            class="w-full bg-primary text-white font-bold py-3 sm:py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 text-base sm:text-lg">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">check_circle</span>
+                        Confirmer la commande
+                    </button>
+                </form>
+            </div>
+
+            <!-- Récapitulatif de la commande -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6 sticky top-4 sm:top-6">
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-4">Récapitulatif</h3>
+
+                    <!-- Articles -->
+                    <div class="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+                        {% for item in cart_items %}
+                        <div class="flex items-center gap-3">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                     class="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg flex-shrink-0">
+                            {% else %}
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <span class="text-base sm:text-lg text-slate-400">
+                                        {% if item.product.product_type == 'SHEET' %}🛏️
+                                        {% elif item.product.product_type == 'PHONE' %}📱
+                                        {% else %}🔧{% endif %}
+                                    </span>
+                                </div>
+                            {% endif %}
+
+                            <div class="flex-grow min-w-0">
+                                <p class="font-medium text-slate-900 text-xs sm:text-sm line-clamp-2">{{ item.product.name }}</p>
+                                <p class="text-slate-500 text-xs">Quantité: {{ item.quantity }}</p>
+                            </div>
+
+                            <div class="text-right flex-shrink-0">
+                                <p class="font-semibold text-slate-900 text-sm sm:text-base">{{ item.get_total_price|floatformat:2 }} €</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Total -->
+                    <div class="border-t border-slate-200 pt-3 sm:pt-4 space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-600">Sous-total</span>
+                            <span class="font-medium text-slate-900">{{ cart.get_total_price|floatformat:2 }} €</span>
+                        </div>
+
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-600">Livraison</span>
+                            <span class="font-medium text-green-600">Gratuit</span>
+                        </div>
+
+                        <div class="flex justify-between text-base font-bold pt-2 border-t border-slate-200">
+                            <span class="text-slate-900">Total</span>
+                            <span class="text-slate-900">{{ cart.get_total_price|floatformat:2 }} €</span>
+                        </div>
+                    </div>
+
+                    <!-- Sécurités -->
+                    <div class="mt-4 sm:mt-6 space-y-2 sm:space-y-3 text-xs text-slate-500">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-sm sm:text-base">verified</span>
+                            <span class="text-xs sm:text-sm">Confirmation téléphonique</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-sm sm:text-base">local_shipping</span>
+                            <span class="text-xs sm:text-sm">Livraison offerte</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-sm sm:text-base">support_agent</span>
+                            <span class="text-xs sm:text-sm">Service client dédié</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+/* Pour les très petits écrans */
+@media (max-width: 480px) {
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+</style>

@@ -1,0 +1,113 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Tech & Home - Mes Commandes{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">Mes Commandes</h1>
+
+    {% if orders %}
+    <div class="space-y-4 sm:space-y-6">
+        {% for order in orders %}
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
+            <!-- En-tête de commande -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4">
+                <div class="mb-2 sm:mb-0">
+                    <h3 class="text-base sm:text-lg font-semibold text-slate-900">Commande #{{ order.order_number }}</h3>
+                    <p class="text-xs sm:text-sm text-slate-500">Passée le {{ order.created_at|date:"d/m/Y à H:i" }}</p>
+                </div>
+                <div>
+                    <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium
+                                {% if order.status == 'PENDING' %}bg-yellow-100 text-yellow-800
+                                {% elif order.status == 'CONFIRMED' %}bg-blue-100 text-blue-800
+                                {% elif order.status == 'SHIPPED' %}bg-purple-100 text-purple-800
+                                {% elif order.status == 'DELIVERED' %}bg-green-100 text-green-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Articles de la commande -->
+            <div class="mb-3 sm:mb-4">
+                <h4 class="font-medium text-slate-900 mb-2 text-sm sm:text-base">Articles :</h4>
+                <div class="space-y-1 sm:space-y-2">
+                    {% for item in order.items.all %}
+                    <div class="flex justify-between text-xs sm:text-sm">
+                        <span class="flex-1 pr-2">{{ item.quantity }} × {{ item.product_name }}</span>
+                        <span class="text-slate-600 whitespace-nowrap">{{ item.get_total_price|floatformat:2 }} €</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Informations commande -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm border-t border-slate-200 pt-3 sm:pt-4">
+                <div class="space-y-1">
+                    <p class="text-slate-600"><strong>Total :</strong> {{ order.total_price|floatformat:2 }} €</p>
+                    <p class="text-slate-600">
+                        <strong>Livraison :</strong>
+                        <span class="line-clamp-1">{{ order.address }}, {{ order.city }}</span>
+                    </p>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-slate-600"><strong>Contact :</strong> {{ order.phone_number }}</p>
+                    <p class="text-slate-600">
+                        <strong>Email :</strong>
+                        <span class="line-clamp-1">{{ order.email }}</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-3 sm:mt-4 border-t border-slate-200 pt-3 sm:pt-4">
+                <div class="flex flex-wrap gap-2">
+                    <a href="https://wa.me/{{ order.phone_number|cut:' '|cut:'+' }}?text=Bonjour,%20concernant%20ma%20commande%20{{ order.order_number }}"
+                       class="inline-flex items-center justify-center gap-1 bg-green-500 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg hover:bg-green-600 transition-colors flex-1 sm:flex-none text-center min-w-0">
+                        <span>💬</span>
+                        <span class="truncate">WhatsApp</span>
+                    </a>
+                    <a href="tel:{{ order.phone_number }}"
+                       class="inline-flex items-center justify-center gap-1 bg-blue-500 text-white text-xs sm:text-sm font-medium py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg hover:bg-blue-600 transition-colors flex-1 sm:flex-none text-center min-w-0">
+                        <span>📞</span>
+                        <span class="truncate">Appeler</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- État vide -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-8 lg:p-12 text-center">
+        <span class="material-symbols-outlined text-4xl sm:text-6xl text-slate-300 mb-4">receipt_long</span>
+        <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2">Aucune commande</h3>
+        <p class="text-slate-600 mb-6 text-sm sm:text-base">Vous n'avez pas encore passé de commande.</p>
+        <a href="{% url 'shop:home' %}"
+           class="inline-flex items-center gap-2 bg-primary text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base">
+            <span class="material-symbols-outlined text-lg">storefront</span>
+            Découvrir nos produits
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+/* Pour les très petits écrans */
+@media (max-width: 480px) {
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+/* Ajustements pour tablettes */
+@media (min-width: 640px) and (max-width: 768px) {
+    .sm\:flex-none {
+        flex: none;
+    }
+}
+</style>
+{% endblock %}

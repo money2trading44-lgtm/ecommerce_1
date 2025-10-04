@@ -1,0 +1,272 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Tech & Home - Téléphones{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+
+        <!-- FILTRES - Mobile first -->
+        <aside class="w-full lg:w-64">
+            <!-- Bouton filtre mobile -->
+            <button id="mobile-filter-toggle" class="lg:hidden w-full bg-primary text-white font-bold py-3 px-4 rounded-lg text-sm hover:bg-primary/90 mb-4 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">filter_list</span>
+                Filtres
+            </button>
+
+            <div id="filters-sidebar" class="hidden lg:block bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Filtres</h2>
+                <form method="get" class="space-y-4 sm:space-y-6">
+
+                    <!-- Nouveautés -->
+                    <div>
+                        <h3 class="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Nouveautés</h3>
+                        <div class="space-y-1 sm:space-y-2">
+                            {% for category_value, category_label in phone_categories %}
+                            <label class="flex items-center">
+                                <input type="checkbox" name="category" value="{{ category_value }}"
+                                       class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                                       {% if selected_category == category_value %}checked{% endif %}>
+                                <span class="ml-2 sm:ml-3 text-xs sm:text-sm text-slate-600">{{ category_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Marque -->
+                    <div>
+                        <h3 class="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Marque</h3>
+                        <div class="space-y-1 sm:space-y-2">
+                            {% for brand_value, brand_label in phone_brands %}
+                            <label class="flex items-center">
+                                <input type="checkbox" name="brand" value="{{ brand_value }}"
+                                       class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                                       {% if selected_brand == brand_value %}checked{% endif %}>
+                                <span class="ml-2 sm:ml-3 text-xs sm:text-sm text-slate-600">{{ brand_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Prix -->
+                    <div>
+                        <h3 class="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Prix</h3>
+                        <div class="space-y-3">
+                            <div class="flex gap-2">
+                                <input type="number" name="min_price" placeholder="Min"
+                                       value="{{ min_price }}"
+                                       class="w-20 sm:w-24 rounded border-slate-300 text-xs sm:text-sm px-2 py-1 border">
+                                <span class="text-slate-500 flex items-center">-</span>
+                                <input type="number" name="max_price" placeholder="Max"
+                                       value="{{ max_price }}"
+                                       class="w-20 sm:w-24 rounded border-slate-300 text-xs sm:text-sm px-2 py-1 border">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <button type="submit" class="w-full bg-primary text-white font-bold py-2 px-4 rounded text-sm hover:bg-primary/90">
+                            Appliquer
+                        </button>
+                        <a href="{% url 'shop:phones_list' %}" class="w-full bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded text-sm text-center hover:bg-slate-300 block">
+                            Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <!-- PRODUITS -->
+        <div class="flex-1">
+            <!-- En-tête avec tri -->
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4 sm:gap-0">
+                <h1 class="text-2xl sm:text-3xl font-bold">Téléphones</h1>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs sm:text-sm text-slate-500">Trier par:</span>
+                    <select class="rounded-lg text-xs sm:text-sm border border-slate-300 bg-white focus:ring-primary px-2 sm:px-3 py-1.5 sm:py-2"
+                            onchange="window.location.href = '?sort=' + this.value">
+                        <option value="">Popularité</option>
+                        <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Prix: Croissant</option>
+                        <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Prix: Décroissant</option>
+                        <option value="new" {% if sort_by == 'new' %}selected{% endif %}>Nouveautés</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- GRILLE DE PRODUITS -->
+            <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {% for phone in phones %}
+                <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-shadow">
+                    <a href="{% url 'shop:product_detail' product_id=phone.id %}" class="block">
+                        <div class="relative">
+                            {% if phone.image %}
+                                <img src="{{ phone.image.url }}" alt="{{ phone.name }}" class="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-500">
+                            {% else %}
+                                <div class="w-full h-48 sm:h-56 bg-gray-200 flex items-center justify-center">
+                                    <span class="text-3xl sm:text-4xl">📱</span>
+                                </div>
+                            {% endif %}
+
+                            {% if phone.on_sale %}
+                            <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                -{{ phone.discount_percentage }}%
+                            </div>
+                            {% endif %}
+
+                            {% if phone.phone_category == 'BESTSELLER' %}
+                            <div class="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                🔥 Best-seller
+                            </div>
+                            {% elif phone.phone_category == 'REFURBISHED' %}
+                            <div class="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                ♻️ Reconditionné
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="p-3 sm:p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-slate-900 text-sm sm:text-base line-clamp-2">{{ phone.name }}</h3>
+                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded shrink-0 ml-2">
+                                    {{ phone.get_phone_brand_display }}
+                                </span>
+                            </div>
+
+                            <p class="text-xs sm:text-sm text-slate-500 mb-3">
+                                {% if phone.storage %}{{ phone.storage }} • {% endif %}
+                                {% if phone.screen_size %}{{ phone.screen_size }}{% endif %}
+                            </p>
+
+                            <div class="mb-3 sm:mb-4">
+                                {% if phone.on_sale %}
+                                    <span class="text-base sm:text-lg font-bold text-primary">{{ phone.get_discounted_price|floatformat:2 }} €</span>
+                                    <span class="text-xs sm:text-sm text-red-500 line-through">{{ phone.price|floatformat:2 }} €</span>
+                                {% else %}
+                                    <span class="text-base sm:text-lg font-bold text-slate-900">{{ phone.price|floatformat:2 }} €</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Bouton Ajouter au panier -->
+                    <div class="px-3 sm:px-4 pb-3 sm:pb-4">
+                        {% if phone.stock > 0 %}
+                            <button type="button"
+                                    data-add-to-cart
+                                    data-product-id="{{ phone.id }}"
+                                    class="w-full bg-primary text-white font-medium py-2 px-3 sm:px-4 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-2">
+                                <span class="material-symbols-outlined text-sm sm:text-base">shopping_cart</span>
+                                Ajouter au panier
+                            </button>
+                        {% else %}
+                            <button class="w-full bg-slate-300 text-slate-500 font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm cursor-not-allowed" disabled>
+                                Rupture de stock
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-1 xs:col-span-2 md:col-span-3 lg:col-span-3 xl:col-span-4 text-center py-8 sm:py-12">
+                    <p class="text-gray-500 text-base sm:text-lg">Aucun téléphone trouvé.</p>
+                    <p class="text-xs sm:text-sm text-gray-400 mt-2">Ajoute des téléphones via l'administration.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Gestion des filtres mobiles
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileFilterToggle = document.getElementById('mobile-filter-toggle');
+    const filtersSidebar = document.getElementById('filters-sidebar');
+
+    if (mobileFilterToggle && filtersSidebar) {
+        mobileFilterToggle.addEventListener('click', function() {
+            filtersSidebar.classList.toggle('hidden');
+
+            // Changer l'icône
+            const icon = this.querySelector('.material-symbols-outlined');
+            if (filtersSidebar.classList.contains('hidden')) {
+                icon.textContent = 'filter_list';
+            } else {
+                icon.textContent = 'close';
+            }
+        });
+
+        // Fermer les filtres en cliquant à l'extérieur sur mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth < 1024) {
+                if (!filtersSidebar.contains(event.target) && !mobileFilterToggle.contains(event.target)) {
+                    filtersSidebar.classList.add('hidden');
+                    const icon = mobileFilterToggle.querySelector('.material-symbols-outlined');
+                    icon.textContent = 'filter_list';
+                }
+            }
+        });
+    }
+});
+
+// Redimensionnement de la fenêtre
+window.addEventListener('resize', function() {
+    const filtersSidebar = document.getElementById('filters-sidebar');
+    const mobileFilterToggle = document.getElementById('mobile-filter-toggle');
+
+    if (window.innerWidth >= 1024) {
+        // Sur desktop, toujours afficher les filtres
+        if (filtersSidebar) {
+            filtersSidebar.classList.remove('hidden');
+        }
+        if (mobileFilterToggle) {
+            const icon = mobileFilterToggle.querySelector('.material-symbols-outlined');
+            icon.textContent = 'filter_list';
+        }
+    } else {
+        // Sur mobile, cacher les filtres par défaut
+        if (filtersSidebar) {
+            filtersSidebar.classList.add('hidden');
+        }
+    }
+});
+</script>
+
+<style>
+/* Pour les très petits écrans */
+@media (max-width: 475px) {
+    .xs\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 380px) {
+    .xs\:grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Overlay pour filtres mobiles */
+@media (max-width: 1023px) {
+    #filters-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 40;
+        background: white;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}

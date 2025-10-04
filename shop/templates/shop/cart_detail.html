@@ -1,0 +1,487 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Tech & Home - Panier{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+    <!-- Fil d'ariane -->
+    <nav class="mb-6">
+        <div class="flex items-center gap-2 text-sm text-slate-500">
+            <a href="{% url 'shop:home' %}" class="hover:text-primary transition-colors">Accueil</a>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+            <span class="text-slate-800 font-medium">Panier</span>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 lg:mb-8">Votre Panier</h1>
+
+        {% if cart_items %}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <!-- Liste des articles -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="divide-y divide-slate-100">
+                        {% for item in cart_items %}
+                        <div class="p-4 sm:p-6" data-item-id="{{ item.id }}">
+                            <div class="flex items-start gap-4">
+                                <!-- Image du produit -->
+                                <div class="flex-shrink-0">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                             class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg">
+                                    {% else %}
+                                        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-slate-100 rounded-lg flex items-center justify-center">
+                                            <span class="text-xl sm:text-2xl text-slate-400">
+                                                {% if item.product.product_type == 'SHEET' %}🛏️
+                                                {% elif item.product.product_type == 'PHONE' %}📱
+                                                {% else %}🔧{% endif %}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Informations du produit -->
+                                <div class="flex-grow min-w-0">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                                        <div class="flex-grow min-w-0">
+                                            <h3 class="font-semibold text-slate-900 mb-1 text-sm sm:text-base">
+                                                <a href="{% url 'shop:product_detail' product_id=item.product.id %}"
+                                                   class="hover:text-primary transition-colors line-clamp-2">
+                                                    {{ item.product.name }}
+                                                </a>
+                                            </h3>
+                                            <p class="text-xs sm:text-sm text-slate-500 mb-2">
+                                                {% if item.product.product_type == 'SHEET' %}
+                                                    {{ item.product.get_color_display }} • {{ item.product.get_sheet_size_display }}
+                                                {% elif item.product.product_type == 'PHONE' %}
+                                                    {{ item.product.get_phone_brand_display }} • {{ item.product.storage }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-base sm:text-lg font-bold text-slate-900" data-item-total>
+                                                {{ item.get_total_price|floatformat:2 }} €
+                                            </p>
+                                            {% if item.product.on_sale %}
+                                            <p class="text-xs sm:text-sm text-red-500 line-through">
+                                                {{ item.product.price|floatformat:2 }} €
+                                            </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Contrôles de quantité AVEC AJAX -->
+                                    <div class="flex items-center justify-between mt-4">
+                                        <div class="flex items-center gap-3">
+                                            <form method="post" action="{% url 'shop:update_cart_item' item.id %}" class="flex items-center gap-2">
+                                                {% csrf_token %}
+                                                <button type="button"
+                                                        data-cart-update
+                                                        data-action="decrease"
+                                                        class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-300 flex items-center justify-center hover:bg-slate-50 transition-colors">
+                                                    <span class="material-symbols-outlined text-xs sm:text-sm">remove</span>
+                                                </button>
+
+                                                <span class="w-8 sm:w-12 text-center font-medium text-sm sm:text-base" data-quantity-display>{{ item.quantity }}</span>
+
+                                                <button type="button"
+                                                        data-cart-update
+                                                        data-action="increase"
+                                                        class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-300 flex items-center justify-center hover:bg-slate-50 transition-colors">
+                                                    <span class="material-symbols-outlined text-xs sm:text-sm">add</span>
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <!-- Supprimer AVEC AJAX -->
+                                        <form method="post" action="{% url 'shop:remove_from_cart' item.id %}">
+                                            {% csrf_token %}
+                                            <button type="button"
+                                                    data-cart-remove
+                                                    class="text-red-500 hover:text-red-700 transition-colors flex items-center gap-1 text-xs sm:text-sm">
+                                                <span class="material-symbols-outlined text-sm">delete</span>
+                                                <span class="hidden xs:inline">Supprimer</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Actions supplémentaires -->
+                <div class="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
+                    <a href="{% url 'shop:home' %}"
+                       class="bg-white border border-slate-300 text-slate-700 font-semibold py-3 px-6 rounded-lg hover:bg-slate-50 transition-colors text-center">
+                        Continuer mes achats
+                    </a>
+                </div>
+            </div>
+
+            <!-- Résumé de commande -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6 sticky top-4 sm:top-6">
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-4">Résumé de la commande</h3>
+
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Sous-total</span>
+                            <span class="font-medium text-slate-900" data-cart-subtotal>
+                                {{ cart.get_total_price|floatformat:2 }} €
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Livraison</span>
+                            <span class="font-medium text-green-600">Gratuit</span>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-200">
+                            <div class="flex justify-between text-base font-bold">
+                                <span class="text-slate-900">Total</span>
+                                <span class="text-slate-900" data-cart-total>
+                                    {{ cart.get_total_price|floatformat:2 }} €
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">TVA incluse</p>
+                        </div>
+                    </div>
+
+                    <!-- BOUTON COMMANDE -->
+                    <a href="{% url 'shop:checkout' %}"
+                       class="w-full bg-primary text-white font-bold py-3 sm:py-4 px-6 rounded-lg hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2 mt-4 sm:mt-6 text-sm sm:text-base">
+                        <span class="material-symbols-outlined text-lg">lock</span>
+                        Passer la commande
+                    </a>
+
+                    <!-- Sécurités -->
+                    <div class="mt-4 space-y-2 text-xs text-slate-500">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-base">verified</span>
+                            <span>Paiement sécurisé SSL</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-base">local_shipping</span>
+                            <span>Livraison rapide</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Panier vide -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sm:p-12 text-center">
+            <div class="max-w-md mx-auto">
+                <span class="material-symbols-outlined text-4xl sm:text-6xl text-slate-300 mb-4">shopping_cart</span>
+                <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2">Votre panier est vide</h3>
+                <p class="text-slate-600 mb-6 text-sm sm:text-base">Découvrez nos produits et ajoutez-les à votre panier.</p>
+                <a href="{% url 'shop:home' %}"
+                   class="inline-flex items-center gap-2 bg-primary text-white font-semibold py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base">
+                    <span class="material-symbols-outlined">storefront</span>
+                    Découvrir nos produits
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+class CartManager {
+    constructor() {
+        this.isUpdating = false;
+        this.initEventListeners();
+    }
+
+    initEventListeners() {
+        // Déléguation d'événements pour les boutons de quantité
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('[data-cart-update]') && !this.isUpdating) {
+                e.preventDefault();
+                this.updateQuantity(e.target.closest('[data-cart-update]'));
+            }
+
+            if (e.target.closest('[data-cart-remove]') && !this.isUpdating) {
+                e.preventDefault();
+                this.removeItem(e.target.closest('[data-cart-remove]'));
+            }
+        });
+    }
+
+    async updateQuantity(button) {
+        if (this.isUpdating) return;
+
+        this.isUpdating = true;
+        const form = button.closest('form');
+        const url = form.action;
+        const action = button.getAttribute('data-action');
+        const quantityDisplay = form.querySelector('[data-quantity-display]');
+        const currentQuantity = parseInt(quantityDisplay.textContent);
+
+        let newQuantity = currentQuantity;
+        if (action === 'increase') {
+            newQuantity = currentQuantity + 1;
+        } else if (action === 'decrease') {
+            newQuantity = currentQuantity - 1;
+            if (newQuantity < 1) newQuantity = 1;
+        }
+
+        // Mettre à jour l'affichage immédiatement pour le feedback visuel
+        quantityDisplay.textContent = newQuantity;
+        this.showLoading(form);
+
+        const formData = new FormData(form);
+        formData.set('quantity', newQuantity);
+
+        try {
+            const response = await this.makeRequest(url, formData);
+            this.handleUpdateResponse(response, form.closest('[data-item-id]'));
+        } catch (error) {
+            console.error('Error:', error);
+            this.showError('Erreur lors de la mise à jour');
+            // Revenir à l'ancienne valeur en cas d'erreur
+            quantityDisplay.textContent = currentQuantity;
+        } finally {
+            this.hideLoading(form);
+            this.isUpdating = false;
+        }
+    }
+
+    async removeItem(button) {
+        if (this.isUpdating) return;
+
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+            return;
+        }
+
+        this.isUpdating = true;
+        const form = button.closest('form');
+        const url = form.action;
+        const formData = new FormData(form);
+        const itemElement = form.closest('[data-item-id]');
+
+        this.showLoading(button);
+
+        try {
+            const response = await this.makeRequest(url, formData);
+            this.handleRemoveResponse(response, itemElement);
+        } catch (error) {
+            console.error('Error:', error);
+            this.showError('Erreur lors de la suppression');
+        } finally {
+            this.isUpdating = false;
+        }
+    }
+
+    async makeRequest(url, formData) {
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        return await response.json();
+    }
+
+    handleUpdateResponse(data, itemElement) {
+        if (data.success) {
+            if (data.deleted) {
+                this.removeItemFromDOM(itemElement);
+            } else {
+                this.updateItemInDOM(itemElement, data);
+            }
+            this.updateCartSummary(data);
+            this.showSuccess(data.message);
+        } else {
+            this.showError(data.error);
+            // Recharger la page en cas d'erreur de stock
+            setTimeout(() => window.location.reload(), 1000);
+        }
+    }
+
+    handleRemoveResponse(data, itemElement) {
+        if (data.success) {
+            this.removeItemFromDOM(itemElement);
+            this.updateCartSummary(data);
+            this.showSuccess(data.message);
+        } else {
+            this.showError('Erreur lors de la suppression');
+        }
+    }
+
+    updateItemInDOM(itemElement, data) {
+        // Mettre à jour la quantité affichée
+        const quantityDisplay = itemElement.querySelector('[data-quantity-display]');
+        if (quantityDisplay) {
+            quantityDisplay.textContent = data.item_quantity;
+        }
+
+        // Mettre à jour le prix total de l'article
+        const itemTotalElement = itemElement.querySelector('[data-item-total]');
+        if (itemTotalElement) {
+            itemTotalElement.textContent = `${data.item_total.toFixed(2)} €`;
+        }
+    }
+
+    removeItemFromDOM(itemElement) {
+        itemElement.style.transition = 'all 0.3s ease';
+        itemElement.style.opacity = '0';
+        itemElement.style.height = `${itemElement.offsetHeight}px`;
+        itemElement.style.marginBottom = '0';
+
+        setTimeout(() => {
+            itemElement.style.height = '0';
+            itemElement.style.paddingTop = '0';
+            itemElement.style.paddingBottom = '0';
+            itemElement.style.overflow = 'hidden';
+
+            setTimeout(() => {
+                if (itemElement.parentNode) {
+                    itemElement.remove();
+                }
+                // Vérifier si le panier est vide
+                const remainingItems = document.querySelectorAll('[data-item-id]');
+                if (remainingItems.length === 0) {
+                    setTimeout(() => window.location.reload(), 500);
+                }
+            }, 300);
+        }, 100);
+    }
+
+    updateCartSummary(data) {
+        // Mettre à jour le total du panier
+        const cartTotalElement = document.querySelector('[data-cart-total]');
+        if (cartTotalElement) {
+            cartTotalElement.textContent = `${data.cart_total.toFixed(2)} €`;
+        }
+
+        // Mettre à jour le sous-total
+        const subtotalElement = document.querySelector('[data-cart-subtotal]');
+        if (subtotalElement) {
+            subtotalElement.textContent = `${data.cart_total.toFixed(2)} €`;
+        }
+
+        // Mettre à jour le compteur d'articles dans l'en-tête (GLOBAL)
+        this.updateGlobalCartCounter(data.cart_quantity);
+    }
+
+    updateGlobalCartCounter(count) {
+        const counter = document.getElementById('cart-counter');
+        if (counter) {
+            if (count > 0) {
+                counter.textContent = count;
+                counter.style.display = 'flex';
+
+                // Stocker aussi dans localStorage pour persistance entre pages
+                localStorage.setItem('cartQuantity', count);
+            } else {
+                counter.style.display = 'none';
+                localStorage.removeItem('cartQuantity');
+            }
+        }
+    }
+
+    showLoading(element) {
+        const buttons = element.querySelectorAll('button');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+        });
+    }
+
+    hideLoading(element) {
+        const buttons = element.querySelectorAll('button');
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        });
+    }
+
+    showSuccess(message) {
+        this.showNotification(message, 'success');
+    }
+
+    showError(message) {
+        this.showNotification(message, 'error');
+    }
+
+    showNotification(message, type) {
+        // Supprimer les notifications existantes
+        document.querySelectorAll('.cart-notification').forEach(notif => notif.remove());
+
+        // Créer une notification toast
+        const toast = document.createElement('div');
+        toast.className = `cart-notification fixed top-4 right-4 z-50 p-4 rounded-lg text-white font-medium transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
+        toast.textContent = message;
+        toast.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+
+        document.body.appendChild(toast);
+
+        // Animation d'entrée
+        requestAnimationFrame(() => {
+            toast.style.transform = 'translateX(0)';
+        });
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }, 2000);
+    }
+}
+
+// Initialiser le gestionnaire de panier quand la page est chargée
+document.addEventListener('DOMContentLoaded', () => {
+    new CartManager();
+});
+</script>
+
+<style>
+.cart-notification {
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.cart-notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Pour les très petits écrans */
+@media (max-width: 480px) {
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+/* Afficher "Supprimer" sur les très petits écrans */
+@media (max-width: 360px) {
+    .xs\:inline {
+        display: inline !important;
+    }
+}
+</style>
+{% endblock %}
