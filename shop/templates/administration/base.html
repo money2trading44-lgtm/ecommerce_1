@@ -61,52 +61,141 @@
             top: 64px; /* Sous la navigation */
             z-index: 40;
         }
+
+        /* Ajustement mobile pour la navigation fixe */
+        @media (max-width: 640px) {
+            .content-with-fixed-nav {
+                margin-top: 56px; /* Hauteur réduite sur mobile */
+            }
+
+            .page-header-fixed {
+                top: 56px; /* Ajusté pour mobile */
+            }
+        }
+
+        /* Breakpoint personnalisé pour très petits écrans */
+        @media (max-width: 475px) {
+            .text-2xl {
+                font-size: 1.5rem;
+            }
+            .text-xl {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Animation de spin pour le chargement */
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Amélioration de l'accessibilité */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Style pour les états désactivés */
+        button:disabled, a[disabled] {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Optimisation pour très petits écrans */
+        @media (max-width: 320px) {
+            .px-4 {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+            .gap-3 {
+                gap: 0.5rem;
+            }
+        }
+
+        /* Amélioration de la lisibilité sur mobile */
+        @media (max-width: 640px) {
+            .bg-gray-50 {
+                background-color: #f9fafb;
+            }
+
+            .leading-relaxed {
+                line-height: 1.5;
+            }
+        }
+
+        /* Styles pour le scroll fluide */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Ombre portée pour la navigation fixe */
+        .fixed-nav {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Ombre pour l'en-tête de page fixe */
+        .page-header-fixed {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Empêche le contenu de déborder horizontalement */
+        .max-width-safe {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
     </style>
 </head>
-<body class="font-sans bg-gray-100">
-    <!-- Barre de navigation FIXE -->
+<body class="font-sans bg-gray-100 max-width-safe">
     <nav class="fixed-nav bg-white shadow-sm border-b border-gray-200">
-        <div class="px-4 sm:px-6 lg:px-8">
+        <div class="px-4 sm:px-6 lg:px-8 max-width-safe">
             <div class="flex justify-between items-center h-16">
-                <!-- Logo et titre -->
-                <div class="flex items-center">
-                    <a href="/administration/dashboard/" class="flex items-center gap-3">
+                <div class="flex items-center flex-shrink-0">
+                    <button id="mobile-menu-button" class="md:hidden mr-4 text-gray-700">
+                        <span class="material-symbols-outlined text-2xl">menu</span>
+                    </button>
+
+                    <a href="/gestion-securisee/dashboard/" class="flex items-center gap-3 whitespace-nowrap">
                         <span class="material-symbols-outlined text-primary text-2xl">admin_panel_settings</span>
                         <span class="text-xl font-bold text-gray-900 hidden sm:block">DSG Admin</span>
                     </a>
                 </div>
 
-                <!-- Navigation desktop -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <a href="/administration/dashboard/"
-                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/dashboard/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                <div class="hidden md:flex items-center space-x-4 overflow-x-auto **flex-1**">
+                    <a href="/gestion-securisee/dashboard/"
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap {% if request.path == '/gestion-securisee/dashboard/' %}bg-blue-50 text-primary font-medium{% endif %}">
                         <span class="material-symbols-outlined">dashboard</span>
                         Tableau de bord
                     </a>
-                    <a href="/administration/products/"
-                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/products/' or request.path == '/administration/products/add/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                    <a href="/gestion-securisee/products/"
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap {% if request.path == '/gestion-securisee/products/' or request.path == '/gestion-securisee/products/add/' %}bg-blue-50 text-primary font-medium{% endif %}">
                         <span class="material-symbols-outlined">inventory_2</span>
                         Produits
                     </a>
-                    <a href="/administration/orders/"
-                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                    <a href="/gestion-securisee/orders/"
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap {% if request.path == '/gestion-securisee/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
                         <span class="material-symbols-outlined">receipt_long</span>
                         Commandes
                     </a>
-                    <a href="/administration/repairs/"
-                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                    <a href="/gestion-securisee/repairs/"
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap {% if request.path == '/gestion-securisee/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
                         <span class="material-symbols-outlined">build</span>
                         Réparations
                     </a>
                 </div>
 
-                <!-- Menu utilisateur -->
-                <div class="flex items-center space-x-3">
-                    <span class="text-sm text-gray-700 hidden sm:block">Bonjour, {% if user.is_authenticated %}{{ user.username }}{% else %}Admin{% endif %}</span>
-                    <form method="post" action="/administration/logout/">
+                <div class="flex items-center space-x-3 flex-shrink-0">
+                    <span class="text-sm text-gray-700 hidden sm:block whitespace-nowrap">Bonjour, {% if user.is_authenticated %}{{ user.username }}{% else %}Admin{% endif %}</span>
+                    <form method="post" action="/gestion-securisee/logout/">
                         {% csrf_token %}
                         <button type="submit"
-                                class="text-gray-600 hover:text-red-600 transition-colors flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100">
+                                class="text-gray-600 hover:text-red-600 transition-colors flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 whitespace-nowrap">
                             <span class="material-symbols-outlined">logout</span>
                             <span class="hidden sm:block">Déconnexion</span>
                         </button>
@@ -115,26 +204,25 @@
             </div>
         </div>
 
-        <!-- Navigation mobile -->
-        <div class="md:hidden border-t border-gray-200">
+        <div id="mobile-menu" class="md:hidden border-t border-gray-200 hidden">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="/administration/dashboard/"
-                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/dashboard/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                <a href="/gestion-securisee/dashboard/"
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/gestion-securisee/dashboard/' %}bg-blue-50 text-primary font-medium{% endif %}">
                     <span class="material-symbols-outlined">dashboard</span>
                     Tableau de bord
                 </a>
-                <a href="/administration/products/"
-                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/products/' or request.path == '/administration/products/add/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                <a href="/gestion-securisee/products/"
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/gestion-securisee/products/' or request.path == '/gestion-securisee/products/add/' %}bg-blue-50 text-primary font-medium{% endif %}">
                     <span class="material-symbols-outlined">inventory_2</span>
                     Produits
                 </a>
-                <a href="/administration/orders/"
-                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                <a href="/gestion-securisee/orders/"
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/gestion-securisee/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
                     <span class="material-symbols-outlined">receipt_long</span>
                     Commandes
                 </a>
-                <a href="/administration/repairs/"
-                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/administration/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                <a href="/gestion-securisee/repairs/"
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/gestion-securisee/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
                     <span class="material-symbols-outlined">build</span>
                     Réparations
                 </a>
@@ -142,9 +230,7 @@
         </div>
     </nav>
 
-    <!-- Contenu principal avec marge pour la navigation fixe -->
     <div class="content-with-fixed-nav">
-        <!-- En-tête de page FIXE -->
         <div class="page-header-fixed bg-white shadow-sm border-b border-gray-200">
             <div class="px-4 sm:px-6 lg:px-8 py-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -156,18 +242,15 @@
                             {% block page_subtitle %}Vue d'ensemble de votre activité{% endblock %}
                         </p>
                     </div>
-                    <div class="mt-4 sm:mt-0">
+                    <div class="mt-4 sm:mt-0 flex-shrink-0">
                         {% block page_actions %}
-                        <!-- Actions spécifiques à la page (boutons, etc.) -->
                         {% endblock %}
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Contenu de la page -->
-        <main class="px-4 sm:px-6 lg:px-8 py-6">
-            <!-- Messages Django -->
+        <main class="px-4 sm:px-6 lg:px-8 py-6 max-width-safe">
             {% if messages %}
             <div class="mb-6 space-y-3">
                 {% for message in messages %}
@@ -176,7 +259,7 @@
                                           {% elif message.tags == 'warning' %}bg-yellow-50 border border-yellow-200 text-yellow-700
                                           {% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
                     <div class="flex items-center">
-                        <span class="material-symbols-outlined mr-2 text-base">
+                        <span class="material-symbols-outlined mr-2 text-base flex-shrink-0">
                             {% if message.tags == 'error' %}error
                             {% elif message.tags == 'success' %}check_circle
                             {% elif message.tags == 'warning' %}warning
@@ -189,21 +272,15 @@
             </div>
             {% endif %}
 
-            <!-- Contenu spécifique de la page -->
             {% block content %}
-            <!-- Le contenu spécifique à chaque page viendra ici -->
             {% endblock %}
         </main>
     </div>
 
-    <!-- Scripts supplémentaires -->
     {% block extra_js %}
-    <!-- Scripts spécifiques aux pages -->
     {% endblock %}
 
-    <!-- Scripts globaux -->
     <script>
-    // Fonctions globales pour l'administration
     document.addEventListener('DOMContentLoaded', function() {
         // Animation au chargement des pages
         const mainContent = document.querySelector('main');
@@ -262,42 +339,20 @@
                 }
             });
         });
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
 
-        // Fonction de confirmation améliorée
-        window.confirmAction = function(message, callback) {
-            if (window.innerWidth <= 768) {
-                // Sur mobile, utiliser une confirmation native
-                if (confirm(message)) {
-                    if (typeof callback === 'function') {
-                        callback();
-                    }
-                    return true;
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', function() {
+                if (mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.remove('hidden');
+                } else {
+                    mobileMenu.classList.add('hidden');
                 }
-                return false;
-            } else {
-                // Sur desktop, on garde le comportement par défaut
-                if (typeof callback === 'function') {
-                    callback();
-                }
-                return true;
-            }
-        };
-
-        // Ajustement dynamique de la hauteur pour le contenu
-        function adjustContentHeight() {
-            const navHeight = document.querySelector('.fixed-nav').offsetHeight;
-            const headerHeight = document.querySelector('.page-header-fixed').offsetHeight;
-            const content = document.querySelector('.content-with-fixed-nav');
-
-            if (content) {
-                content.style.marginTop = navHeight + 'px';
-                content.style.minHeight = `calc(100vh - ${navHeight}px)`;
-            }
+            });
         }
-
-        // Ajuster la hauteur au chargement et au redimensionnement
-        adjustContentHeight();
-        window.addEventListener('resize', adjustContentHeight);
     });
 
     // Fonction utilitaire pour formater les prix
@@ -318,88 +373,5 @@
         });
     };
     </script>
-
-    <style>
-    /* Breakpoint personnalisé pour très petits écrans */
-    @media (max-width: 475px) {
-        .text-2xl {
-            font-size: 1.5rem;
-        }
-        .text-xl {
-            font-size: 1.25rem;
-        }
-    }
-
-    /* Animation de spin pour le chargement */
-    .animate-spin {
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    /* Amélioration de l'accessibilité */
-    @media (prefers-reduced-motion: reduce) {
-        * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-        }
-    }
-
-    /* Style pour les états désactivés */
-    button:disabled, a[disabled] {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    /* Optimisation pour très petits écrans */
-    @media (max-width: 320px) {
-        .px-4 {
-            padding-left: 0.75rem;
-            padding-right: 0.75rem;
-        }
-        .gap-3 {
-            gap: 0.5rem;
-        }
-    }
-
-    /* Amélioration de la lisibilité sur mobile */
-    @media (max-width: 640px) {
-        .bg-gray-50 {
-            background-color: #f9fafb;
-        }
-
-        .leading-relaxed {
-            line-height: 1.5;
-        }
-
-        /* Ajustement spécifique mobile pour la navigation fixe */
-        .content-with-fixed-nav {
-            margin-top: 56px; /* Hauteur réduite sur mobile */
-        }
-
-        .page-header-fixed {
-            top: 56px; /* Ajusté pour mobile */
-        }
-    }
-
-    /* Styles pour le scroll fluide */
-    html {
-        scroll-behavior: smooth;
-    }
-
-    /* Ombre portée pour la navigation fixe */
-    .fixed-nav {
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Ombre pour l'en-tête de page fixe */
-    .page-header-fixed {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-    </style>
 </body>
 </html>

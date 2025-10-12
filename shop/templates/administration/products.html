@@ -13,7 +13,7 @@
             <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Catalogue des produits</h3>
             <p class="text-xs sm:text-sm text-gray-600 mt-1">{{ products.count }} produit(s) trouvé(s)</p>
         </div>
-        <a href="/administration/products/add/" class="bg-primary text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-600 transition-all duration-300 flex items-center justify-center gap-2 group transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto">
+        <a href="/gestion-securisee/products/add/" class="bg-primary text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-600 transition-all duration-300 flex items-center justify-center gap-2 group transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto">
             <span class="material-symbols-outlined text-base">add</span>
             <span class="hidden xs:inline">Ajouter un produit</span>
             <span class="xs:hidden">Ajouter</span>
@@ -178,7 +178,7 @@
 
                         <!-- Prix -->
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ product.price }} €</div>
+                            <div class="text-sm font-medium text-gray-900">{{ product.price }} FCFA</div>
                             {% if product.on_sale %}
                             <div class="text-xs text-red-600">Promo: -{{ product.discount_percentage }}%</div>
                             {% endif %}
@@ -211,7 +211,7 @@
                         <!-- Actions -->
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center space-x-2">
-                                <a href="#" class="text-blue-600 hover:text-blue-900 transition-all duration-200" title="Modifier">
+                                <a href="/gestion-securisee/products/edit/{{ product.id }}/" class="text-blue-600 hover:text-blue-900 transition-all duration-200" title="Modifier">
                                     <span class="material-symbols-outlined text-base">edit</span>
                                 </a>
                                 <a href="{% url 'shop:product_detail' product_id=product.id %}" class="text-green-600 hover:text-green-900 transition-all duration-200" title="Voir">

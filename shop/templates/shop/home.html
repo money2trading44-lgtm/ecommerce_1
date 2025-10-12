@@ -1,6 +1,6 @@
 {% extends 'shop/base.html' %}
 {% load static %}
-{% block title %}Tech & Home - Accueil{% endblock %}
+{% block title %}Accueil{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
@@ -209,10 +209,10 @@
 
                     <div class="flex items-center gap-3 mb-4">
                         {% if product.on_sale %}
-                            <span class="text-lg sm:text-xl font-bold text-primary">{{ product.get_discounted_price|floatformat:2 }} €</span>
-                            <span class="text-xs sm:text-sm text-red-500 line-through">{{ product.price|floatformat:2 }} €</span>
+                            <span class="text-lg sm:text-xl font-bold text-primary">{{ product.get_discounted_price|floatformat:2 }} FCFA</span>
+                            <span class="text-xs sm:text-sm text-red-500 line-through">{{ product.price|floatformat:2 }} FCFA</span>
                         {% else %}
-                            <span class="text-lg sm:text-xl font-bold text-slate-900">{{ product.price|floatformat:2 }} €</span>
+                            <span class="text-lg sm:text-xl font-bold text-slate-900">{{ product.price|floatformat:2 }} FCFA</span>
                         {% endif %}
                     </div>
 

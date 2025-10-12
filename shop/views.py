@@ -1,15 +1,14 @@
-from datetime import timedelta
-from django.utils import timezone as django_timezone
+from django.db.models.functions import ExtractMonth
+from django.utils import timezone as django_timezone, timezone
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Avg
-from django.http import JsonResponse, HttpResponse
+from django.db.models import Avg, Count
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from shop.models import Category, Product, RepairRequest, Cart, CartItem, Order, OrderItem
-from django.db.models import Count, Sum, Q
-from datetime import datetime, timedelta
-
+from django.db.models import Sum, Q
+from datetime import timedelta, datetime
 
 
 # ========================= VUES CLIENT ======================
@@ -70,46 +69,57 @@ def search_products(request):
 
     return render(request,'shop/search_results.html',context)
 
+
 def sheets_list(request):
+    from shop.models import Product
     """
     Vue pour afficher la liste des draps
     avec des filtres
     """
-
     sheets = Product.objects.filter(
-        product_type = 'SHEET',
-        is_active = True
+        product_type='SHEET',
+        is_active=True
     )
 
     # Gestion des filtres
-    selected_size = request.GET.get('size','')
-    selected_color = request.GET.get('color','')
+    selected_size = request.GET.get('size', '')
+    min_price = request.GET.get('min_price', '')
+    max_price = request.GET.get('max_price', '')
 
     if selected_size:
-        sheets = sheets.filter(sheet_size = selected_size)
-    if selected_color:
-        sheets = sheets.filter(color = selected_color)
+        sheets = sheets.filter(sheet_size=selected_size)
 
+    # Filtrage par prix
+    if min_price:
+        sheets = sheets.filter(price__gte=min_price)
+    if max_price:
+        sheets = sheets.filter(price__lte=max_price)
 
     # Gestion du tri
-    sort_by = request.GET.get('sort','')
+    sort_by = request.GET.get('sort', '')
     if sort_by == 'price_asc':
         sheets = sheets.order_by('price')
-    elif sort_by=='price_desc':
+    elif sort_by == 'price_desc':
         sheets = sheets.order_by('-price')
-    elif sort_by =='new':
+    elif sort_by == 'new':
         sheets = sheets.order_by('-created_at')
     else:
         sheets = sheets.order_by('-created_at')
 
+    # Ajouter les choix de taille au contexte
+    from shop.models import Product
+    sheet_sizes = Product.SHEET_SIZES
+
     context = {
-        'sheets':sheets,
-        'selected_size':selected_size,
-        'selected_color':selected_color,
-        'sort_by':sort_by
+        'sheets': sheets,
+        'selected_size': selected_size,
+        'min_price': min_price,
+        'max_price': max_price,
+        'sort_by': sort_by,
+        'sheet_sizes': sheet_sizes,  # Ajouté pour les filtres
     }
 
-    return render(request,'shop/sheets_list.html',context)
+    return render(request, 'shop/sheets_list.html', context)
 
 
 def phone_list(request):
@@ -464,9 +474,32 @@ def order_history(request):
 
     # ========================= VUES ADMINISTRATION ======================
 
+# ========================= VUES ADMINISTRATEUR ======================
+
+    """
+    Ici est decrit toute la logique de la partie administrateur du site internet.
+    """
+
+def admin_required(view_func):
+    def _wrapped_view(request, *args, **kwargs):
+        if not (request.user.is_authenticated and request.user.is_staff):
+            messages.error(request, "Accès réservé aux administrateurs.")
+            return redirect('shop:home')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
+
+def admin_redirect(request):
+    """Redirige les accès non autorisés vers l'accueil"""
+    # UN SEUL message au lieu de plusieurs
+    messages.error(request, "Accès réservé aux administrateurs.")
+    return redirect('shop:home')
+
 def is_admin_user(user):
     """Vérifie si l'utilisateur est un administrateur"""
     return user.is_authenticated and user.is_staff
+
 
 
 def admin_login(request):
@@ -476,7 +509,7 @@ def admin_login(request):
 
     # SI l'utilisateur est déjà connecté, rediriger vers le dashboard
     if request.user.is_authenticated and request.user.is_staff:
-        return redirect('/administration/dashboard/')
+        return redirect('/gestion-securisee/dashboard/')
 
     # SI méthode POST : traiter la connexion
     if request.method == 'POST':
@@ -488,7 +521,7 @@ def admin_login(request):
         if user is not None and user.is_staff:
             login(request, user)
             messages.success(request, f"Bienvenue {user.username} !")
-            return redirect('/administration/dashboard/')
+            return redirect('/gestion-securisee/dashboard/')
         else:
             messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
             # IMPORTANT: Utiliser notre template personnalisé
@@ -498,6 +531,7 @@ def admin_login(request):
     return render(request, 'administration/login.html')
 
 
+@admin_required
 def admin_logout(request):
     """Vue pour la déconnexion administrateur"""
     # Déconnecter l'utilisateur s'il est connecté
@@ -506,186 +540,71 @@ def admin_logout(request):
         messages.success(request, "Vous avez été déconnecté avec succès.")
 
     # Rediriger vers notre page de login personnalisée
-    return redirect('/administration/login/')
+    return redirect('/gestion-securisee/login/')
 
 
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_dashboard(request):
-    """Vue pour le tableau de bord administrateur dynamique"""
-    from django.db.models.aggregates import Sum
+    """Vue du tableau de bord administrateur avec statistiques et graphique des ventes."""
 
-    # Date d'aujourd'hui
-    today = django_timezone.now().date()
-    this_month_start = today.replace(day=1)
-    last_month_start = (this_month_start - timedelta(days=1)).replace(day=1)
+    # ✅ Récupération des statistiques globales
+    total_products = Product.objects.count()
+    total_orders = Order.objects.count()
+    total_sales = Order.objects.aggregate(Sum('total_price'))['total_price__sum'] or 0
+    total_repairs = RepairRequest.objects.count()
 
-    # === STATISTIQUES DES COMMANDES ===
-    # Ventes totales (toutes les commandes)
-    total_sales = Order.objects.aggregate(
-        total= Sum('total_price')
-    )['total'] or 0
+    # ✅ Récupération de l'année courante
+    current_year = datetime.now().year
 
-    # Commandes en attente
-    pending_orders = Order.objects.filter(status='PENDING').count()
+    # ✅ Agrégation des ventes par mois pour l'année courante
+    sales_data = (
+        Order.objects.filter(created_at__year=current_year)
+        .annotate(month=ExtractMonth('created_at'))
+        .values('month')
+        .annotate(total_sales=Sum('total_price'))
+        .order_by('month')
+    )
 
-    # Ventes du mois en cours
-    monthly_sales = Order.objects.filter(
-        created_at__date__gte=this_month_start
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    # ✅ Construction du tableau des ventes mensuelles
+    monthly_sales = [0] * 12
+    for entry in sales_data:
+        month_index = entry['month'] - 1
+        monthly_sales[month_index] = float(entry['total_sales'])
 
-    # Ventes du mois dernier
-    last_month_sales = Order.objects.filter(
-        created_at__date__gte=last_month_start,
-        created_at__date__lt=this_month_start
-    ).aggregate(total=Sum('total_price'))['total'] or 0
+    # ✅ Statistiques sur les réparations
+    repair_status_stats = (
+        RepairRequest.objects.values('status')
+        .annotate(total=Count('id'))
+        .order_by('status')
+    )
+    repair_stats_dict = {r['status']: r['total'] for r in repair_status_stats}
+    repairs_pending = repair_stats_dict.get('PENDING', 0)
+    repairs_in_progress = repair_stats_dict.get('IN_PROGRESS', 0)
+    repairs_completed = repair_stats_dict.get('COMPLETED', 0)
+    repairs_cancelled = repair_stats_dict.get('CANCELLED', 0)
 
-    # Calcul de l'augmentation en pourcentage
-    if last_month_sales > 0:
-        monthly_sales_increase = f"+{((monthly_sales - last_month_sales) / last_month_sales * 100):.0f}%"
-    else:
-        monthly_sales_increase = "+0%" if monthly_sales == 0 else "+100%"
+    recent_orders = Order.objects.order_by('-created_at')[:5]  # les 5 dernières commandes
 
-    # === STATISTIQUES DES RÉPARATIONS ===
-    in_progress_repairs = RepairRequest.objects.filter(status='IN_PROGRESS').count()
-
-    # === PRODUIT LE PLUS VENDU ===
-    best_selling_item = OrderItem.objects.values(
-        'product_name'
-    ).annotate(
-        total_sold=Sum('quantity')
-    ).order_by('-total_sold').first()
-
-    best_selling_product = best_selling_item['product_name'] if best_selling_item else "Aucune vente"
-
-    # === STATISTIQUES SUPPLÉMENTAIRES POUR L'APERÇU RAPIDE ===
-    active_products = Product.objects.filter(is_active=True).count()
-
-    # Clients uniques ce mois-ci (par email)
-    unique_customers_this_month = Order.objects.filter(
-        created_at__date__gte=this_month_start
-    ).values('email').distinct().count()
-
-    # Taux de satisfaction (basé sur les commandes livrées vs annulées)
-    delivered_orders = Order.objects.filter(status='DELIVERED').count()
-    cancelled_orders = Order.objects.filter(status='CANCELLED').count()
-    total_processed_orders = delivered_orders + cancelled_orders
-
-    if total_processed_orders > 0:
-        satisfaction_rate = f"{(delivered_orders / total_processed_orders * 100):.0f}%"
-    else:
-        satisfaction_rate = "100%"
-
-    # === DONNÉES POUR LE GRAPHIQUE AMÉLIORÉ ===
-    # Calculer les ventes des 6 derniers mois
-    from django.db.models.functions import TruncMonth
-    from django.db.models import Sum
-    from datetime import datetime
-
-    # Générer les 6 derniers mois
-    months = []
-    sales_data = []
-
-    for i in range(6):
-        # Calculer la date du mois
-        month_date = (django_timezone.now() - timedelta(days=30 * i)).replace(day=1, hour=0, minute=0, second=0,
-                                                                              microsecond=0)
-        next_month = month_date.replace(day=28) + timedelta(days=4)  # Pour obtenir le dernier jour du mois
-        last_day = next_month - timedelta(days=next_month.day)
-
-        # Nom court du mois en français
-        month_names_fr = {
-            1: 'Jan', 2: 'Fév', 3: 'Mar', 4: 'Avr', 5: 'Mai', 6: 'Juin',
-            7: 'Juil', 8: 'Aoû', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Déc'
-        }
-        month_name = month_names_fr.get(month_date.month, month_date.strftime('%b'))
-
-        # Calculer les ventes pour ce mois
-        month_sales = Order.objects.filter(
-            created_at__date__gte=month_date,
-            created_at__date__lte=last_day,
-            status__in=['CONFIRMED', 'SHIPPED', 'DELIVERED']  # Seulement les commandes validées
-        ).aggregate(total=Sum('total_price'))['total'] or 0
-
-        # Insérer au début pour avoir l'ordre chronologique
-        months.insert(0, month_name)
-        sales_data.insert(0, float(month_sales))
-
-    # Calculer la valeur maximale pour l'échelle du graphique
-    max_value = max(sales_data) if sales_data and max(sales_data) > 0 else 1
-
-    monthly_sales_data = {
-        'labels': months,
-        'data': sales_data,
-        'max_value': max_value
-    }
-
-    # === ACTIVITÉS RÉCENTES ===
-    # Dernières commandes (7 derniers jours)
-    recent_orders = Order.objects.filter(
-        created_at__gte=django_timezone.now() - timedelta(days=7)
-    ).select_related().prefetch_related('items').order_by('-created_at')[:5]
-
-    # Dernières réparations (7 derniers jours)
-    recent_repairs = RepairRequest.objects.filter(
-        created_at__gte=django_timezone.now() - timedelta(days=7)
-    ).order_by('-created_at')[:3]
-
-    # Activités récentes combinées
-    recent_activities = []
-
-    # Ajouter les commandes récentes
-    for order in recent_orders:
-        recent_activities.append({
-            'type': 'order',
-            'title': f'Commande #{order.order_number}',
-            'description': f'{order.full_name} - {order.total_price:.2f} €',
-            'time': order.created_at,
-            'status': order.status,
-            'status_display': order.get_status_display()
-        })
-
-    # Ajouter les réparations récentes
-    for repair in recent_repairs:
-        recent_activities.append({
-            'type': 'repair',
-            'title': 'Demande de réparation',
-            'description': f'{repair.device_model} - {repair.get_issue_type_display()}',
-            'time': repair.created_at,
-            'status': repair.status,
-            'status_display': repair.get_status_display()
-        })
-
-    # Trier par date (plus récent en premier) et limiter à 5 activités
-    recent_activities.sort(key=lambda x: x['time'], reverse=True)
-    recent_activities = recent_activities[:5]
-
+    # ✅ Préparation du contexte
     context = {
-        # Cartes principales
+        'total_products': total_products,
+        'total_orders': total_orders,
         'total_sales': total_sales,
-        'pending_orders': pending_orders,
-        'in_progress_repairs': in_progress_repairs,
-        'best_selling_product': best_selling_product,
-        'monthly_sales_increase': monthly_sales_increase,
-
-        # Aperçu rapide
-        'active_products': active_products,
-        'unique_customers_this_month': unique_customers_this_month,
-        'satisfaction_rate': satisfaction_rate,
-
-        # Activités récentes
-        'recent_activities': recent_activities,
-
-        # Données pour graphique
-        'monthly_sales_data': monthly_sales_data,
-
-        # Statistiques supplémentaires
-        'monthly_sales': monthly_sales,
+        'total_repairs': total_repairs,
+        'sales_data': monthly_sales,
+        'current_year': current_year,
+        'repairs_pending': repairs_pending,
+        'repairs_in_progress': repairs_in_progress,
+        'repairs_completed': repairs_completed,
+        'repairs_cancelled': repairs_cancelled,
+        'recent_orders':recent_orders
     }
 
     return render(request, 'administration/dashboard.html', context)
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_products(request):
@@ -744,6 +663,8 @@ def admin_products(request):
     return render(request, 'administration/products.html', context)
 
 
+
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_orders(request):
@@ -818,6 +739,7 @@ def admin_orders(request):
 
     return render(request, 'administration/orders.html', context)
 
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_repairs(request):
@@ -847,7 +769,7 @@ def admin_repairs(request):
     }
     return render(request, 'administration/repairs.html', context)
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_repair_detail(request, repair_id):
@@ -859,7 +781,7 @@ def admin_repair_detail(request, repair_id):
     }
     return render(request, 'administration/repair_detail.html', context)
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_repair_update_status(request, repair_id):
@@ -875,9 +797,9 @@ def admin_repair_update_status(request, repair_id):
         else:
             messages.error(request, "Statut invalide.")
 
-        return redirect('/administration/repairs/')
+        return redirect('/gestion-securisee/repairs/')
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_repair_complete(request, repair_id):
@@ -888,9 +810,10 @@ def admin_repair_complete(request, repair_id):
         repair.save()
         messages.success(request, f"Réparation #{repair.id} marquée comme terminée !")
 
-        return redirect('/administration/repairs/')
+        return redirect('/gestion-securisee/repairs/')
 
 
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_repair_delete(request, repair_id):
@@ -901,9 +824,9 @@ def admin_repair_delete(request, repair_id):
         repair.delete()
         messages.success(request, f"Réparation #{repair_id} supprimée !")
 
-        return redirect('/administration/repairs/')
+        return redirect('/gestion-securisee/repairs/')
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_add_product(request):
@@ -936,12 +859,12 @@ def admin_add_product(request):
 
         if missing_fields:
             messages.error(request, f"Champs obligatoires manquants: {', '.join(missing_fields)}")
-            return redirect('/administration/products/add/')
+            return redirect('/gestion-securisee/products/add/')
 
         # Validation de l'image
         if not image:
             messages.error(request, "Veuillez sélectionner une image.")
-            return redirect('/administration/products/add/')
+            return redirect('/gestion-securisee/products/add/')
 
         # Validation des champs spécifiques selon le type
         if product_type == 'SHEET':
@@ -954,14 +877,14 @@ def admin_add_product(request):
                 if not color: missing_specs.append("couleur")
                 messages.error(request,
                                f"Pour les draps, les champs suivants sont obligatoires: {', '.join(missing_specs)}")
-                return redirect('/administration/products/add/')
+                return redirect('/gestion-securisee/products/add/')
 
         elif product_type == 'PHONE':
             phone_brand = request.POST.get('phone_brand')
 
             if not phone_brand:
                 messages.error(request, "Pour les téléphones, la marque est obligatoire.")
-                return redirect('/administration/products/add/')
+                return redirect('/gestion-securisee/products/add/')
 
         try:
             # Déterminer la catégorie automatiquement basée sur le type de produit
@@ -1013,16 +936,16 @@ def admin_add_product(request):
             product.save()
 
             messages.success(request, f"Le produit '{name}' a été créé avec succès !")
-            return redirect('/administration/products/')
+            return redirect('/gestion-securisee/products/')
 
         except Exception as e:
             messages.error(request, f"Erreur lors de la création du produit: {str(e)}")
-            return redirect('/administration/products/add/')
+            return redirect('/gestion-securisee/products/add/')
 
     # GET request - afficher le formulaire
     return render(request, 'administration/add_product.html')
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_order_detail(request, order_id):
@@ -1040,7 +963,7 @@ def admin_order_detail(request, order_id):
     }
     return render(request, 'administration/order_detail.html', context)
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_order_cancel(request, order_id):
@@ -1068,11 +991,11 @@ def admin_order_cancel(request, order_id):
         else:
             messages.error(request, f"Impossible d'annuler une commande déjà livrée.")
 
-        return redirect('/administration/orders/')
+        return redirect('/gestion-securisee/orders/')
 
-    return redirect('/administration/orders/')
+    return redirect('/gestion-securisee/orders/')
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_order_confirm(request, order_id):
@@ -1087,11 +1010,11 @@ def admin_order_confirm(request, order_id):
         else:
             messages.warning(request, f"La commande #{order.order_number} a déjà été traitée.")
 
-        return redirect('/administration/orders/')
+        return redirect('/gestion-securisee/orders/')
 
-    return redirect('/administration/orders/')
+    return redirect('/gestion-securisee/orders/')
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_order_update_status(request, order_id):
@@ -1119,16 +1042,15 @@ def admin_order_update_status(request, order_id):
         else:
             messages.error(request, "Statut invalide.")
 
-        return redirect(f'/administration/orders/{order_id}/')
+        return redirect(f'/gestion-securisee/orders/{order_id}/')
 
-    return redirect('/administration/orders/')
+    return redirect('/gestion-securisee/orders/')
 
-
+@admin_required
 @login_required
 @user_passes_test(is_admin_user)
 def admin_order_export(request, order_id):
     """Vue pour exporter une commande en PDF avec reportlab"""
-    from reportlab.pdfgen import canvas
     from reportlab.lib.pagesizes import A4
     from reportlab.lib.units import mm
     from reportlab.lib.styles import getSampleStyleSheet
@@ -1278,7 +1200,7 @@ def admin_order_export(request, order_id):
         footer_text = """
         <para alignment="center">
         <font size="8" color="gray">
-        Tech & Home - Abidjan, Côte d'Ivoire<br/>
+        DSD General Trading - Abidjan, Côte d'Ivoire<br/>
         Tél: +225 07 07 07 07 07 - Email: contact@techandhome.ci<br/>
         Ce document a une valeur informative et constitue une preuve d'achat.
         </font>
@@ -1294,7 +1216,7 @@ def admin_order_export(request, order_id):
         # En cas d'erreur, utiliser l'export HTML en fallback
         return export_html_fallback(request, order)
 
-
+@admin_required
 def export_html_fallback(request, order):
     """Fallback HTML si le PDF échoue"""
     from django.utils import timezone
@@ -1404,3 +1326,86 @@ def export_html_fallback(request, order):
     response = HttpResponse(html_content, content_type='text/html')
     response['Content-Disposition'] = f'attachment; filename="commande_{order.order_number}.html"'
     return response
+
+@admin_required
+@login_required
+@user_passes_test(is_admin_user)
+def admin_edit_product(request, product_id):
+    """Vue pour modifier un produit existant"""
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.method == 'POST':
+        try:
+            # Récupérer les données du formulaire
+            name = request.POST.get('name')
+            description = request.POST.get('description')
+            price = request.POST.get('price')
+            stock = request.POST.get('stock')
+            product_type = request.POST.get('product_type')
+            discount_percentage = request.POST.get('discount_percentage', 0)
+            image = request.FILES.get('image')
+
+            # Mettre à jour les champs de base
+            product.name = name
+            product.description = description
+            product.price = price
+            product.stock = stock
+            product.product_type = product_type
+            product.discount_percentage = discount_percentage
+            product.on_sale = bool(discount_percentage and int(discount_percentage) > 0)
+
+            # Mettre à jour l'image si une nouvelle est fournie
+            if image:
+                product.image = image
+
+            # Mettre à jour les spécifications selon le type
+            if product_type == 'SHEET':
+                product.sheet_size = request.POST.get('sheet_size')
+                product.color = request.POST.get('color')
+                product.material = request.POST.get('material')
+
+                # Réinitialiser les champs téléphone
+                product.phone_brand = None
+                product.phone_category = None
+                product.storage = ''
+                product.screen_size = ''
+                product.processor = ''
+                product.ram = ''
+                product.camera = ''
+                product.battery = ''
+                product.operating_system = ''
+                product.connectivity = ''
+
+            elif product_type == 'PHONE':
+                product.phone_brand = request.POST.get('phone_brand')
+                product.phone_category = request.POST.get('phone_category')
+                product.storage = request.POST.get('storage')
+                product.screen_size = request.POST.get('screen_size')
+                product.processor = request.POST.get('processor')
+                product.ram = request.POST.get('ram')
+                product.camera = request.POST.get('camera')
+                product.battery = request.POST.get('battery')
+                product.operating_system = request.POST.get('operating_system')
+                product.connectivity = request.POST.get('connectivity')
+
+                # Réinitialiser les champs draps
+                product.sheet_size = None
+                product.color = None
+                product.material = ''
+
+            # Sauvegarder les modifications
+            product.save()
+
+            messages.success(request, f"Le produit '{product.name}' a été modifié avec succès !")
+            return redirect('/gestion-securisee/products/')
+
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la modification : {str(e)}")
+
+    # Préparer les données pour le template
+    context = {
+        'product': product,
+        'categories': Category.objects.all(),
+    }
+
+    return render(request, 'administration/edit_product.html', context)

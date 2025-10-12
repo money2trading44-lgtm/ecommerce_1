@@ -17,5 +17,6 @@ urlpatterns = [
     path('commande/confirmation/<int:order_id>/',views.order_confirmation,name='order_confirmation'),
     path('mes-commandes',views.order_history,name='order_history'),
     path('recherche/', views.search_products, name='search_products'),
-    path('administration/',include('shop.urls_admin'))
+    path('gestion-securisee/',include('shop.urls_admin')),
+    path('administration/',views.admin_redirect,name='admin_redirect')
 ]

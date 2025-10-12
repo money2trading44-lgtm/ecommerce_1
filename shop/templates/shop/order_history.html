@@ -1,6 +1,6 @@
 {% extends 'shop/base.html' %}
 
-{% block title %}Tech & Home - Mes Commandes{% endblock %}
+{% block title %}Mes Commandes{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -35,7 +35,7 @@
                     {% for item in order.items.all %}
                     <div class="flex justify-between text-xs sm:text-sm">
                         <span class="flex-1 pr-2">{{ item.quantity }} × {{ item.product_name }}</span>
-                        <span class="text-slate-600 whitespace-nowrap">{{ item.get_total_price|floatformat:2 }} €</span>
+                        <span class="text-slate-600 whitespace-nowrap">{{ item.get_total_price|floatformat:2 }} FCFA</span>
                     </div>
                     {% endfor %}
                 </div>
@@ -44,7 +44,7 @@
             <!-- Informations commande -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm border-t border-slate-200 pt-3 sm:pt-4">
                 <div class="space-y-1">
-                    <p class="text-slate-600"><strong>Total :</strong> {{ order.total_price|floatformat:2 }} €</p>
+                    <p class="text-slate-600"><strong>Total :</strong> {{ order.total_price|floatformat:2 }} FCFA</p>
                     <p class="text-slate-600">
                         <strong>Livraison :</strong>
                         <span class="line-clamp-1">{{ order.address }}, {{ order.city }}</span>

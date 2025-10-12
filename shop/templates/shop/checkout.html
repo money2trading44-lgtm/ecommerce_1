@@ -1,6 +1,6 @@
 {% extends 'shop/base.html' %}
 
-{% block title %}Tech & Home - Commande{% endblock %}
+{% block title %}Commande{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
@@ -146,7 +146,7 @@
                             </div>
 
                             <div class="text-right flex-shrink-0">
-                                <p class="font-semibold text-slate-900 text-sm sm:text-base">{{ item.get_total_price|floatformat:2 }} €</p>
+                                <p class="font-semibold text-slate-900 text-sm sm:text-base">{{ item.get_total_price|floatformat:2 }} FCFA</p>
                             </div>
                         </div>
                         {% endfor %}
@@ -156,7 +156,7 @@
                     <div class="border-t border-slate-200 pt-3 sm:pt-4 space-y-2">
                         <div class="flex justify-between text-sm">
                             <span class="text-slate-600">Sous-total</span>
-                            <span class="font-medium text-slate-900">{{ cart.get_total_price|floatformat:2 }} €</span>
+                            <span class="font-medium text-slate-900">{{ cart.get_total_price|floatformat:2 }} FCFA</span>
                         </div>
 
                         <div class="flex justify-between text-sm">
@@ -166,7 +166,7 @@
 
                         <div class="flex justify-between text-base font-bold pt-2 border-t border-slate-200">
                             <span class="text-slate-900">Total</span>
-                            <span class="text-slate-900">{{ cart.get_total_price|floatformat:2 }} €</span>
+                            <span class="text-slate-900">{{ cart.get_total_price|floatformat:2 }} FCFA</span>
                         </div>
                     </div>
 

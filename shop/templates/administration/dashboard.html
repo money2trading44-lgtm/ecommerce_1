@@ -1,203 +1,173 @@
 {% extends 'administration/base.html' %}
 
-{% block title %}Tableau de bord - Admin{% endblock %}
+{% block title %}Tableau de bord Admin{% endblock %}
 
 {% block page_title %}Tableau de bord{% endblock %}
-{% block page_subtitle %}Vue d'ensemble de votre activité{% endblock %}
+{% block page_subtitle %}Statistiques générales et suivi des ventes et réparations{% endblock %}
 
 {% block content %}
-<div class="space-y-4 sm:space-y-6 lg:space-y-8">
-    <!-- Cartes de statistiques principales -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-        <!-- Chiffre d'affaires total -->
-        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">CA Total</p>
-                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ total_sales|floatformat:2 }} €</p>
-                    <p class="text-xs text-green-600 mt-1">Toutes périodes</p>
-                </div>
-                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
-                    <span class="material-symbols-outlined text-blue-600 text-sm sm:text-base">euro</span>
-                </div>
-            </div>
-        </div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-        <!-- Commandes en attente -->
-        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">En attente</p>
-                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ pending_orders }}</p>
-                    <p class="text-xs text-orange-600 mt-1">À traiter</p>
-                </div>
-                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
-                    <span class="material-symbols-outlined text-orange-600 text-sm sm:text-base">schedule</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Réparations en cours -->
-        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Réparations</p>
-                    <p class="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{{ in_progress_repairs }}</p>
-                    <p class="text-xs text-purple-600 mt-1">En cours</p>
-                </div>
-                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
-                    <span class="material-symbols-outlined text-purple-600 text-sm sm:text-base">build</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Produit le plus vendu -->
-        <div class="bg-white p-3 sm:p-4 lg:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
-            <div class="flex items-center justify-between">
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs sm:text-sm font-medium text-gray-600 truncate">Top vente</p>
-                    <p class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mt-1 sm:mt-2 truncate">{{ best_selling_product }}</p>
-                    <p class="text-xs text-green-600 mt-1">Populaire</p>
-                </div>
-                <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 ml-2 sm:ml-3">
-                    <span class="material-symbols-outlined text-green-600 text-sm sm:text-base">trending_up</span>
-                </div>
-            </div>
-        </div>
+    <!-- Total produits -->
+    <div class="bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-lg rounded-lg p-5 transform hover:scale-105 transition-transform duration-300">
+        <h3 class="text-lg font-semibold">Produits</h3>
+        <p class="text-3xl font-bold mt-2">{{ total_products }}</p>
+        <p class="mt-1 text-sm opacity-75">Nombre total de produits</p>
     </div>
 
-    <!-- Graphique et aperçu rapide -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <!-- Graphique des ventes -->
-        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Ventes des 6 derniers mois</h3>
-            <div class="h-64 sm:h-80">
-                <!-- Graphique simplifié -->
-                <div class="flex items-end justify-between h-48 sm:h-56 gap-2 sm:gap-4 mt-4">
-                    {% for month_data in monthly_sales_data.data %}
-                    <div class="flex flex-col items-center flex-1">
-                        <div class="w-full bg-blue-100 rounded-t-lg transition-all duration-300 hover:bg-blue-200"
-                             style="height: {{ month_data|default:0 }}%">
-                        </div>
-                        <span class="text-xs text-gray-600 mt-2">{{ monthly_sales_data.labels.forloop.counter0 }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="mt-4 text-center">
-                    <p class="text-sm text-gray-600">Évolution du chiffre d'affaires mensuel</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Aperçu rapide -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Aperçu rapide</h3>
-            <div class="space-y-4">
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span class="text-sm text-gray-600">Produits actifs</span>
-                    <span class="font-semibold text-gray-900">{{ active_products }}</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span class="text-sm text-gray-600">Clients ce mois</span>
-                    <span class="font-semibold text-gray-900">{{ unique_customers_this_month }}</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span class="text-sm text-gray-600">Taux satisfaction</span>
-                    <span class="font-semibold text-green-600">{{ satisfaction_rate }}</span>
-                </div>
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span class="text-sm text-gray-600">CA ce mois</span>
-                    <span class="font-semibold text-gray-900">{{ monthly_sales|floatformat:2 }} €</span>
-                </div>
-            </div>
-        </div>
+    <!-- Total commandes -->
+    <div class="bg-gradient-to-r from-green-500 to-green-400 text-white shadow-lg rounded-lg p-5 transform hover:scale-105 transition-transform duration-300">
+        <h3 class="text-lg font-semibold">Commandes</h3>
+        <p class="text-3xl font-bold mt-2">{{ total_orders }}</p>
+        <p class="mt-1 text-sm opacity-75">Commandes enregistrées</p>
     </div>
 
-    <!-- Activités récentes -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <!-- Dernières activités -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Activités récentes</h3>
-            <div class="space-y-3">
-                {% for activity in recent_activities %}
-                <div class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <span class="material-symbols-outlined text-base mt-0.5 flex-shrink-0
-                                {% if activity.type == 'order' %}text-blue-600
-                                {% else %}text-green-600{% endif %}">
-                        {% if activity.type == 'order' %}receipt_long{% else %}build{% endif %}
-                    </span>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-medium text-gray-900 text-sm">{{ activity.title }}</p>
-                        <p class="text-xs text-gray-600 truncate">{{ activity.description }}</p>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs
-                                        {% if activity.status == 'PENDING' %}bg-yellow-100 text-yellow-800
-                                        {% elif activity.status == 'IN_PROGRESS' %}bg-blue-100 text-blue-800
-                                        {% elif activity.status == 'COMPLETED' %}bg-green-100 text-green-800
-                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                {{ activity.status_display }}
-                            </span>
-                            <span class="text-xs text-gray-500">{{ activity.time|date:"d/m H:i" }}</span>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="text-center py-8">
-                    <span class="material-symbols-outlined text-4xl text-gray-300 mb-2">notifications</span>
-                    <p class="text-gray-500">Aucune activité récente</p>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+    <!-- Total ventes -->
+    <div class="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white shadow-lg rounded-lg p-5 transform hover:scale-105 transition-transform duration-300">
+        <h3 class="text-lg font-semibold">Ventes totales</h3>
+        <p class="text-3xl font-bold mt-2">${{ total_sales|floatformat:2 }}</p>
+        <p class="mt-1 text-sm opacity-75">Revenus générés</p>
+    </div>
 
-        <!-- Statistiques avancées -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Performances</h3>
-            <div class="space-y-4">
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm text-gray-600">Croissance mensuelle</span>
-                        <span class="text-sm font-semibold text-green-600">{{ monthly_sales_increase }}</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-green-600 h-2 rounded-full" style="width: 75%"></div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm text-gray-600">Taux de conversion</span>
-                        <span class="text-sm font-semibold text-blue-600">85%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-blue-600 h-2 rounded-full" style="width: 85%"></div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm text-gray-600">Satisfaction client</span>
-                        <span class="text-sm font-semibold text-purple-600">{{ satisfaction_rate }}</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-purple-600 h-2 rounded-full" style="width: 90%"></div>
-                    </div>
-                </div>
-
-                <!-- Actions rapides -->
-                <div class="pt-4 border-t border-gray-200">
-                    <h4 class="font-medium text-gray-900 mb-3">Actions rapides</h4>
-                    <div class="grid grid-cols-2 gap-2">
-                        <a href="/administration/orders/" class="bg-blue-600 text-white text-center py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                            Voir commandes
-                        </a>
-                        <a href="/administration/products/" class="bg-green-600 text-white text-center py-2 px-3 rounded-lg hover:bg-green-700 transition-colors text-sm">
-                            Gérer produits
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Total réparations -->
+    <div class="bg-gradient-to-r from-red-500 to-red-400 text-white shadow-lg rounded-lg p-5 transform hover:scale-105 transition-transform duration-300">
+        <h3 class="text-lg font-semibold">Réparations</h3>
+        <p class="text-3xl font-bold mt-2">{{ total_repairs }}</p>
+        <p class="mt-1 text-sm opacity-75">Demandes de réparation</p>
     </div>
 </div>
+
+<!-- Graphique des ventes -->
+<div class="mt-8 bg-white shadow rounded-lg p-5">
+    <h3 class="text-xl font-semibold mb-4">Ventes mensuelles {{ current_year }}</h3>
+    <canvas id="salesChart" height="120"></canvas>
+</div>
+
+<!-- Statistiques réparations avec cartes détaillées -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+    <div class="bg-gray-100 shadow rounded-lg p-5 text-center">
+        <h4 class="text-lg font-medium">En attente</h4>
+        <p class="text-2xl font-bold mt-2">{{ repairs_pending }}</p>
+    </div>
+
+    <div class="bg-gray-100 shadow rounded-lg p-5 text-center">
+        <h4 class="text-lg font-medium">En cours</h4>
+        <p class="text-2xl font-bold mt-2">{{ repairs_in_progress }}</p>
+    </div>
+
+    <div class="bg-gray-100 shadow rounded-lg p-5 text-center">
+        <h4 class="text-lg font-medium">Terminées</h4>
+        <p class="text-2xl font-bold mt-2">{{ repairs_completed }}</p>
+    </div>
+
+    <div class="bg-gray-100 shadow rounded-lg p-5 text-center">
+        <h4 class="text-lg font-medium">Annulées</h4>
+        <p class="text-2xl font-bold mt-2">{{ repairs_cancelled }}</p>
+    </div>
+
+</div>
+
+<!-- Tableau récent des commandes -->
+<div class="mt-8 bg-white shadow rounded-lg p-5 overflow-x-auto">
+    <h3 class="text-xl font-semibold mb-4">Commandes récentes</h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Commande</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Client</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Montant</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Statut</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% if recent_orders %}
+                    {% for order in recent_orders %}
+                    <tr class="hover:bg-gray-50 transition duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ order.order_number }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-800">{{ order.full_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-800">{{ order.total_price|floatformat:2 }} FCFA</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if order.status == 'PENDING' %}
+                                <span class="px-3 py-1 inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">En attente</span>
+                            {% elif order.status == 'CONFIRMED' %}
+                                <span class="px-3 py-1 inline-block bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Confirmée</span>
+                            {% elif order.status == 'SHIPPED' %}
+                                <span class="px-3 py-1 inline-block bg-purple-100 text-purple-800 text-xs font-semibold rounded-full">Expédiée</span>
+                            {% elif order.status == 'DELIVERED' %}
+                                <span class="px-3 py-1 inline-block bg-green-100 text-green-800 text-xs font-semibold rounded-full">Livrée</span>
+                            {% elif order.status == 'CANCELLED' %}
+                                <span class="px-3 py-1 inline-block bg-red-100 text-red-800 text-xs font-semibold rounded-full">Annulée</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-6 text-gray-500">Aucune commande récente</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    const salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [
+                'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun',
+                'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'
+            ],
+            datasets: [{
+                label: 'Ventes',
+                data: {{ sales_data|safe }},
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.formattedValue;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

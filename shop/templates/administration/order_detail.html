@@ -32,7 +32,7 @@
                                     {% else %}bg-gray-600{% endif %}"></span>
                         {{ order.get_status_display }}
                     </span>
-                    <a href="/administration/orders/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base">
+                    <a href="/gestion-securisee/orders/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base">
                         <span class="material-symbols-outlined text-base">arrow_back</span>
                         <span class="hidden xs:inline">Retour</span>
                     </a>
@@ -132,13 +132,13 @@
                             </p>
                             <div class="flex flex-wrap items-center gap-2 mt-2">
                                 <p class="text-xs text-gray-500">Ref: {{ item.product.id }}</p>
-                                <p class="text-xs text-gray-500">Prix: {{ item.product_price }} €</p>
+                                <p class="text-xs text-gray-500">Prix: {{ item.product_price }} FCFA</p>
                             </div>
                         </div>
                     </div>
                     <div class="text-right flex-shrink-0">
-                        <p class="text-sm text-gray-600">{{ item.quantity }} × {{ item.product_price }} €</p>
-                        <p class="text-base sm:text-lg font-bold text-gray-900">{{ item.get_total_price|floatformat:2 }} €</p>
+                        <p class="text-sm text-gray-600">{{ item.quantity }} × {{ item.product_price }} FCFA</p>
+                        <p class="text-base sm:text-lg font-bold text-gray-900">{{ item.get_total_price|floatformat:2 }} FCFA</p>
                         {% if item.product.discount_percentage > 0 %}
                         <p class="text-xs text-green-600">Promo: -{{ item.product.discount_percentage }}%</p>
                         {% endif %}
@@ -156,7 +156,7 @@
             <div class="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
                 <div class="flex justify-between items-center text-base sm:text-lg font-semibold">
                     <span>Total de la commande:</span>
-                    <span>{{ order.total_price|floatformat:2 }} €</span>
+                    <span>{{ order.total_price|floatformat:2 }} FCFA</span>
                 </div>
             </div>
         </div>
@@ -170,7 +170,7 @@
             <div class="space-y-2 sm:space-y-3 text-sm sm:text-base">
                 <div class="flex justify-between">
                     <span class="text-gray-600">Sous-total</span>
-                    <span class="font-medium">{{ order.total_price|floatformat:2 }} €</span>
+                    <span class="font-medium">{{ order.total_price|floatformat:2 }} FCFA</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600">Livraison</span>
@@ -178,7 +178,7 @@
                 </div>
                 <div class="border-t pt-2 sm:pt-3 flex justify-between font-bold">
                     <span>Total</span>
-                    <span>{{ order.total_price|floatformat:2 }} €</span>
+                    <span>{{ order.total_price|floatformat:2 }} FCFA</span>
                 </div>
             </div>
         </div>
@@ -212,7 +212,7 @@
 
                 <!-- Confirmer - seulement si en attente -->
                 {% if order.status == 'PENDING' %}
-                <form method="post" action="/administration/orders/{{ order.id }}/confirm/">
+                <form method="post" action="/gestion-securisee/orders/{{ order.id }}/confirm/">
                     {% csrf_token %}
                     <button type="submit"
                             class="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
@@ -231,7 +231,7 @@
 
                 <!-- Annuler - seulement si pas annulée ou livrée -->
                 {% if order.status != 'CANCELLED' and order.status != 'DELIVERED' %}
-                <form method="post" action="/administration/orders/{{ order.id }}/cancel/">
+                <form method="post" action="/gestion-securisee/orders/{{ order.id }}/cancel/">
                     {% csrf_token %}
                     <button type="submit"
                             onclick="return confirmAction('Êtes-vous sûr de vouloir annuler cette commande ? Le stock sera réapprovisionné.', this)"
@@ -250,12 +250,12 @@
                 {% endif %}
 
                 <!-- Exporter -->
-                <a href="/administration/orders/{{ order.id }}/export/"
+                <a href="/gestion-securisee/orders/{{ order.id }}/export/"
                    class="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
                    target="_blank">
                     <span class="material-symbols-outlined text-base">download</span>
                     <span class="hidden xs:inline">Exporter PDF</span>
-                    <span class="xs:hidden">PDF</span>
+                    <span class="xs:hidden">Facture PDF</span>
                 </a>
             </div>
         </div>

@@ -1,6 +1,6 @@
 {% extends 'shop/base.html' %}
 
-{% block title %}Tech & Home - Draps{% endblock %}
+{% block title %}Draps{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -33,28 +33,57 @@
                         </div>
                     </div>
 
-                    <!-- Filtre Couleur -->
+                    <!-- Filtre Prix -->
                     <div>
-                        <h3 class="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Couleur</h3>
-                        <div class="flex flex-wrap gap-2">
-                            {% for color_value, color_label in sheet_colors %}
-                            <label class="cursor-pointer">
-                                <input type="radio" name="color" value="{{ color_value }}" class="sr-only peer"
-                                       {% if selected_color == color_value %}checked{% endif %} />
-                                <span class="w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 block peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary border-transparent hover:border-slate-400"
-                                      style="background-color:
-                                      {% if color_value == 'WHITE' %}#ffffff
-                                      {% elif color_value == 'GRAY' %}#94a3b8
-                                      {% elif color_value == 'BLUE' %}#93c5fd
-                                      {% elif color_value == 'PINK' %}#fca5a5
-                                      {% elif color_value == 'GREEN' %}#86efac
-                                      {% elif color_value == 'BEIGE' %}#fef3c7
-                                      {% else %}#e2e8f0{% endif %};"
-                                      title="{{ color_label }}">
-                                </span>
-                            </label>
-                            {% endfor %}
+                        <h3 class="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Prix (FCFA)</h3>
+
+                        <!-- Plage de prix avec inputs -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <input type="number"
+                                       name="min_price"
+                                       placeholder="Min"
+                                       value="{{ min_price|default:'' }}"
+                                       class="w-20 sm:w-24 px-2 py-1.5 border border-slate-300 rounded text-xs sm:text-sm focus:ring-primary focus:border-primary">
+                                <span class="text-slate-400">-</span>
+                                <input type="number"
+                                       name="max_price"
+                                       placeholder="Max"
+                                       value="{{ max_price|default:'' }}"
+                                       class="w-20 sm:w-24 px-2 py-1.5 border border-slate-300 rounded text-xs sm:text-sm focus:ring-primary focus:border-primary">
+                            </div>
+
+                            <!-- Boutons de prix rapide -->
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button"
+                                        data-price-range="0-20000"
+                                        class="price-quick-filter text-xs py-1.5 px-2 border border-slate-300 rounded hover:bg-slate-50 text-slate-600">
+                                    < 20k
+                                </button>
+                                <button type="button"
+                                        data-price-range="20000-40000"
+                                        class="price-quick-filter text-xs py-1.5 px-2 border border-slate-300 rounded hover:bg-slate-50 text-slate-600">
+                                    20k-40k
+                                </button>
+                                <button type="button"
+                                        data-price-range="40000-60000"
+                                        class="price-quick-filter text-xs py-1.5 px-2 border border-slate-300 rounded hover:bg-slate-50 text-slate-600">
+                                    40k-60k
+                                </button>
+                                <button type="button"
+                                        data-price-range="60000-1000000"
+                                        class="price-quick-filter text-xs py-1.5 px-2 border border-slate-300 rounded hover:bg-slate-50 text-slate-600">
+                                    > 60k
+                                </button>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Compteur de résultats -->
+                    <div class="bg-slate-50 p-3 rounded-lg">
+                        <p class="text-xs sm:text-sm text-slate-600">
+                            <span class="font-semibold">{{ sheets.count }}</span> produit(s) trouvé(s)
+                        </p>
                     </div>
 
                     <!-- Boutons -->
@@ -74,11 +103,21 @@
         <div class="flex-1">
             <!-- En-tête avec titre et tri -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4 sm:gap-0">
-                <h1 class="text-2xl sm:text-3xl font-bold">Nos Draps</h1>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold">Nos Draps</h1>
+                    {% if min_price or max_price or selected_size %}
+                    <p class="text-sm text-slate-500 mt-1">
+                        Filtres actifs :
+                        {% if selected_size %}<span class="bg-primary/10 text-primary px-2 py-1 rounded text-xs">{{ selected_size }}</span>{% endif %}
+                        {% if min_price %}<span class="bg-primary/10 text-primary px-2 py-1 rounded text-xs">À partir de {{ min_price }} FCFA</span>{% endif %}
+                        {% if max_price %}<span class="bg-primary/10 text-primary px-2 py-1 rounded text-xs">Jusqu'à {{ max_price }} FCFA</span>{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
                 <div class="flex items-center gap-2">
                     <span class="text-xs sm:text-sm text-slate-500">Trier par:</span>
                     <select class="rounded-lg text-xs sm:text-sm border border-slate-300 bg-white focus:ring-primary px-2 sm:px-3 py-1.5 sm:py-2"
-                          onchange="window.location.href = '?sort=' + this.value">
+                          onchange="window.location.href = updateUrlParam('sort', this.value)">
                       <option value=""{% if not sort_by %} selected="selected"{% endif %}>Popularité</option>
                       <option value="price_asc"{% if sort_by == "price_asc" %} selected="selected"{% endif %}>Prix: Croissant</option>
                       <option value="price_desc"{% if sort_by == "price_desc" %} selected="selected"{% endif %}>Prix: Décroissant</option>
@@ -121,10 +160,10 @@
                         <div class="mt-3 sm:mt-4">
                             <div class="flex items-center gap-2">
                                 {% if sheet.on_sale %}
-                                    <span class="text-base sm:text-lg font-bold text-primary">{{ sheet.get_discounted_price|floatformat:2 }} €</span>
-                                    <span class="text-xs sm:text-sm text-red-500 line-through">{{ sheet.price|floatformat:2 }} €</span>
+                                    <span class="text-base sm:text-lg font-bold text-primary">{{ sheet.get_discounted_price|floatformat:2 }} FCFA</span>
+                                    <span class="text-xs sm:text-sm text-red-500 line-through">{{ sheet.price|floatformat:2 }} FCFA</span>
                                 {% else %}
-                                    <span class="text-base sm:text-lg font-bold text-slate-900">{{ sheet.price|floatformat:2 }} €</span>
+                                    <span class="text-base sm:text-lg font-bold text-slate-900">{{ sheet.price|floatformat:2 }} FCFA</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -192,7 +231,33 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Gestion des boutons de prix rapide
+    const quickFilterButtons = document.querySelectorAll('.price-quick-filter');
+    quickFilterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const range = this.dataset.priceRange.split('-');
+            document.querySelector('input[name="min_price"]').value = range[0];
+            document.querySelector('input[name="max_price"]').value = range[1];
+
+            // Soumettre le formulaire automatiquement
+            this.closest('form').submit();
+        });
+    });
 });
+
+// Fonction utilitaire pour mettre à jour les paramètres URL
+function updateUrlParam(key, value) {
+    const url = new URL(window.location.href);
+
+    if (value) {
+        url.searchParams.set(key, value);
+    } else {
+        url.searchParams.delete(key);
+    }
+
+    return url.toString();
+}
 
 // Redimensionnement de la fenêtre
 window.addEventListener('resize', function() {
@@ -258,6 +323,11 @@ window.addEventListener('resize', function() {
     .2xl\:grid-cols-4 {
         grid-template-columns: repeat(4, 1fr);
     }
+}
+
+/* Style pour les badges de filtres actifs */
+.bg-primary\/10 {
+    background-color: rgba(59, 130, 246, 0.1);
 }
 </style>
 {% endblock %}
