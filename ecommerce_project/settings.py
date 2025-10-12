@@ -32,7 +32,9 @@ ALLOWED_HOSTS = [
     'dsd-general-trading.com',
     'www.dsd-general-trading.com',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    '.up.railway.app',
+    'ecommerceproject-production-c284.up.railway.app', 
 ]
 
 
