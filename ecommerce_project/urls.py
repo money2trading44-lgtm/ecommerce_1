@@ -18,10 +18,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('',include('shop.urls')),
     path('administration/', include('shop.urls_admin')),
+    path('googlefd983fc4e0f7c2aa.html', TemplateView.as_view(template_name='googlefd983fc4e0f7c2aa.html')),
 ]
 
 if settings.DEBUG:
