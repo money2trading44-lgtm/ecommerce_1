@@ -23,6 +23,17 @@ from django.contrib.sitemaps.views import sitemap
 
 from shop.sitemaps import ProductSitemap, CategorySitemap, StaticViewSitemap
 
+from django.http import HttpResponse
+
+def robots_txt(request):
+    content = """User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /gestion-securisee/
+
+Sitemap: https://dsd-general-trading.com/sitemap.xml"""
+    return HttpResponse(content, content_type="text/plain")
+
 sitemaps = {
     'products': ProductSitemap,
     'categories': CategorySitemap,
@@ -33,10 +44,7 @@ urlpatterns = [
     path('',include('shop.urls')),
     path('administration/', include('shop.urls_admin')),
     # SEO URLs
-    path('robots.txt', TemplateView.as_view(
-        template_name="robots.txt",
-        content_type="text/plain"
-    )),
+    path('robots.txt', robots_txt),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
          name='django.contrib.sitemaps.views.sitemap'),
 ]
