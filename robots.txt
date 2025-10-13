@@ -2,14 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /gestion-securisee/
-Disallow: /media/private/
 
-# Google Ads
-User-agent: AdsBot-Google
-Allow: /
-
-# Crawl-delay
-Crawl-delay: 1
-
-# Sitemap
 Sitemap: https://dsd-general-trading.com/sitemap.xml
