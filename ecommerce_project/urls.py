@@ -41,10 +41,10 @@ sitemaps = {
 }
 
 urlpatterns = [
+    path('robots.txt', robots_txt),
     path('',include('shop.urls')),
     path('administration/', include('shop.urls_admin')),
     # SEO URLs
-    path('robots.txt', robots_txt),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
          name='django.contrib.sitemaps.views.sitemap'),
 ]
