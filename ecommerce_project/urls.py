@@ -23,7 +23,12 @@ from django.contrib.sitemaps.views import sitemap
 
 from shop.sitemaps import ProductSitemap, CategorySitemap, StaticViewSitemap
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
+
+
+def sitemap_xml(request: HttpRequest):
+    from django.contrib.sitemaps.views import sitemap as sitemap_view
+    return sitemap_view(request, sitemaps=sitemaps)
 
 def robots_txt(request):
     content = """User-agent: *
@@ -42,11 +47,12 @@ sitemaps = {
 
 urlpatterns = [
     path('robots.txt', robots_txt),
+    path('sitemap.xml', sitemap_xml),
     path('',include('shop.urls')),
     path('administration/', include('shop.urls_admin')),
     # SEO URLs
-    path('sitemap.xml', sitemap, {'sitemaps': sitemaps},
-         name='django.contrib.sitemaps.views.sitemap'),
+
+
 ]
 
 if settings.DEBUG:
