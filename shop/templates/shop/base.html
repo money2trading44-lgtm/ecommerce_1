@@ -76,6 +76,14 @@
         }
     </style>
     {% block extra_css %}{% endblock %}
+
+    <!-- Preload des polices -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap"></noscript>
+
+<!-- Preload des icônes -->
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"></noscript>
 </head>
 <body class="bg-background-light font-display text-slate-800">
 <div class="flex flex-col min-h-screen">

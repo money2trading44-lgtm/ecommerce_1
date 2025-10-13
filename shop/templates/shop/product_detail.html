@@ -1,6 +1,8 @@
 {% extends 'shop/base.html' %}
 
-{% block title %}{{ product.name }}{% endblock %}
+{% block title %}{{ product.name }} - {{ product.get_product_type_display }} | DSD General Trading{% endblock %}
+
+{% block description %}Achetez {{ product.name }} - {{ product.description|truncatewords:20 }}. Prix: {{ product.get_discounted_price|floatformat:2 }} FCFA. Livraison gratuite à Abidjan.{% endblock %}
 
 {% block content %}
 <!-- Fil d'ariane -->
@@ -29,8 +31,10 @@
             <div class="space-y-3 sm:space-y-4">
                 <div class="bg-white rounded-lg overflow-hidden border border-slate-200">
                     {% if product.image %}
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}"
-                             class="w-full h-64 sm:h-72 lg:h-80 xl:h-96 object-cover hover:scale-105 transition-transform duration-300">
+                        <img src="{{ product.image.url }}"
+                         alt="{{ product.name }} - {{ product.get_product_type_display }} DSD General Trading"
+                         class="w-full h-64 sm:h-72 lg:h-80 xl:h-96 object-cover hover:scale-105 transition-transform duration-300"
+                         loading="eager" width="600" height="400">
                     {% else %}
                         <div class="w-full h-64 sm:h-72 lg:h-80 xl:h-96 bg-slate-100 flex items-center justify-center">
                             <span class="text-4xl sm:text-5xl text-slate-400">
@@ -281,6 +285,30 @@
         {% endif %}
     </div>
 </div>
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": "{{ product.name }}",
+    "description": "{{ product.description|escapejs }}",
+    {% if product.image %}
+    "image": "{{ product.image.url }}",
+    {% endif %}
+    "offers": {
+        "@type": "Offer",
+        "price": "{{ product.get_discounted_price|floatformat:2 }}",
+        "priceCurrency": "XOF",
+        "availability": "{% if product.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+    },
+    "brand": {
+        "@type": "Brand",
+        "name": "{% if product.phone_brand %}{{ product.get_phone_brand_display }}{% else %}DSD General Trading{% endif %}"
+    }
+}
+</script>
+{% endblock %}
 {% endblock %}
 
 {% block extra_js %}

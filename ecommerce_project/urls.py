@@ -24,23 +24,26 @@ from django.http import HttpResponse, HttpRequest
 
 
 def sitemap_xml(request):
-    from django.contrib.sitemaps import Sitemap
     from django.urls import reverse
-    from shop.models import Product, Category
+    from shop.models import Product
 
-    # Créer un sitemap simple manuellement
-    urls = []
+    # URLs statiques
+    urls = [
+        'https://dsd-general-trading.com/',
+        'https://dsd-general-trading.com/telephones/',
+        'https://dsd-general-trading.com/draps/',
+        'https://dsd-general-trading.com/reparation/',
+    ]
 
-    # Pages statiques
-    static_urls = ['', 'telephones/', 'draps/', 'reparation/']
-    for url in static_urls:
-        urls.append(f'https://dsd-general-trading.com/{url}')
+    # Ajouter les produits
+    try:
+        products = Product.objects.filter(is_active=True)
+        for product in products:
+            urls.append(f'https://dsd-general-trading.com/produit/{product.id}')
+    except:
+        pass  # En cas d'erreur DB, on garde les URLs statiques
 
-    # Produits
-    for product in Product.objects.filter(is_active=True):
-        urls.append(f'https://dsd-general-trading.com/produit/{product.id}')
-
-    # Générer le XML manuellement
+    # Générer le XML
     xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
     for url in urls:
