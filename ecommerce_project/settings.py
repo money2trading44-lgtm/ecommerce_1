@@ -33,6 +33,8 @@ ALLOWED_HOSTS = [
     'www.dsd-general-trading.com',
     'localhost',
     '127.0.0.1',
+    '.up.railway.app',
+    'ecommerceproject-production-c284.up.railway.app',
 ]
 CSRF_TRUSTED_ORIGINS = ['https://dsd-general-trading.com', 'https://www.dsd-general-trading.com']
 
