@@ -18,17 +18,37 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import TemplateView
-from django.contrib.sitemaps.views import sitemap
-
 from shop.sitemaps import ProductSitemap, CategorySitemap, StaticViewSitemap
 
 from django.http import HttpResponse, HttpRequest
 
 
-def sitemap_xml(request: HttpRequest):
-    from django.contrib.sitemaps.views import sitemap as sitemap_view
-    return sitemap_view(request, sitemaps=sitemaps)
+def sitemap_xml(request):
+    from django.contrib.sitemaps import Sitemap
+    from django.urls import reverse
+    from shop.models import Product, Category
+
+    # Créer un sitemap simple manuellement
+    urls = []
+
+    # Pages statiques
+    static_urls = ['', 'telephones/', 'draps/', 'reparation/']
+    for url in static_urls:
+        urls.append(f'https://dsd-general-trading.com/{url}')
+
+    # Produits
+    for product in Product.objects.filter(is_active=True):
+        urls.append(f'https://dsd-general-trading.com/produit/{product.id}')
+
+    # Générer le XML manuellement
+    xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+
+    for url in urls:
+        xml_content += f'  <url>\n    <loc>{url}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n'
+
+    xml_content += '</urlset>'
+
+    return HttpResponse(xml_content, content_type='application/xml')
 
 def robots_txt(request):
     content = """User-agent: *
