@@ -4,11 +4,56 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>{% block title %}Tech & Home{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- BALISES SEO ESSENTIELLES -->
+    <title>{% block title %}DSD General Trading - Téléphones, Draps & Réparations en Côte d'Ivoire{% endblock %}</title>
+    <meta name="description" content="{% block description %}DSD General Trading : Votre boutique en ligne à Abidjan pour téléphones high-tech, draps de qualité et service de réparation expert. Livraison en Côte d'Ivoire.{% endblock %}">
+    <meta name="keywords" content="téléphones Abidjan, draps Côte d'Ivoire, réparation téléphone, smartphone, draps de qualité, tech, literie, DSD General Trading">
+
+    <!-- OPEN GRAPH (pour les réseaux sociaux) -->
+    <meta property="og:title" content="DSD General Trading - Téléphones, Draps & Réparations">
+    <meta property="og:description" content="Votre boutique en ligne à Abidjan pour téléphones high-tech, draps de qualité et service de réparation expert.">
+    <meta property="og:image" content="{% static 'shop/images/logo.jpg' %}">
+    <meta property="og:url" content="https://dsd-general-trading.com">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DSD General Trading">
+    <meta property="og:locale" content="fr_CI">
+
+    <!-- TWITTER CARD -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DSD General Trading - Téléphones, Draps & Réparations">
+    <meta name="twitter:description" content="Votre boutique en ligne à Abidjan pour téléphones high-tech, draps de qualité et service de réparation expert.">
+    <meta name="twitter:image" content="{% static 'shop/images/logo.jpg' %}">
+
+    <!-- SCHEMA.ORG STRUCTURED DATA -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Store",
+        "name": "DSD General Trading",
+        "description": "Boutique en ligne de téléphones high-tech, draps de qualité et service de réparation à Abidjan, Côte d'Ivoire",
+        "url": "https://dsd-general-trading.com",
+        "telephone": "+225-01-23-45-67-89",
+        "email": "contact@techhome.fr",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Abidjan",
+            "addressCountry": "CI"
+        },
+        "openingHours": "Mo-Fr 08:00-18:00, Sa 08:00-13:00",
+        "priceRange": "$$"
+    }
+    </script>
+
+    <!-- FAVICON -->
+    <link rel="icon" href="{% static 'shop/images/logo.jpg' %}" type="image/jpeg">
+
+    <!-- RESSOURCES EXTERNES -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+
     <script>
         tailwind.config = {
             theme: {
@@ -24,6 +69,7 @@
             },
         }
     </script>
+
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
