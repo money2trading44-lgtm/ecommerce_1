@@ -473,17 +473,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialiser le compteur du panier au chargement de la page
     const serverQuantity = {{ request.cart.get_total_quantity|default:0 }};
-    const storedQuantity = localStorage.getItem('cartQuantity');
-
-    const finalQuantity = storedQuantity ? parseInt(storedQuantity) : serverQuantity;
-
     const counter = document.getElementById('cart-counter');
+
     if (counter) {
-        if (finalQuantity > 0) {
-            counter.textContent = finalQuantity;
+        if (serverQuantity > 0) {
+            counter.textContent = serverQuantity;
             counter.style.display = 'flex';
+            localStorage.setItem('cartQuantity', serverQuantity.toString());
         } else {
             counter.style.display = 'none';
+            localStorage.removeItem('cartQuantity');
         }
     }
 
