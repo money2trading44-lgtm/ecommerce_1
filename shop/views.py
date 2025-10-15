@@ -361,12 +361,14 @@ def process_payment(request,order_id):
     """
     Vue pour traiter le paiement en ligne via PayDunya
     """
-    order = get_object_or_404(Order,id=order_id)
+    print("🎯 PROCESS_PAYMENT appelée")  # DEBUG
+    order = get_object_or_404(Order, id=order_id)
+    print(f"🎯 Commande #{order.order_number} - Méthode: {order.payment_method}")
 
-    # Si paiement a la livraison , rediriger directement vers confirmation
-
+    # Si paiement à la livraison, rediriger directement vers confirmation
     if order.payment_method == 'CASH':
-        return redirect('shop:order_confirmation',order_id = order_id)
+        print("🎯 Paiement cash - redirection confirmation")
+        return redirect('shop:order_confirmation', order_id=order.id)
 
     # Configuration PayDunya
 
@@ -377,12 +379,15 @@ def process_payment(request,order_id):
         'TOKEN': os.environ.get('PAYDUNYA_TOKEN', ''),
         'MODE': 'test'  # Mettre 'live' en production
     }
+    print(f"🎯 Clés configurées: {bool(PAYDUNYA_CONFIG['MASTER_KEY'])}")  # DEBUG
     if not all([PAYDUNYA_CONFIG['MASTER_KEY'], PAYDUNYA_CONFIG['PRIVATE_KEY'],
                 PAYDUNYA_CONFIG['PUBLIC_KEY'], PAYDUNYA_CONFIG['TOKEN']]):
+        print("❌ Clés manquantes")
         messages.error(request, "Configuration de paiement incomplète. Veuillez réessayer plus tard.")
         return redirect('shop:checkout')
 
     try:
+        print("🎯 Tentative de création de facture PayDunya...")
         # Préparer les données pour PayDunya
         store = {
             "name": "DSD General Trading",
@@ -512,6 +517,7 @@ def payment_cancel(request, order_id):
     messages.warning(request, f"Paiement annulé pour la commande #{order.order_number}")
     return redirect('shop:checkout')
 
+
 def checkout(request):
     """
     Vue pour la page de commande AVEC PAIEMENTS
@@ -573,20 +579,19 @@ def checkout(request):
             )
             order_item.save()
 
-            # Mettre à jour les stocks
+            # Mettre à jour les stocks IMMÉDIATEMENT
             cart_item.product.stock -= cart_item.quantity
             cart_item.product.save()
 
-        # Vider le panier
-        cart.items.all().delete()
-
-        # Redirection selon le mode de paiement
+        # 🔥 CORRECTION : Vider le panier SEULEMENT pour paiement à la livraison
         if payment_method == 'CASH':
+            cart.items.all().delete()
             messages.success(request,
                              f"Votre commande #{order.order_number} a été passée avec succès ! Paiement à la livraison.")
             return redirect('shop:order_confirmation', order_id=order.id)
         else:
-            # Rediriger vers le processus de paiement en ligne
+            # 🔥 CORRECTION : NE PAS VIDER LE PANIER pour paiements en ligne
+            # Le panier sera vidé après confirmation du paiement
             return redirect('shop:process_payment', order_id=order.id)
 
     context = {
