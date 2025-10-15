@@ -93,8 +93,77 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Méthodes de paiement -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-4">Méthode de paiement</h2>
 
-                    <!-- Informations de contact -->
+                        <div class="space-y-3">
+                            <!-- Paiement à la livraison -->
+                            <div class="flex items-center gap-3 p-3 border-2 border-primary rounded-lg bg-blue-50">
+                                <input type="radio" id="cash_payment" name="payment_method" value="CASH" checked
+                                       class="text-primary focus:ring-primary h-4 w-4">
+                                <label for="cash_payment" class="flex items-center gap-2 flex-grow cursor-pointer">
+                                    <span class="material-symbols-outlined text-green-600">local_shipping</span>
+                                    <div>
+                                        <span class="font-medium text-slate-900">Paiement à la livraison</span>
+                                        <p class="text-xs text-slate-600">Payez cash à la réception de votre commande</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Wave -->
+                            <div class="flex items-center gap-3 p-3 border border-slate-300 rounded-lg hover:border-primary transition-colors">
+                                <input type="radio" id="wave_payment" name="payment_method" value="WAVE"
+                                       class="text-primary focus:ring-primary h-4 w-4">
+                                <label for="wave_payment" class="flex items-center gap-2 flex-grow cursor-pointer">
+                                    <span class="text-purple-600 font-bold text-sm">WAVE</span>
+                                    <div>
+                                        <span class="font-medium text-slate-900">Payer avec Wave</span>
+                                        <p class="text-xs text-slate-600">Paiement mobile sécurisé</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Orange Money -->
+                            <div class="flex items-center gap-3 p-3 border border-slate-300 rounded-lg hover:border-primary transition-colors">
+                                <input type="radio" id="orange_payment" name="payment_method" value="ORANGE"
+                                       class="text-primary focus:ring-primary h-4 w-4">
+                                <label for="orange_payment" class="flex items-center gap-2 flex-grow cursor-pointer">
+                                    <span class="text-orange-500 font-bold text-sm">ORANGE</span>
+                                    <div>
+                                        <span class="font-medium text-slate-900">Orange Money</span>
+                                        <p class="text-xs text-slate-600">Paiement mobile sécurisé</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- MTN Money -->
+                            <div class="flex items-center gap-3 p-3 border border-slate-300 rounded-lg hover:border-primary transition-colors">
+                                <input type="radio" id="mtn_payment" name="payment_method" value="MTN"
+                                       class="text-primary focus:ring-primary h-4 w-4">
+                                <label for="mtn_payment" class="flex items-center gap-2 flex-grow cursor-pointer">
+                                    <span class="text-yellow-500 font-bold text-sm">MTN</span>
+                                    <div>
+                                        <span class="font-medium text-slate-900">MTN Money</span>
+                                        <p class="text-xs text-slate-600">Paiement mobile sécurisé</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Information sécurité -->
+                        <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div class="flex items-start gap-2">
+                                <span class="material-symbols-outlined text-green-500 text-sm mt-0.5">lock</span>
+                                <div class="text-xs text-slate-600">
+                                    <p class="font-medium">Paiements 100% sécurisés</p>
+                                    <p>Tous les paiements en ligne sont cryptés et sécurisés par PayDunya</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations de contact (gardée mais déplacée) -->
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div class="flex items-start gap-3">
                             <span class="material-symbols-outlined text-blue-500 text-lg mt-0.5 flex-shrink-0">info</span>
@@ -102,7 +171,7 @@
                                 <p class="font-medium mb-1">Comment procéderons-nous ?</p>
                                 <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm">
                                     <li>Nous vous contacterons par téléphone pour confirmer votre commande</li>
-                                    <li>Paiement à la livraison ou par virement bancaire</li>
+                                    <li>Paiement sécurisé en ligne ou à la livraison</li>
                                     <li>Livraison sous 2-3 jours ouvrés</li>
                                 </ul>
                             </div>

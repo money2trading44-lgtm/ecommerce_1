@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-prct4r0m&#@h#i0vnm=z(8sx)!)@*a&2rc+cr6kq1us7tzr5%6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'dsd-general-trading.com',
@@ -153,4 +153,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Configuration PayDunya (Wave, Orange, MTN)
+PAYDUNYA_CONFIG = {
+    'MASTER_KEY': os.environ.get('PAYDUNYA_MASTER_KEY', ''),
+    'PRIVATE_KEY': os.environ.get('PAYDUNYA_PRIVATE_KEY', ''),
+    'PUBLIC_KEY': os.environ.get('PAYDUNYA_PUBLIC_KEY', ''),
+    'TOKEN': os.environ.get('PAYDUNYA_TOKEN', ''),
+    'MODE': 'test' if DEBUG else 'live',  # test ou live
+}
 

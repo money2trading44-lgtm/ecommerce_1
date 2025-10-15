@@ -1,3 +1,5 @@
+import os
+
 from django.db.models.functions import ExtractMonth
 from django.utils import timezone as django_timezone, timezone
 from django.contrib import messages
@@ -9,6 +11,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from shop.models import Category, Product, RepairRequest, Cart, CartItem, Order, OrderItem
 from django.db.models import Sum, Q
 from datetime import timedelta, datetime
+import requests
+import json
 
 
 # ========================= VUES CLIENT ======================
@@ -353,10 +357,164 @@ def remove_from_cart(request, item_id):
 
     return redirect('shop:cart_detail')
 
+def process_payment(request,order_id):
+    """
+    Vue pour traiter le paiement en ligne via PayDunya
+    """
+    order = get_object_or_404(Order,id=order_id)
+
+    # Si paiement a la livraison , rediriger directement vers confirmation
+
+    if order.payment_method == 'CASH':
+        return redirect('shop:order_confirmation',order_id = order_id)
+
+    # Configuration PayDunya
+
+    PAYDUNYA_CONFIG = {
+        'MASTER_KEY': os.environ.get('PAYDUNYA_MASTER_KEY', ''),
+        'PRIVATE_KEY': os.environ.get('PAYDUNYA_PRIVATE_KEY', ''),
+        'PUBLIC_KEY': os.environ.get('PAYDUNYA_PUBLIC_KEY', ''),
+        'TOKEN': os.environ.get('PAYDUNYA_TOKEN', ''),
+        'MODE': 'test'  # Mettre 'live' en production
+    }
+    if not all([PAYDUNYA_CONFIG['MASTER_KEY'], PAYDUNYA_CONFIG['PRIVATE_KEY'],
+                PAYDUNYA_CONFIG['PUBLIC_KEY'], PAYDUNYA_CONFIG['TOKEN']]):
+        messages.error(request, "Configuration de paiement incomplète. Veuillez réessayer plus tard.")
+        return redirect('shop:checkout')
+
+    try:
+        # Préparer les données pour PayDunya
+        store = {
+            "name": "DSD General Trading",
+            "tagline": "Confort & Technologie Réunis",
+            "postal_address": "Abidjan, Côte d'Ivoire",
+            "phone_number": "+2250102030405",
+            "website_url": "https://dsd-general-trading.com",
+            "logo_url": "https://dsd-general-trading.com/static/shop/images/logo.jpg"
+        }
+        items = []
+        for item in order.items.all():
+            items.append({
+                "name": item.product_name,
+                "quantity": item.quantity,
+                "unit_price": str(float(item.product_price)),
+                "total_price": str(float(item.get_total_price())),
+                "description": f"{item.product_name} - {order.get_payment_method_display()}"
+            })
+        # Donnees de la requete paydunya
+
+        payload = {
+            "invoice": {
+                "items": items,
+                "total_amount": str(float(order.total_price)),
+                "description": f"Commande #{order.order_number}"
+            },
+            "store": store,
+            "custom_data": {
+                "order_id": order.id,
+                "order_number": order.order_number
+            },
+            "actions": {
+                "cancel_url": f"https://dsd-general-trading.com/commande/annulation/{order.id}/",
+                "return_url": f"https://dsd-general-trading.com/commande/confirmation/{order.id}/",
+                "callback_url": f"https://dsd-general-trading.com/payment/webhook/"
+            }
+        }
+
+        # Headers pour l'API PayDunya
+        headers = {
+            "PAYDUNYA-MASTER-KEY": PAYDUNYA_CONFIG['MASTER_KEY'],
+            "PAYDUNYA-PRIVATE-KEY": PAYDUNYA_CONFIG['PRIVATE_KEY'],
+            "PAYDUNYA-PUBLIC-KEY": PAYDUNYA_CONFIG['PUBLIC_KEY'],
+            "PAYDUNYA-TOKEN": PAYDUNYA_CONFIG['TOKEN'],
+            "Content-Type": "application/json"
+        }
+        # Envoyer la requête à PayDunya (mode test)
+        if PAYDUNYA_CONFIG['MODE'] == 'test':
+            response = requests.post(
+                "https://app.paydunya.com/api/v1/checkout-invoice/create",
+                json=payload,
+                headers=headers
+            )
+        else:
+            # Mode production
+            response = requests.post(
+                "https://app.paydunya.com/api/v1/checkout-invoice/create",
+                json=payload,
+                headers=headers
+            )
+
+        if response.status_code == 200:
+            data = response.json()
+            if data['response_code'] == '00':  # Succès
+                # Sauvegarder la référence de paiement
+                order.payment_reference = data['token']
+                order.save()
+
+                # Rediriger vers la page de paiement PayDunya
+                return redirect(data['response_text'])
+            else:
+                messages.error(request, f"Erreur de paiement: {data['response_text']}")
+                return redirect('shop:checkout')
+
+        else:
+            messages.error(request, "Erreur de connexion avec le service de paiement")
+            return redirect('shop:checkout')
+
+    except Exception as e:
+        messages.error(request, f"Erreur lors du traitement du paiement: {str(e)}")
+        return redirect('shop:checkout')
+
+def payment_webhook(request):
+    """Webhook pour recevoir les confirmations de paiement de PayDunya"""
+
+    if request.method =='POST':
+        try:
+            data = json.loads(request.body)
+            # Vérifier la signature PayDunya
+            # (à implémenter avec vos clés)
+
+            order_id = data.get('custom_data', {}).get('order_id')
+            status = data.get('status')
+
+            if order_id and status:
+                order = Order.objects.get(id=order_id)
+
+                if status == 'completed':
+                    order.payment_status = 'PAID'
+                    order.status = 'CONFIRMED'  # Confirmer la commande
+                    messages.success(request, f"Paiement confirmé pour la commande #{order.order_number}")
+                else:
+                    order.payment_status = 'FAILED'
+                    messages.error(request, f"Paiement échoué pour la commande #{order.order_number}")
+
+                order.save()
+
+            return HttpResponse(status=200)
+
+        except Exception as e:
+            print(f"Erreur webhook: {str(e)}")
+            return HttpResponse(status=400)
+
+    return HttpResponse(status=405)
+
+
+def payment_cancel(request, order_id):
+    """
+    Vue appelée quand l'utilisateur annule le paiement
+    """
+    order = get_object_or_404(Order, id=order_id)
+
+    # Marquer le paiement comme annulé
+    order.payment_status = 'FAILED'
+    order.save()
+
+    messages.warning(request, f"Paiement annulé pour la commande #{order.order_number}")
+    return redirect('shop:checkout')
 
 def checkout(request):
     """
-    Vue pour la page de commande
+    Vue pour la page de commande AVEC PAIEMENTS
     """
     cart = get_or_create_cart(request)
     cart_items = cart.items.select_related('product')
@@ -365,27 +523,31 @@ def checkout(request):
         messages.error(request, "Votre panier est vide.")
         return redirect('shop:cart_detail')
 
-    # Vérifier le stock avant de passer commande
+    # Vérifier le stock
     for item in cart_items:
         if item.quantity > item.product.stock:
-            messages.error(request, f"Stock insuffisant pour {item.product.name}. Il ne reste que {item.product.stock} unité(s) disponible(s).")
+            messages.error(request,
+                           f"Stock insuffisant pour {item.product.name}. Il ne reste que {item.product.stock} unité(s) disponible(s).")
             return redirect('shop:cart_detail')
 
     if request.method == 'POST':
-        # Traitement du formulaire de commande
+        # Récupérer la méthode de paiement
+        payment_method = request.POST.get('payment_method', 'CASH')
+
+        # Données client
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
         phone_number = request.POST.get('phone_number')
         address = request.POST.get('address')
         city = request.POST.get('city')
-        country = request.POST.get('country', 'Cote d\'ivoire')
+        country = request.POST.get('country', 'Côte d\'Ivoire')
 
-        # Validation des champs requis
+        # Validation
         if not all([full_name, email, phone_number, address, city]):
             messages.error(request, "Veuillez remplir tous les champs obligatoires.")
             return redirect('shop:checkout')
 
-        # Création de la commande
+        # Créer la commande
         order = Order(
             full_name=full_name,
             email=email,
@@ -394,11 +556,13 @@ def checkout(request):
             city=city,
             country=country,
             total_price=cart.get_total_price(),
-            session_key=request.session.session_key if not request.user.is_authenticated else None
+            session_key=request.session.session_key if not request.user.is_authenticated else None,
+            payment_method=payment_method,
+            payment_status='CASH_ON_DELIVERY' if payment_method == 'CASH' else 'PENDING'
         )
         order.save()
 
-        # Créer les OrderItems pour sauvegarder les articles
+        # Créer les OrderItems
         for cart_item in cart_items:
             order_item = OrderItem(
                 order=order,
@@ -416,11 +580,14 @@ def checkout(request):
         # Vider le panier
         cart.items.all().delete()
 
-        # Forcer la mise à jour du panier
-        cart = get_or_create_cart(request)
-
-        messages.success(request, f"Votre commande #{order.order_number} a été passée avec succès !")
-        return redirect('shop:order_confirmation', order_id=order.id)
+        # Redirection selon le mode de paiement
+        if payment_method == 'CASH':
+            messages.success(request,
+                             f"Votre commande #{order.order_number} a été passée avec succès ! Paiement à la livraison.")
+            return redirect('shop:order_confirmation', order_id=order.id)
+        else:
+            # Rediriger vers le processus de paiement en ligne
+            return redirect('shop:process_payment', order_id=order.id)
 
     context = {
         'cart': cart,

@@ -189,12 +189,28 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
+
     STATUS_CHOICES = [
         ('PENDING', 'En attente'),
         ('CONFIRMED', 'Confirmée'),
         ('SHIPPED', 'Expédiée'),
         ('DELIVERED', 'Livrée'),
         ('CANCELLED', 'Annulée'),
+    ]
+
+    PAYMENT_METHODS =[
+        ('CASH','Paiement à la livraison'),
+        ('WAVE','Wave'),
+        ('ORANGE','Orange Money'),
+        ('MTN','MTN Money'),
+        ('PAYDUNYA','PayDunya Checkout')
+    ]
+
+    PAYMENT_STATUS = [
+        ('PENDING', 'En attente'),
+        ('PAID', 'Payé'),
+        ('FAILED', 'Échoué'),
+        ('CASH_ON_DELIVERY', 'À payer à la livraison'),
     ]
 
     order_number = models.CharField(max_length=20, unique=True, verbose_name='Numéro de commande')
@@ -209,6 +225,12 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', verbose_name="Statut")  # NOUVEAU CHAMP
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Dernière modification")
+
+    # Payment feature
+    payment_method = models.CharField(max_length=20,choices=PAYMENT_METHODS,default='CASH',verbose_name='Méthode de paiement')
+    payment_status = models.CharField(max_length=20,choices=PAYMENT_STATUS,default='PENDING',verbose_name='Statut paiement')
+    payment_reference = models.CharField(max_length=100,blank=True,verbose_name='Référence paiement')
+
 
     class Meta:
         verbose_name = "Commande"
