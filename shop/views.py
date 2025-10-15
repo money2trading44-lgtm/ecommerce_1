@@ -357,7 +357,8 @@ def remove_from_cart(request, item_id):
 
     return redirect('shop:cart_detail')
 
-def process_payment(request,order_id):
+
+def process_payment(request, order_id):
     """
     Vue pour traiter le paiement en ligne via PayDunya
     """
@@ -371,7 +372,6 @@ def process_payment(request,order_id):
         return redirect('shop:order_confirmation', order_id=order.id)
 
     # Configuration PayDunya
-
     PAYDUNYA_CONFIG = {
         'MASTER_KEY': os.environ.get('PAYDUNYA_MASTER_KEY', ''),
         'PRIVATE_KEY': os.environ.get('PAYDUNYA_PRIVATE_KEY', ''),
@@ -380,6 +380,7 @@ def process_payment(request,order_id):
         'MODE': 'test'  # Mettre 'live' en production
     }
     print(f"🎯 Clés configurées: {bool(PAYDUNYA_CONFIG['MASTER_KEY'])}")  # DEBUG
+
     if not all([PAYDUNYA_CONFIG['MASTER_KEY'], PAYDUNYA_CONFIG['PRIVATE_KEY'],
                 PAYDUNYA_CONFIG['PUBLIC_KEY'], PAYDUNYA_CONFIG['TOKEN']]):
         print("❌ Clés manquantes")
@@ -388,6 +389,7 @@ def process_payment(request,order_id):
 
     try:
         print("🎯 Tentative de création de facture PayDunya...")
+
         # Préparer les données pour PayDunya
         store = {
             "name": "DSD General Trading",
@@ -397,6 +399,7 @@ def process_payment(request,order_id):
             "website_url": "https://dsd-general-trading.com",
             "logo_url": "https://dsd-general-trading.com/static/shop/images/logo.jpg"
         }
+
         items = []
         for item in order.items.all():
             items.append({
@@ -406,8 +409,8 @@ def process_payment(request,order_id):
                 "total_price": str(float(item.get_total_price())),
                 "description": f"{item.product_name} - {order.get_payment_method_display()}"
             })
-        # Donnees de la requete paydunya
 
+        # Données de la requête PayDunya
         payload = {
             "invoice": {
                 "items": items,
@@ -434,39 +437,49 @@ def process_payment(request,order_id):
             "PAYDUNYA-TOKEN": PAYDUNYA_CONFIG['TOKEN'],
             "Content-Type": "application/json"
         }
+
         # Envoyer la requête à PayDunya (mode test)
+        print("🎯 Envoi requête à PayDunya...")
         if PAYDUNYA_CONFIG['MODE'] == 'test':
             response = requests.post(
                 "https://app.paydunya.com/api/v1/checkout-invoice/create",
                 json=payload,
-                headers=headers
+                headers=headers,
+                timeout=30
             )
         else:
-            # Mode production
             response = requests.post(
                 "https://app.paydunya.com/api/v1/checkout-invoice/create",
                 json=payload,
-                headers=headers
+                headers=headers,
+                timeout=30
             )
+
+        # 🔥🔥🔥 DEBUG COMPLET 🔥🔥🔥
+        print(f"🎯 Statut HTTP: {response.status_code}")
+        print(f"🎯 Réponse PayDunya: {response.text}")
 
         if response.status_code == 200:
             data = response.json()
-            if data['response_code'] == '00':  # Succès
-                # Sauvegarder la référence de paiement
+            print(f"🎯 Données reçues: {data}")
+
+            if data.get('response_code') == '00':  # Succès
+                print("✅ Succès PayDunya - Redirection...")
                 order.payment_reference = data['token']
                 order.save()
-
-                # Rediriger vers la page de paiement PayDunya
                 return redirect(data['response_text'])
             else:
-                messages.error(request, f"Erreur de paiement: {data['response_text']}")
+                print(f"❌ Erreur PayDunya: {data}")
+                messages.error(request, f"Erreur de paiement: {data.get('response_text', 'Erreur inconnue')}")
                 return redirect('shop:checkout')
 
         else:
+            print(f"❌ Erreur HTTP: {response.status_code}")
             messages.error(request, "Erreur de connexion avec le service de paiement")
             return redirect('shop:checkout')
 
     except Exception as e:
+        print(f"❌ Exception: {str(e)}")
         messages.error(request, f"Erreur lors du traitement du paiement: {str(e)}")
         return redirect('shop:checkout')
 
