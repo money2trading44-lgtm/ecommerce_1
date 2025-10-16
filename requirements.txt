@@ -4,4 +4,4 @@ whitenoise==6.6.0
 reportlab==4.0.6
 #psycopg2-binary==2.9.9
 requests==2.31.0  # Pour les APIs de paiement
-dotenv==1.1.1
+dotenv==0.9.9
