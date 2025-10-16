@@ -1,0 +1,255 @@
+{% extends 'administration/base.html' %}
+
+{% block title %}Modifier le devis - Admin{% endblock %}
+
+{% block page_title %}Modifier le devis{% endblock %}
+{% block page_subtitle %}{{ quote.full_name }} - {{ quote.product.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <!-- En-tête -->
+        <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Modifier le devis</h3>
+                    <p class="text-sm text-gray-600">Client: {{ quote.full_name }} - {{ quote.product.name }}</p>
+                </div>
+                <a href="{% url 'shop:admin_custom_quotes' %}" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start">
+                    <span class="material-symbols-outlined text-base">arrow_back</span>
+                    Retour à la liste
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages d'alerte -->
+        {% if messages %}
+            <div class="mx-4 sm:mx-6 mt-4">
+                {% for message in messages %}
+                    <div class="p-3 sm:p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% else %}bg-green-100 text-green-700 border border-green-200{% endif %}">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined mr-2 text-sm sm:text-base">
+                                {% if message.tags == 'error' %}error{% else %}check_circle{% endif %}
+                            </span>
+                            <span class="text-sm sm:text-base">{{ message }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Informations de la demande -->
+        <div class="p-4 sm:p-6 border-b border-gray-200">
+            <h4 class="font-semibold text-gray-900 text-sm sm:text-base mb-4">Informations de la demande</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <!-- Informations client -->
+                <div class="space-y-3">
+                    <h5 class="font-medium text-gray-700 text-sm">Informations client</h5>
+                    <div class="space-y-2 text-sm">
+                        <div>
+                            <span class="text-gray-500">Nom:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.full_name }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Téléphone:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.phone_number }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Email:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.email }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Ville:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.city }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informations produit -->
+                <div class="space-y-3">
+                    <h5 class="font-medium text-gray-700 text-sm">Informations produit</h5>
+                    <div class="space-y-2 text-sm">
+                        <div>
+                            <span class="text-gray-500">Produit:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.product.name }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Type:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.product.get_decoration_type_display }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Adresse:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.address }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rendez-vous -->
+                <div class="space-y-3">
+                    <h5 class="font-medium text-gray-700 text-sm">Rendez-vous demandé</h5>
+                    <div class="space-y-2 text-sm">
+                        <div>
+                            <span class="text-gray-500">Date:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.preferred_date|date:"d/m/Y" }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Horaire:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.get_preferred_time_display }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Date demande:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.created_at|date:"d/m/Y H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spécifications du client -->
+        <div class="p-4 sm:p-6 border-b border-gray-200">
+            <h4 class="font-semibold text-gray-900 text-sm sm:text-base mb-4">Spécifications fournies par le client</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <!-- Dimensions -->
+                <div class="space-y-3">
+                    <h5 class="font-medium text-gray-700 text-sm">Dimensions</h5>
+                    <div class="space-y-2 text-sm">
+                        {% if quote.room_dimensions %}
+                        <div>
+                            <span class="text-gray-500">Pièce:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.room_dimensions }}</span>
+                        </div>
+                        {% endif %}
+                        {% if quote.window_measurements %}
+                        <div>
+                            <span class="text-gray-500">Fenêtres:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.window_measurements }}</span>
+                        </div>
+                        {% endif %}
+                        {% if quote.bed_size %}
+                        <div>
+                            <span class="text-gray-500">Lit:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.bed_size }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Préférences -->
+                <div class="space-y-3">
+                    <h5 class="font-medium text-gray-700 text-sm">Préférences</h5>
+                    <div class="space-y-2 text-sm">
+                        {% if quote.fabric_preference %}
+                        <div>
+                            <span class="text-gray-500">Tissu:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.fabric_preference }}</span>
+                        </div>
+                        {% endif %}
+                        {% if quote.color_preferences %}
+                        <div>
+                            <span class="text-gray-500">Couleurs:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.color_preferences }}</span>
+                        </div>
+                        {% endif %}
+                        {% if quote.special_requests %}
+                        <div>
+                            <span class="text-gray-500">Demandes spéciales:</span>
+                            <span class="font-medium text-gray-900 block">{{ quote.special_requests }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire de modification -->
+        <form method="post" class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+            {% csrf_token %}
+
+            <!-- Gestion du devis -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <!-- Statut -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Statut *</label>
+                    <select id="status" name="status" required
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if quote.status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Prix devisé -->
+                <div>
+                    <label for="quoted_price" class="block text-sm font-medium text-gray-700 mb-2">Prix devisé (FCFA)</label>
+                    <input type="number" id="quoted_price" name="quoted_price" step="0.01" min="0"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                           placeholder="0.00"
+                           value="{{ quote.quoted_price|default:'' }}">
+                    <p class="mt-1 text-xs text-gray-500">Prix final proposé au client</p>
+                </div>
+            </div>
+
+            <!-- Notes internes -->
+            <div>
+                <label for="admin_notes" class="block text-sm font-medium text-gray-700 mb-2">Notes internes</label>
+                <textarea id="admin_notes" name="admin_notes" rows="4"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none"
+                          placeholder="Notes sur le client, détails de la visite, informations supplémentaires...">{{ quote.admin_notes }}</textarea>
+                <p class="mt-1 text-xs text-gray-500">Ces notes sont visibles uniquement par les administrateurs</p>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="bg-blue-50 rounded-lg p-4 sm:p-6">
+                <h4 class="font-semibold text-blue-900 text-sm sm:text-base mb-3">Actions rapides</h4>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="mailto:{{ quote.email }}?subject=Devis {{ quote.product.name }}&body=Bonjour {{ quote.full_name|urlencode }},"
+                       class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                        <span class="material-symbols-outlined text-base">email</span>
+                        Envoyer un email
+                    </a>
+                    <a href="https://wa.me/{{ quote.phone_number|cut:' '|cut:'+' }}?text=Bonjour%20{{ quote.full_name|urlencode }}%2C%20concernant%20votre%20demande%20de%20devis%20pour%20{{ quote.product.name|urlencode }}"
+                       target="_blank"
+                       class="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
+                        <span class="material-symbols-outlined text-base">chat</span>
+                        Contacter sur WhatsApp
+                    </a>
+                    <a href="tel:{{ quote.phone_number }}"
+                       class="inline-flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                        <span class="material-symbols-outlined text-base">call</span>
+                        Appeler
+                    </a>
+                </div>
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:space-x-4 pt-6 border-t border-gray-200">
+                <a href="{% url 'shop:admin_custom_quotes' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-center text-sm sm:text-base">
+                    Annuler
+                </a>
+                <button type="submit" class="bg-primary text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    <span class="hidden xs:inline">Enregistrer les modifications</span>
+                    <span class="xs:hidden">Enregistrer</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Style pour améliorer l'affichage -->
+<style>
+    .border-gray-200 {
+        border-color: #e5e7eb;
+    }
+
+    .bg-blue-50 {
+        background-color: #eff6ff;
+    }
+
+    .text-blue-900 {
+        color: #1e3a8a;
+    }
+</style>
+{% endblock %}

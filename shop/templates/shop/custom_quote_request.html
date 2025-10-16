@@ -1,0 +1,306 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Demande de Devis Personnalisé - {{ product.name }} | DSD General Trading{% endblock %}
+
+{% block description %}Demandez un devis personnalisé pour {{ product.name }}. Notre équipe d'experts se déplace gratuitement à votre domicile pour prendre les mesures et vous proposer la solution idéale.{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-4xl">
+    
+    <!-- EN-TÊTE -->
+    <div class="text-center mb-8 sm:mb-12">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Devis Personnalisé</h1>
+        <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto">
+            Demandez une visite gratuite de nos experts pour un devis sur mesure adapté à votre espace.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12">
+        <!-- PRODUIT -->
+        <div class="lg:col-span-1">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 sticky top-6">
+                <div class="text-center mb-6">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                             class="w-32 h-32 mx-auto object-cover rounded-lg mb-4">
+                    {% else %}
+                        <div class="w-32 h-32 mx-auto bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center mb-4">
+                            <span class="text-3xl text-slate-400">
+                                {% if product.decoration_type == 'SHEET' %}🛏️
+                                {% elif product.decoration_type == 'CURTAIN' %}🪟
+                                {% elif product.decoration_type == 'CARPET' %}🧶
+                                {% else %}🏠{% endif %}
+                            </span>
+                        </div>
+                    {% endif %}
+                    <h2 class="font-bold text-lg text-slate-900 mb-2">{{ product.name }}</h2>
+                    <p class="text-sm text-slate-500">{{ product.get_decoration_type_display }}</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="material-symbols-outlined text-orange-600 text-lg">request_quote</span>
+                            <span class="font-semibold text-orange-800 text-sm">Service sur mesure</span>
+                        </div>
+                        <p class="text-orange-700 text-xs leading-relaxed">
+                            Prix adapté à vos dimensions et préférences après visite de nos experts.
+                        </p>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="material-symbols-outlined text-blue-600 text-lg">home</span>
+                            <span class="font-semibold text-blue-800 text-sm">Visite à domicile</span>
+                        </div>
+                        <p class="text-blue-700 text-xs leading-relaxed">
+                            Nos experts se déplacent gratuitement pour prendre les mesures et vous conseiller.
+                        </p>
+                    </div>
+
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="material-symbols-outlined text-green-600 text-lg">support_agent</span>
+                            <span class="font-semibold text-green-800 text-sm">Conseil personnalisé</span>
+                        </div>
+                        <p class="text-green-700 text-xs leading-relaxed">
+                            Recommandations adaptées à votre espace et à vos goûts.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORMULAIRE -->
+        <div class="lg:col-span-2">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8">
+                <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-6">Informations pour le devis</h2>
+
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- INFORMATIONS PERSONNELLES -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        <div class="sm:col-span-2">
+                            <label for="full_name" class="block text-sm font-medium text-slate-700 mb-2">
+                                Nom complet *
+                            </label>
+                            <input type="text" id="full_name" name="full_name" required
+                                   class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                   placeholder="Votre nom complet">
+                        </div>
+
+                        <div>
+                            <label for="phone_number" class="block text-sm font-medium text-slate-700 mb-2">
+                                Numéro de téléphone *
+                            </label>
+                            <input type="tel" id="phone_number" name="phone_number" required
+                                   class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                   placeholder="Ex: 01 23 45 67 89">
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-slate-700 mb-2">
+                                Adresse email *
+                            </label>
+                            <input type="email" id="email" name="email" required
+                                   class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                   placeholder="votre@email.com">
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="address" class="block text-sm font-medium text-slate-700 mb-2">
+                                Adresse de visite *
+                            </label>
+                            <textarea id="address" name="address" required rows="2"
+                                      class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                      placeholder="Adresse complète où se fera la visite"></textarea>
+                        </div>
+
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-slate-700 mb-2">
+                                Ville *
+                            </label>
+                            <input type="text" id="city" name="city" required
+                                   class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                   placeholder="Votre ville">
+                        </div>
+                    </div>
+
+                    <!-- PRÉFÉRENCES DE RENDEZ-VOUS -->
+                    <div class="border-t border-slate-200 pt-6">
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4">Préférences de rendez-vous</h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                            <div>
+                                <label for="preferred_date" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Date préférée *
+                                </label>
+                                <input type="date" id="preferred_date" name="preferred_date" required
+                                       min="{{ today|date:'Y-m-d' }}"
+                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                            </div>
+
+                            <div>
+                                <label for="preferred_time" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Plage horaire *
+                                </label>
+                                <select id="preferred_time" name="preferred_time" required
+                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                                    <option value="">Choisir une plage</option>
+                                    <option value="MORNING">Matin (8h-12h)</option>
+                                    <option value="AFTERNOON">Après-midi (14h-18h)</option>
+                                    <option value="EVENING">Soir (18h-20h)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- INFORMATIONS SPÉCIFIQUES -->
+                    <div class="border-t border-slate-200 pt-6">
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4">Informations pour le devis</h3>
+                        
+                        <div class="space-y-4">
+                            {% if product.decoration_type == 'SHEET' %}
+                            <div>
+                                <label for="bed_size" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Taille du lit
+                                </label>
+                                <input type="text" id="bed_size" name="bed_size"
+                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                       placeholder="Ex: 140x190cm, 160x200cm...">
+                            </div>
+                            {% endif %}
+
+                            {% if product.decoration_type == 'CURTAIN' %}
+                            <div>
+                                <label for="window_measurements" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Mesures approximatives des fenêtres
+                                </label>
+                                <input type="text" id="window_measurements" name="window_measurements"
+                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                       placeholder="Ex: Largeur 120cm, Hauteur 200cm...">
+                            </div>
+                            {% endif %}
+
+                            <div>
+                                <label for="room_dimensions" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Dimensions de la pièce (optionnel)
+                                </label>
+                                <input type="text" id="room_dimensions" name="room_dimensions"
+                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                       placeholder="Ex: 4m x 5m, surface 20m²...">
+                            </div>
+
+                            <div>
+                                <label for="fabric_preference" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Préférence de tissu/matière
+                                </label>
+                                <input type="text" id="fabric_preference" name="fabric_preference"
+                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                       placeholder="Ex: Coton, lin, velours...">
+                            </div>
+
+                            <div>
+                                <label for="color_preferences" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Préférences de couleurs
+                                </label>
+                                <input type="text" id="color_preferences" name="color_preferences"
+                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                       placeholder="Ex: Bleu, beige, tons neutres...">
+                            </div>
+
+                            <div>
+                                <label for="special_requests" class="block text-sm font-medium text-slate-700 mb-2">
+                                    Demandes spéciales ou commentaires
+                                </label>
+                                <textarea id="special_requests" name="special_requests" rows="3"
+                                          class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                          placeholder="Toute information supplémentaire qui pourrait nous aider..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOUTON DE SOUMISSION -->
+                    <div class="border-t border-slate-200 pt-6">
+                        <button type="submit"
+                                class="w-full bg-orange-500 text-white font-bold py-4 px-6 rounded-lg hover:bg-orange-600 transition-colors text-lg flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined">send</span>
+                            Envoyer la demande de devis
+                        </button>
+                        <p class="text-xs text-slate-500 text-center mt-3">
+                            * Champs obligatoires. Notre équipe vous contactera dans les 24h pour confirmer le rendez-vous.
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Définir la date minimale pour aujourd'hui
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('preferred_date');
+    if (dateInput) {
+        dateInput.min = today;
+    }
+
+    // Validation du formulaire
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('border-red-500');
+                } else {
+                    field.classList.remove('border-red-500');
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Veuillez remplir tous les champs obligatoires marqués d\'un astérisque (*).');
+            }
+        });
+    }
+});
+    // Empêcher le retour en arrière et le cache
+history.pushState(null, null, location.href);
+window.onpopstate = function() {
+    history.go(1);
+};
+
+// Désactiver le cache
+window.onpageshow = function(event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+};
+
+// Empêcher la resoumission du formulaire
+let formSubmitted = false;
+document.querySelector('form')?.addEventListener('submit', function(e) {
+    if (formSubmitted) {
+        e.preventDefault();
+        return false;
+    }
+    formSubmitted = true;
+});
+</script>
+
+<style>
+/* Style pour les champs obligatoires invalides */
+.border-red-500 {
+    border-color: #ef4444 !important;
+}
+</style>
+{% endblock %}

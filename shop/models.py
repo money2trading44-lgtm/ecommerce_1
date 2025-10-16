@@ -18,8 +18,8 @@ class Category(models.Model):
 
 class Product(models.Model):
     PRODUCT_TYPES = [
-        ('SHEET', 'Draps'),
         ('PHONE', 'Téléphone'),
+        ('DECORATION','Déco & Aménagement')
     ]
 
     # TAILLES pour les draps
@@ -88,7 +88,26 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Actif")
     on_sale = models.BooleanField(default=False, verbose_name="En promotion")
     discount_percentage = models.IntegerField(default=0, verbose_name="Pourcentage de réduction")
-
+    needs_custom_quote = models.BooleanField(default=False,verbose_name='Nécessite un devis personnalisé')
+    decoration_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('SHEET', 'Draps'),
+            ('CURTAIN', 'Rideaux'),
+            ('CARPET', 'Tapis'),
+            ('OTHER', 'Autre décoration'),
+        ],
+        blank=True,
+        null=True,
+        verbose_name='Type de décoration'
+    )
+    price_per_sqm = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name='Prix au m² (pour tapis)'
+    )
     class Meta:
         verbose_name = "Produit"
         verbose_name_plural = "Produits"
@@ -99,13 +118,88 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse('product_detail', kwargs={'pk': self.pk})
 
+
     # Méthode pour calculer le prix promotionnel
     def get_discounted_price(self):
+        # Si c'est un produit nécessitant un devis, pas de prix fixe
+        if self.needs_custom_quote:
+            return None
         if self.on_sale and self.discount_percentage > 0:
             discount = self.price * self.discount_percentage / 100
             return self.price - discount
         return self.price
 
+    def save(self, *args, **kwargs):
+        # Déterminer la catégorie automatiquement
+        if self.product_type == 'PHONE':
+            category_name = "Téléphones"
+        else:  # DECORATION
+            category_name = "Déco & Aménagement Intérieur"
+
+        # Récupérer ou créer la catégorie
+        from .models import Category  # Import circulaire, donc importer ici
+        category, created = Category.objects.get_or_create(
+            name=category_name,
+            defaults={'description': f'Catégorie pour les {category_name.lower()}'}
+        )
+        self.category = category
+
+        super().save(*args, **kwargs)
+
+
+class CustomQuoteRequest(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'En attente'),
+        ('CONTACTED', 'Client contacté'),
+        ('SCHEDULED', 'Rendez-vous planifié'),
+        ('QUOTED', 'Devis envoyé'),
+        ('COMPLETED', 'Terminé'),
+        ('CANCELLED', 'Annulé'),
+    ]
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Produit")
+    full_name = models.CharField(max_length=200, verbose_name="Nom complet")
+    phone_number = models.CharField(max_length=20, verbose_name="Numéro de téléphone")
+    email = models.EmailField(verbose_name="Adresse email")
+    address = models.TextField(verbose_name="Adresse de visite")
+    city = models.CharField(max_length=100, verbose_name="Ville")
+
+    # Préférences de rendez-vous
+    preferred_date = models.DateField(verbose_name="Date préférée")
+    preferred_time = models.CharField(
+        max_length=20,
+        choices=[
+            ('MORNING', 'Matin (8h-12h)'),
+            ('AFTERNOON', 'Après-midi (14h-18h)'),
+            ('EVENING', 'Soir (18h-20h)'),
+        ],
+        verbose_name="Plage horaire préférée"
+    )
+
+    # Informations pour le devis
+    room_dimensions = models.CharField(max_length=100, blank=True, verbose_name="Dimensions de la pièce")
+    window_measurements = models.CharField(max_length=100, blank=True,
+                                           verbose_name="Mesures des fenêtres (pour rideaux)")
+    bed_size = models.CharField(max_length=50, blank=True, verbose_name="Taille du lit (pour draps)")
+    special_requests = models.TextField(blank=True, verbose_name="Demandes spéciales")
+    fabric_preference = models.CharField(max_length=100, blank=True, verbose_name="Préférence de tissu")
+    color_preferences = models.CharField(max_length=200, blank=True, verbose_name="Préférences de couleurs")
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', verbose_name="Statut")
+    admin_notes = models.TextField(blank=True, verbose_name="Notes internes")
+    quoted_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True,
+                                       verbose_name="Prix devisé")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Dernière modification")
+
+    class Meta:
+        verbose_name = "Demande de devis personnalisé"
+        verbose_name_plural = "Demandes de devis personnalisés"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Devis {self.product.name} - {self.full_name}"
 
 class RepairRequest(models.Model):
     ISSUE_TYPES = [

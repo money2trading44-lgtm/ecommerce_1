@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Avg, Count
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
-from shop.models import Category, Product, RepairRequest, Cart, CartItem, Order, OrderItem
+from shop.models import Category, Product, RepairRequest, Cart, CartItem, Order, OrderItem,CustomQuoteRequest
 from django.db.models import Sum, Q
 from datetime import timedelta, datetime
 import requests
@@ -73,58 +73,53 @@ def search_products(request):
 
     return render(request,'shop/search_results.html',context)
 
-
-def sheets_list(request):
-    from shop.models import Product
+def decoration_list(request):
     """
-    Vue pour afficher la liste des draps
-    avec des filtres
+    Vue pour afficher les articles de décoration d'intérieur
+    avec gestion des produits à prix personnalisé
     """
-    sheets = Product.objects.filter(
-        product_type='SHEET',
+    decorations = Product.objects.filter(
+        product_type='DECORATION',
         is_active=True
     )
 
-    # Gestion des filtres
-    selected_size = request.GET.get('size', '')
-    min_price = request.GET.get('min_price', '')
-    max_price = request.GET.get('max_price', '')
+    # Filtres spécifiques à la décoration
+    decoration_type = request.GET.get('type', '')
+    needs_quote = request.GET.get('needs_quote', '')
 
-    if selected_size:
-        sheets = sheets.filter(sheet_size=selected_size)
+    if decoration_type:
+        decorations = decorations.filter(decoration_type=decoration_type)
 
-    # Filtrage par prix
-    if min_price:
-        sheets = sheets.filter(price__gte=min_price)
-    if max_price:
-        sheets = sheets.filter(price__lte=max_price)
+    if needs_quote == 'custom':
+        decorations = decorations.filter(needs_custom_quote=True)
+    elif needs_quote == 'standard':
+        decorations = decorations.filter(needs_custom_quote=False)
 
     # Gestion du tri
     sort_by = request.GET.get('sort', '')
     if sort_by == 'price_asc':
-        sheets = sheets.order_by('price')
+        decorations = decorations.order_by('price')
     elif sort_by == 'price_desc':
-        sheets = sheets.order_by('-price')
+        decorations = decorations.order_by('-price')
     elif sort_by == 'new':
-        sheets = sheets.order_by('-created_at')
+        decorations = decorations.order_by('-created_at')
     else:
-        sheets = sheets.order_by('-created_at')
-
-    # Ajouter les choix de taille au contexte
-    from shop.models import Product
-    sheet_sizes = Product.SHEET_SIZES
+        decorations = decorations.order_by('-created_at')
 
     context = {
-        'sheets': sheets,
-        'selected_size': selected_size,
-        'min_price': min_price,
-        'max_price': max_price,
+        'decorations': decorations,
+        'decoration_types': [
+            ('SHEET', 'Draps'),
+            ('CURTAIN', 'Rideaux'),
+            ('CARPET', 'Tapis'),
+            ('OTHER', 'Autre'),
+        ],
+        'selected_type': decoration_type,
+        'selected_quote_filter': needs_quote,
         'sort_by': sort_by,
-        'sheet_sizes': sheet_sizes,  # Ajouté pour les filtres
     }
 
-    return render(request, 'shop/sheets_list.html', context)
-
+    return render(request, 'shop/decoration_list.html', context)
 
 def phone_list(request):
 
@@ -174,9 +169,15 @@ def phone_list(request):
 def product_detail(request,product_id):
 
     product = get_object_or_404(Product,id =product_id,is_active = True)
+    if product.needs_custom_quote:
+        messages.info(request,
+                      "Ce produit nécessite un devis personnalisé. Veuillez utiliser le formulaire de demande de rendez-vous.")
+        return redirect('shop:custom_quote_request', product_id=product.id)
     similar_products = Product.objects.filter(
-        category = product.category,
-        is_active =True).exclude(id=product_id)[:4]
+        category=product.category,
+        is_active=True,
+        needs_custom_quote=False  # ✅ EXCLURE LES PRODUITS SUR DEVIS
+    ).exclude(id=product_id)[:4]
 
     context = {
         'product':product,
@@ -211,6 +212,93 @@ def repair_request(request):
         messages.success(request,'Votre demande de réparation a été envoyée avec succès !',extra_tags='repair')
         return redirect('shop:repair_request')
     return render(request,'shop/repair_request.html')
+
+
+def custom_quote_request(request, product_id):
+    """Vue pour la demande de devis personnalisé"""
+    product = get_object_or_404(Product, id=product_id, needs_custom_quote=True)
+
+    if request.method == 'POST':
+        # Traitement du formulaire de demande de devis
+        full_name = request.POST.get('full_name')
+        phone_number = request.POST.get('phone_number')
+        email = request.POST.get('email')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        preferred_date = request.POST.get('preferred_date')
+        preferred_time = request.POST.get('preferred_time')
+
+        # Informations spécifiques
+        room_dimensions = request.POST.get('room_dimensions', '')
+        window_measurements = request.POST.get('window_measurements', '')
+        bed_size = request.POST.get('bed_size', '')
+        special_requests = request.POST.get('special_requests', '')
+        fabric_preference = request.POST.get('fabric_preference', '')
+        color_preferences = request.POST.get('color_preferences', '')
+
+        # Validation des champs obligatoires
+        required_fields = ['full_name', 'phone_number', 'email', 'address', 'city', 'preferred_date', 'preferred_time']
+        missing_fields = [field for field in required_fields if not request.POST.get(field)]
+
+        if missing_fields:
+            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+            return redirect('shop:custom_quote_request', product_id=product_id)
+
+        try:
+            # Créer la demande de devis
+            quote_request = CustomQuoteRequest(
+                product=product,
+                full_name=full_name,
+                phone_number=phone_number,
+                email=email,
+                address=address,
+                city=city,
+                preferred_date=preferred_date,
+                preferred_time=preferred_time,
+                room_dimensions=room_dimensions,
+                window_measurements=window_measurements,
+                bed_size=bed_size,
+                special_requests=special_requests,
+                fabric_preference=fabric_preference,
+                color_preferences=color_preferences
+            )
+            quote_request.save()
+
+            # Sauvegarder la demande
+            quote_request = CustomQuoteRequest(
+                product=product,
+                full_name=full_name,
+                phone_number=phone_number,
+                email=email,
+                address=address,
+                city=city,
+                preferred_date=preferred_date,
+                preferred_time=preferred_time,
+                room_dimensions=room_dimensions,
+                window_measurements=window_measurements,
+                bed_size=bed_size,
+                special_requests=special_requests,
+                fabric_preference=fabric_preference,
+                color_preferences=color_preferences
+            )
+            quote_request.save()
+
+
+            # Rediriger vers la page de confirmation
+            return render(request, 'shop/quote_confirmation.html', {'quote_request': quote_request})
+
+        except Exception as e:
+            messages.error(request, f"Une erreur est survenue : {str(e)}")
+            return redirect('shop:custom_quote_request', product_id=product_id)
+
+    context = {
+        'product': product,
+    }
+    return render(request, 'shop/custom_quote_request.html', context)
+
+def quote_confirmation(request, quote_id):
+    quote_request = get_object_or_404(CustomQuoteRequest, id=quote_id)
+    return render(request, 'shop/quote_confirmation.html', {'quote_request': quote_request})
 
 def get_or_create_cart(request):
     """
@@ -247,6 +335,18 @@ def cart_detail(request):
 def add_to_cart(request, product_id):
     if request.method == 'POST':
         product = get_object_or_404(Product, id=product_id, is_active=True)
+
+        # EMPÊCHER L'AJOUT AU PANIER POUR LES PRODUITS À DEVIS PERSONNALISÉ
+        if product.needs_custom_quote:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Ce produit nécessite un devis personnalisé. Veuillez utiliser le formulaire de demande de rendez-vous.'
+                })
+            messages.info(request,
+                          'Ce produit nécessite un devis personnalisé. Veuillez utiliser le formulaire de demande de rendez-vous.')
+            return redirect('shop:custom_quote_request', product_id=product_id)
+
         cart = get_or_create_cart(request)
         quantity = int(request.POST.get('quantity', 1))
 
@@ -954,6 +1054,49 @@ def admin_repairs(request):
     }
     return render(request, 'administration/repairs.html', context)
 
+
+@admin_required
+@login_required
+@user_passes_test(is_admin_user)
+def admin_custom_quotes(request):
+    """Vue pour la gestion des demandes de devis personnalisé"""
+    quotes = CustomQuoteRequest.objects.all().select_related('product').order_by('-created_at')
+
+    # Filtres
+    status_filter = request.GET.get('status', '')
+    type_filter = request.GET.get('type', '')
+
+    if status_filter:
+        quotes = quotes.filter(status=status_filter.upper())
+
+    if type_filter:
+        quotes = quotes.filter(product__decoration_type=type_filter)
+
+    # Statistiques
+    pending_quotes = quotes.filter(status='PENDING')
+    scheduled_quotes = quotes.filter(status='SCHEDULED')
+    completed_quotes = quotes.filter(status='COMPLETED')
+
+    # Répartition par type de produit
+    sheet_quotes = quotes.filter(product__decoration_type='SHEET')
+    curtain_quotes = quotes.filter(product__decoration_type='CURTAIN')
+    carpet_quotes = quotes.filter(product__decoration_type='CARPET')
+    other_quotes = quotes.filter(product__decoration_type='OTHER')
+
+    context = {
+        'quotes': quotes,
+        'pending_quotes': pending_quotes,
+        'scheduled_quotes': scheduled_quotes,
+        'completed_quotes': completed_quotes,
+        'sheet_quotes': sheet_quotes,
+        'curtain_quotes': curtain_quotes,
+        'carpet_quotes': carpet_quotes,
+        'other_quotes': other_quotes,
+        'current_status': status_filter,
+        'current_type': type_filter,
+    }
+    return render(request, 'administration/custom_quotes.html', context)
+
 @admin_required
 @login_required
 @user_passes_test(is_admin_user)
@@ -1022,19 +1165,27 @@ def admin_add_product(request):
         name = request.POST.get('name')
         description = request.POST.get('description')
         price = request.POST.get('price')
-        product_type = request.POST.get('product_type')
+        product_type = request.POST.get('product_type')  # Soit 'PHONE' soit 'DECORATION'
         stock = request.POST.get('stock')
         discount_percentage = request.POST.get('discount_percentage', 0)
         image = request.FILES.get('image')
 
-        # Validation basique
+        # Gestion des produits de décoration (inclut maintenant les draps)
+        needs_custom_quote = request.POST.get('needs_custom_quote') == 'on'
+        decoration_type = request.POST.get('decoration_type')  # 'SHEET', 'CURTAIN', etc.
+        price_per_sqm = request.POST.get('price_per_sqm')
+
+        # ✅ VALIDATION SIMPLIFIÉE - Plus de distinction SHEET/PHONE/DECORATION
         required_fields = [
             ('name', 'Nom'),
             ('description', 'Description'),
-            ('price', 'Prix'),
             ('product_type', 'Type de produit'),
             ('stock', 'Stock')
         ]
+
+        # Si pas sur devis, le prix est obligatoire
+        if not needs_custom_quote:
+            required_fields.append(('price', 'Prix'))
 
         missing_fields = []
         for field, field_name in required_fields:
@@ -1051,58 +1202,47 @@ def admin_add_product(request):
             messages.error(request, "Veuillez sélectionner une image.")
             return redirect('/gestion-securisee/products/add/')
 
-        # Validation des champs spécifiques selon le type
-        if product_type == 'SHEET':
-            sheet_size = request.POST.get('sheet_size')
-            color = request.POST.get('color')
-
-            if not sheet_size or not color:
-                missing_specs = []
-                if not sheet_size: missing_specs.append("taille")
-                if not color: missing_specs.append("couleur")
-                messages.error(request,
-                               f"Pour les draps, les champs suivants sont obligatoires: {', '.join(missing_specs)}")
-                return redirect('/gestion-securisee/products/add/')
-
-        elif product_type == 'PHONE':
+        # ✅ NOUVELLE VALIDATION UNIFIÉE
+        if product_type == 'PHONE':
             phone_brand = request.POST.get('phone_brand')
-
             if not phone_brand:
                 messages.error(request, "Pour les téléphones, la marque est obligatoire.")
                 return redirect('/gestion-securisee/products/add/')
 
+        elif product_type == 'DECORATION':
+            if not decoration_type:
+                messages.error(request, "Pour les produits de décoration, le type est obligatoire.")
+                return redirect('/gestion-securisee/products/add/')
+
+            # Validation spécifique pour les draps
+            if decoration_type == 'SHEET':
+                sheet_size = request.POST.get('sheet_size')
+                color = request.POST.get('color')
+                if not sheet_size or not color:
+                    missing_specs = []
+                    if not sheet_size: missing_specs.append("taille")
+                    if not color: missing_specs.append("couleur")
+                    messages.error(request, f"Pour les draps, les champs suivants sont obligatoires: {', '.join(missing_specs)}")
+                    return redirect('/gestion-securisee/products/add/')
+
         try:
-            # Déterminer la catégorie automatiquement basée sur le type de produit
-            if product_type == 'SHEET':
-                category_name = "Draps et Literie"
-            else:  # PHONE
-                category_name = "Téléphones"
-
-            # Récupérer ou créer la catégorie
-            category, created = Category.objects.get_or_create(
-                name=category_name,
-                defaults={'description': f'Catégorie pour les {category_name.lower()}'}
-            )
-
-            # Créer le produit avec les champs de base
+            # ✅ CRÉATION DU PRODUIT AVEC STRUCTURE UNIFIÉE
             product = Product(
                 name=name,
                 description=description,
-                price=price,
-                category=category,
+                price=price if not needs_custom_quote else 0,  # Prix à 0 si sur devis
                 product_type=product_type,
                 stock=stock,
                 discount_percentage=discount_percentage,
-                on_sale=bool(discount_percentage and int(discount_percentage) > 0)
+                on_sale=bool(discount_percentage and int(discount_percentage) > 0),
+                # Champs pour la décoration (utilisés aussi pour les draps maintenant)
+                needs_custom_quote=needs_custom_quote,
+                decoration_type=decoration_type if product_type == 'DECORATION' else None,
+                price_per_sqm=price_per_sqm if product_type == 'DECORATION' and price_per_sqm else None
             )
 
-            # Ajouter les spécifications selon le type de produit
-            if product_type == 'SHEET':
-                product.sheet_size = request.POST.get('sheet_size')
-                product.color = request.POST.get('color')
-                product.material = request.POST.get('material')
-
-            elif product_type == 'PHONE':
+            # ✅ GESTION DES SPÉCIFICATIONS PAR TYPE
+            if product_type == 'PHONE':
                 product.phone_brand = request.POST.get('phone_brand')
                 product.phone_category = request.POST.get('phone_category')
                 product.storage = request.POST.get('storage')
@@ -1114,10 +1254,17 @@ def admin_add_product(request):
                 product.operating_system = request.POST.get('operating_system')
                 product.connectivity = request.POST.get('connectivity')
 
+            elif product_type == 'DECORATION':
+                # Spécifications pour les draps
+                if decoration_type == 'SHEET':
+                    product.sheet_size = request.POST.get('sheet_size')
+                    product.color = request.POST.get('color')
+                    product.material = request.POST.get('material')
+
             if image:
                 product.image = image
 
-            # Sauvegarder le produit
+            # ✅ SAUVEGARDE (la catégorie sera assignée automatiquement via save())
             product.save()
 
             messages.success(request, f"Le produit '{name}' a été créé avec succès !")
@@ -1530,14 +1677,23 @@ def admin_edit_product(request, product_id):
             discount_percentage = request.POST.get('discount_percentage', 0)
             image = request.FILES.get('image')
 
+            # NOUVEAU : Gestion des produits de décoration
+            needs_custom_quote = request.POST.get('needs_custom_quote') == 'on'
+            decoration_type = request.POST.get('decoration_type')
+            price_per_sqm = request.POST.get('price_per_sqm')
+
             # Mettre à jour les champs de base
             product.name = name
             product.description = description
-            product.price = price
+            product.price = price if not needs_custom_quote else 0
             product.stock = stock
             product.product_type = product_type
             product.discount_percentage = discount_percentage
             product.on_sale = bool(discount_percentage and int(discount_percentage) > 0)
+            # NOUVEAUX CHAMPS
+            product.needs_custom_quote = needs_custom_quote
+            product.decoration_type = decoration_type if product_type == 'DECORATION' else None
+            product.price_per_sqm = price_per_sqm if product_type == 'DECORATION' and price_per_sqm else None
 
             # Mettre à jour l'image si une nouvelle est fournie
             if image:
@@ -1549,7 +1705,7 @@ def admin_edit_product(request, product_id):
                 product.color = request.POST.get('color')
                 product.material = request.POST.get('material')
 
-                # Réinitialiser les champs téléphone
+                # Réinitialiser les champs téléphone et décoration
                 product.phone_brand = None
                 product.phone_category = None
                 product.storage = ''
@@ -1573,10 +1729,26 @@ def admin_edit_product(request, product_id):
                 product.operating_system = request.POST.get('operating_system')
                 product.connectivity = request.POST.get('connectivity')
 
-                # Réinitialiser les champs draps
+                # Réinitialiser les champs draps et décoration
                 product.sheet_size = None
                 product.color = None
                 product.material = ''
+
+            elif product_type == 'DECORATION':
+                # Réinitialiser les champs spécifiques aux autres types
+                product.sheet_size = None
+                product.color = None
+                product.material = ''
+                product.phone_brand = None
+                product.phone_category = None
+                product.storage = ''
+                product.screen_size = ''
+                product.processor = ''
+                product.ram = ''
+                product.camera = ''
+                product.battery = ''
+                product.operating_system = ''
+                product.connectivity = ''
 
             # Sauvegarder les modifications
             product.save()
@@ -1594,3 +1766,29 @@ def admin_edit_product(request, product_id):
     }
 
     return render(request, 'administration/edit_product.html', context)
+
+
+@admin_required
+@login_required
+@user_passes_test(is_admin_user)
+def admin_edit_quote(request, quote_id):
+    """Vue pour modifier une demande de devis"""
+    quote = get_object_or_404(CustomQuoteRequest, id=quote_id)
+
+    if request.method == 'POST':
+        # Traiter la modification
+        quote.status = request.POST.get('status')
+        quote.admin_notes = request.POST.get('admin_notes', '')
+        quoted_price = request.POST.get('quoted_price')
+        if quoted_price:
+            quote.quoted_price = quoted_price
+        quote.save()
+
+        messages.success(request, "Devis mis à jour avec succès !")
+        return redirect('shop:admin_custom_quotes')
+
+    context = {
+        'quote': quote,
+        'status_choices': CustomQuoteRequest.STATUS_CHOICES
+    }
+    return render(request, 'administration/edit_quote.html', context)

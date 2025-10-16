@@ -135,5 +135,25 @@ window.addEventListener('storage', function(e) {
         }
     }
 });
+    // Bloquer complètement le retour sur les pages de confirmation
+history.pushState(null, null, location.href);
+window.onpopstate = function() {
+    history.go(1);
+    // Ou rediriger vers l'accueil
+    // window.location.href = "{% url 'shop:home' %}";
+};
+
+// Désactiver le cache
+window.onpageshow = function(event) {
+    if (event.persisted) {
+        window.location.href = "{% url 'shop:home' %}";
+    }
+};
+
+// Empêcher tout rechargement qui pourrait resoumettre
+if (performance.navigation.type === 1) {
+    // Page rechargée - rediriger si nécessaire
+    console.log('Page rechargée');
+}
 </script>
 {% endblock %}
