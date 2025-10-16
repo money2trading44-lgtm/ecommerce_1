@@ -18,6 +18,7 @@ urlpatterns = [
     path('commande/confirmation/<int:order_id>/',views.order_confirmation,name='order_confirmation'),
     path('commande/paiement/<int:order_id>/', views.process_payment, name='process_payment'),
     path('commande/annulation/<int:order_id>/', views.payment_cancel, name='payment_cancel'),
+    path('commande/echec-paiement/<int:order_id>/', views.payment_failed, name='payment_failed'),
     path('devis/confirmation/<int:quote_id>/', views.quote_confirmation, name='quote_confirmation'),
     path('payment/webhook/', views.payment_webhook, name='payment_webhook'),
     path('mes-commandes',views.order_history,name='order_history'),

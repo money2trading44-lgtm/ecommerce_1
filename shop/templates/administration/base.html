@@ -150,6 +150,35 @@
             max-width: 100%;
             overflow-x: hidden;
         }
+        /* Styles pour les badges de notification */
+    .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    /* Ajustement pour les badges sur mobile */
+    @media (max-width: 640px) {
+        .absolute.-top-1.-right-1 {
+            top: -2px;
+            right: -2px;
+            height: 18px;
+            width: 18px;
+            font-size: 10px;
+        }
+    }
+
+    /* Effet de survol pour les liens avec badges */
+    .relative:hover .animate-pulse {
+        animation-duration: 1s;
+    }
     </style>
 </head>
 <body class="font-sans bg-gray-100 max-width-safe">
@@ -167,31 +196,50 @@
                     </a>
                 </div>
 
-                <div class="hidden md:flex items-center space-x-4 overflow-x-auto **flex-1**">
+                <div class="hidden md:flex items-center space-x-4 overflow-x-auto flex-1">
                     <a href="/gestion-securisee/dashboard/"
-                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap {% if request.path == '/gestion-securisee/dashboard/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap relative {% if request.path == '/gestion-securisee/dashboard/' %}bg-blue-50 text-primary font-medium{% endif %}">
                         <span class="material-symbols-outlined">dashboard</span>
                         Tableau de bord
                     </a>
+
                     <a href="/gestion-securisee/products/"
-                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap {% if request.path == '/gestion-securisee/products/' or request.path == '/gestion-securisee/products/add/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap relative {% if request.path == '/gestion-securisee/products/' or request.path == '/gestion-securisee/products/add/' %}bg-blue-50 text-primary font-medium{% endif %}">
                         <span class="material-symbols-outlined">inventory_2</span>
                         Produits
                     </a>
+
                     <a href="/gestion-securisee/orders/"
-                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap {% if request.path == '/gestion-securisee/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap relative {% if request.path == '/gestion-securisee/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
                         <span class="material-symbols-outlined">receipt_long</span>
                         Commandes
+                        {% if pending_orders_count > 0 %}
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                            {{ pending_orders_count }}
+                        </span>
+                        {% endif %}
                     </a>
+
                     <a href="/gestion-securisee/custom-quotes/"
-                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap {% if request.path == '/gestion-securisee/custom-quotes/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap relative {% if request.path == '/gestion-securisee/custom-quotes/' %}bg-blue-50 text-primary font-medium{% endif %}">
                         <span class="material-symbols-outlined">request_quote</span>
                         Demandes Devis
+                        {% if pending_quotes_count > 0 %}
+                        <span class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                            {{ pending_quotes_count }}
+                        </span>
+                        {% endif %}
                     </a>
+
                     <a href="/gestion-securisee/repairs/"
-                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap {% if request.path == '/gestion-securisee/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                       class="text-gray-700 hover:text-primary px-3 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap relative {% if request.path == '/gestion-securisee/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
                         <span class="material-symbols-outlined">build</span>
                         Réparations
+                        {% if pending_repairs_count > 0 %}
+                        <span class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                            {{ pending_repairs_count }}
+                        </span>
+                        {% endif %}
                     </a>
                 </div>
 
@@ -222,19 +270,34 @@
                     Produits
                 </a>
                 <a href="/gestion-securisee/orders/"
-                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/gestion-securisee/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 relative {% if request.path == '/gestion-securisee/orders/' %}bg-blue-50 text-primary font-medium{% endif %}">
                     <span class="material-symbols-outlined">receipt_long</span>
                     Commandes
+                    {% if pending_orders_count > 0 %}
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                        {{ pending_orders_count }}
+                    </span>
+                    {% endif %}
                 </a>
                 <a href="/gestion-securisee/custom-quotes/"
-                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/gestion-securisee/custom-quotes/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 relative {% if request.path == '/gestion-securisee/custom-quotes/' %}bg-blue-50 text-primary font-medium{% endif %}">
                     <span class="material-symbols-outlined">request_quote</span>
                     Demandes Devis
+                    {% if pending_quotes_count > 0 %}
+                    <span class="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                        {{ pending_quotes_count }}
+                    </span>
+                    {% endif %}
                 </a>
                 <a href="/gestion-securisee/repairs/"
-                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 {% if request.path == '/gestion-securisee/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
+                   class="text-gray-700 hover:text-primary block px-3 py-2 rounded-lg transition-colors flex items-center gap-2 relative {% if request.path == '/gestion-securisee/repairs/' %}bg-blue-50 text-primary font-medium{% endif %}">
                     <span class="material-symbols-outlined">build</span>
                     Réparations
+                    {% if pending_repairs_count > 0 %}
+                    <span class="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                        {{ pending_repairs_count }}
+                    </span>
+                    {% endif %}
                 </a>
             </div>
         </div>
@@ -364,6 +427,16 @@
             });
         }
     });
+    function updateNotificationBadges() {
+    fetch('/gestion-securisee/dashboard/')
+        .then(response => response.text())
+        .then(html => {
+            // Met à jour les badges (simplifié - en vrai tu ferais une API)
+            console.log('Badges mis à jour');
+        })
+        .catch(error => console.log('Erreur mise à jour badges:', error));
+    }
+    setInterval(updateNotificationBadges, 30000);
 
     // Fonction utilitaire pour formater les prix
     window.formatPrice = function(price) {

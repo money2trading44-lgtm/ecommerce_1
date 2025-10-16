@@ -45,33 +45,34 @@ def home(request):
 def search_products(request):
     """Vue dediee pour la recherche des produits"""
 
-    search_query = request.GET.get('q','')
+    search_query = request.GET.get('q', '')
 
     if search_query:
         products = Product.objects.filter(
-            Q(name__icontains = search_query)|
+            Q(name__icontains=search_query) |
             Q(description__icontains=search_query) |
             Q(category__name__icontains=search_query) |
             Q(phone_brand__icontains=search_query) |
             Q(material__icontains=search_query),
-            is_active = True
+            is_active=True
         ).distinct()
     else:
         products = Product.objects.none()
 
     # Gestion des filtres
-    product_type = request.GET.get('type','')
+    product_type = request.GET.get('type', '')
     if product_type:
-        products = products.filter(product_type = product_type)
+        products = products.filter(product_type=product_type)
 
     context = {
-        'search_results':products,
-        'search_query':search_query,
-        'product_type':product_type,
-        'total_resuts':products.count()
+        'search_results': products,
+        'search_query': search_query,
+        'product_type': product_type,
+        'total_resuts': products.count()
     }
 
-    return render(request,'shop/search_results.html',context)
+    return render(request, 'shop/search_results.html', context)
+
 
 def decoration_list(request):
     """
@@ -121,14 +122,14 @@ def decoration_list(request):
 
     return render(request, 'shop/decoration_list.html', context)
 
-def phone_list(request):
 
-    phones = Product.objects.filter(product_type = 'PHONE',is_active = True)
+def phone_list(request):
+    phones = Product.objects.filter(product_type='PHONE', is_active=True)
 
     # Filtres
-    selected_brand = request.GET.get('brand','')
-    selected_category = request.GET.get('category','')
-    min_price = request.GET.get('min_price','')
+    selected_brand = request.GET.get('brand', '')
+    selected_category = request.GET.get('category', '')
+    min_price = request.GET.get('min_price', '')
     max_price = request.GET.get('max_price', '')
 
     if selected_brand:
@@ -140,7 +141,7 @@ def phone_list(request):
     if max_price:
         phones = phones.filter(price__lte=max_price)
 
-# Tri
+    # Tri
     sort_by = request.GET.get('sort', '')
     if sort_by == 'price_asc':
         phones = phones.order_by('price')
@@ -152,23 +153,21 @@ def phone_list(request):
         phones = phones.order_by('-created_at')  # Par défaut: nouveautés
 
     context = {
-        'phones':phones,
-        'selected_brand':selected_brand,
-        'selected_category':selected_category,
-        'min_price':min_price,
-        'max_price':max_price,
-        'sort_by':sort_by,
-        'phone_brands':Product.PHONE_BRANDS,
-        'phone_categories':Product.PHONE_CATEGORIES
+        'phones': phones,
+        'selected_brand': selected_brand,
+        'selected_category': selected_category,
+        'min_price': min_price,
+        'max_price': max_price,
+        'sort_by': sort_by,
+        'phone_brands': Product.PHONE_BRANDS,
+        'phone_categories': Product.PHONE_CATEGORIES
     }
 
-    return render(request,'shop/phones_list.html',context)
+    return render(request, 'shop/phones_list.html', context)
 
 
-
-def product_detail(request,product_id):
-
-    product = get_object_or_404(Product,id =product_id,is_active = True)
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id, is_active=True)
     if product.needs_custom_quote:
         messages.info(request,
                       "Ce produit nécessite un devis personnalisé. Veuillez utiliser le formulaire de demande de rendez-vous.")
@@ -180,15 +179,14 @@ def product_detail(request,product_id):
     ).exclude(id=product_id)[:4]
 
     context = {
-        'product':product,
-        'similar_products':similar_products
+        'product': product,
+        'similar_products': similar_products
     }
 
-    return render(request,'shop/product_detail.html',context)
+    return render(request, 'shop/product_detail.html', context)
 
 
 def repair_request(request):
-
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
         phone_number = request.POST.get('phone_number')
@@ -209,9 +207,9 @@ def repair_request(request):
         )
         repair_request.save()
 
-        messages.success(request,'Votre demande de réparation a été envoyée avec succès !',extra_tags='repair')
+        messages.success(request, 'Votre demande de réparation a été envoyée avec succès !', extra_tags='repair')
         return redirect('shop:repair_request')
-    return render(request,'shop/repair_request.html')
+    return render(request, 'shop/repair_request.html')
 
 
 def custom_quote_request(request, product_id):
@@ -264,26 +262,6 @@ def custom_quote_request(request, product_id):
             )
             quote_request.save()
 
-            # Sauvegarder la demande
-            quote_request = CustomQuoteRequest(
-                product=product,
-                full_name=full_name,
-                phone_number=phone_number,
-                email=email,
-                address=address,
-                city=city,
-                preferred_date=preferred_date,
-                preferred_time=preferred_time,
-                room_dimensions=room_dimensions,
-                window_measurements=window_measurements,
-                bed_size=bed_size,
-                special_requests=special_requests,
-                fabric_preference=fabric_preference,
-                color_preferences=color_preferences
-            )
-            quote_request.save()
-
-
             # Rediriger vers la page de confirmation
             return render(request, 'shop/quote_confirmation.html', {'quote_request': quote_request})
 
@@ -296,9 +274,11 @@ def custom_quote_request(request, product_id):
     }
     return render(request, 'shop/custom_quote_request.html', context)
 
+
 def quote_confirmation(request, quote_id):
     quote_request = get_object_or_404(CustomQuoteRequest, id=quote_id)
     return render(request, 'shop/quote_confirmation.html', {'quote_request': quote_request})
+
 
 def get_or_create_cart(request):
     """
@@ -326,10 +306,10 @@ def cart_detail(request):
     cart_items = cart.items.select_related('product')
 
     context = {
-        'cart':cart,
-        'cart_items':cart_items
+        'cart': cart,
+        'cart_items': cart_items
     }
-    return render(request,'shop/cart_detail.html',context)
+    return render(request, 'shop/cart_detail.html', context)
 
 
 def add_to_cart(request, product_id):
@@ -462,9 +442,14 @@ def process_payment(request, order_id):
     """
     Vue pour traiter le paiement en ligne via PayDunya
     """
-    print("🎯 PROCESS_PAYMENT appelée")  # DEBUG
+    print("🎯 PROCESS_PAYMENT appelée")
     order = get_object_or_404(Order, id=order_id)
     print(f"🎯 Commande #{order.order_number} - Méthode: {order.payment_method}")
+
+    # VÉRIFICATION : SI LA COMMANDE EST DÉJÀ PAYÉE, REDIRIGER
+    if order.payment_status == 'PAID':
+        messages.info(request, "Cette commande a déjà été payée.")
+        return redirect('shop:order_confirmation', order_id=order.id)
 
     # Si paiement à la livraison, rediriger directement vers confirmation
     if order.payment_method == 'CASH':
@@ -477,13 +462,12 @@ def process_payment(request, order_id):
         'PRIVATE_KEY': os.environ.get('PAYDUNYA_PRIVATE_KEY', ''),
         'PUBLIC_KEY': os.environ.get('PAYDUNYA_PUBLIC_KEY', ''),
         'TOKEN': os.environ.get('PAYDUNYA_TOKEN', ''),
-        'MODE': 'test'  # Mettre 'live' en production
+        'MODE': 'test'
     }
-    print(f"🎯 Clés configurées: {bool(PAYDUNYA_CONFIG['MASTER_KEY'])}")  # DEBUG
 
     if not all([PAYDUNYA_CONFIG['MASTER_KEY'], PAYDUNYA_CONFIG['PRIVATE_KEY'],
                 PAYDUNYA_CONFIG['PUBLIC_KEY'], PAYDUNYA_CONFIG['TOKEN']]):
-        print("❌ Clés manquantes")
+        print("❌ Clés PayDunya manquantes")
         messages.error(request, "Configuration de paiement incomplète. Veuillez réessayer plus tard.")
         return redirect('shop:checkout')
 
@@ -523,9 +507,9 @@ def process_payment(request, order_id):
                 "order_number": order.order_number
             },
             "actions": {
-                "cancel_url": f"https://dsd-general-trading.com/commande/annulation/{order.id}/",
-                "return_url": f"https://dsd-general-trading.com/commande/confirmation/{order.id}/",
-                "callback_url": f"https://dsd-general-trading.com/payment/webhook/"
+                "cancel_url": f"http://127.0.0.1:8000/commande/echec-paiement/{order.id}/",
+                "return_url": f"http://127.0.0.1:8000/commande/confirmation/{order.id}/",
+                "callback_url": f"http://127.0.0.1:8000/payment/webhook/"
             }
         }
 
@@ -538,7 +522,7 @@ def process_payment(request, order_id):
             "Content-Type": "application/json"
         }
 
-        # Envoyer la requête à PayDunya (mode test)
+        # Envoyer la requête à PayDunya
         print("🎯 Envoi requête à PayDunya...")
         if PAYDUNYA_CONFIG['MODE'] == 'test':
             response = requests.post(
@@ -555,7 +539,6 @@ def process_payment(request, order_id):
                 timeout=30
             )
 
-        # 🔥🔥🔥 DEBUG COMPLET 🔥🔥🔥
         print(f"🎯 Statut HTTP: {response.status_code}")
         print(f"🎯 Réponse PayDunya: {response.text}")
 
@@ -563,50 +546,64 @@ def process_payment(request, order_id):
             data = response.json()
             print(f"🎯 Données reçues: {data}")
 
-            if data.get('response_code') == '00':  # Succès
+            if data.get('response_code') == '00':
                 print("✅ Succès PayDunya - Redirection...")
                 order.payment_reference = data['token']
                 order.save()
                 return redirect(data['response_text'])
             else:
                 print(f"❌ Erreur PayDunya: {data}")
+                # 🔥 SUPPRIMER LA COMMANDE SI LE PAIEMENT ÉCHOUE
+                order.delete()
                 messages.error(request, f"Erreur de paiement: {data.get('response_text', 'Erreur inconnue')}")
                 return redirect('shop:checkout')
 
         else:
             print(f"❌ Erreur HTTP: {response.status_code}")
+            # 🔥 SUPPRIMER LA COMMANDE SI LE PAIEMENT ÉCHOUE
+            order.delete()
             messages.error(request, "Erreur de connexion avec le service de paiement")
             return redirect('shop:checkout')
 
     except Exception as e:
         print(f"❌ Exception: {str(e)}")
+        # 🔥 SUPPRIMER LA COMMANDE SI LE PAIEMENT ÉCHOUE
+        order.delete()
         messages.error(request, f"Erreur lors du traitement du paiement: {str(e)}")
         return redirect('shop:checkout')
 
+
 def payment_webhook(request):
     """Webhook pour recevoir les confirmations de paiement de PayDunya"""
-
-    if request.method =='POST':
+    if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # Vérifier la signature PayDunya
-            # (à implémenter avec vos clés)
-
             order_id = data.get('custom_data', {}).get('order_id')
             status = data.get('status')
 
             if order_id and status:
-                order = Order.objects.get(id=order_id)
+                try:
+                    order = Order.objects.get(id=order_id)
 
-                if status == 'completed':
-                    order.payment_status = 'PAID'
-                    order.status = 'CONFIRMED'  # Confirmer la commande
-                    messages.success(request, f"Paiement confirmé pour la commande #{order.order_number}")
-                else:
-                    order.payment_status = 'FAILED'
-                    messages.error(request, f"Paiement échoué pour la commande #{order.order_number}")
+                    if status == 'completed':
+                        # PAIEMENT RÉUSSI
+                        order.payment_status = 'PAID'
+                        order.status = 'CONFIRMED'
+                        order.save()
 
-                order.save()
+                        # Vider le panier
+                        cart = get_or_create_cart(request)
+                        cart.items.all().delete()
+
+                        print(f"✅ Paiement confirmé pour la commande #{order.order_number}")
+
+                    else:
+                        # PAIEMENT ÉCHOUÉ - SUPPRIMER LA COMMANDE
+                        order.delete()
+                        print(f"❌ Paiement échoué - Commande #{order.order_number} supprimée")
+
+                except Order.DoesNotExist:
+                    print(f"❌ Commande {order_id} non trouvée")
 
             return HttpResponse(status=200)
 
@@ -617,17 +614,34 @@ def payment_webhook(request):
     return HttpResponse(status=405)
 
 
+def payment_failed(request, order_id):
+    """Vue appelée quand le paiement échoue"""
+    try:
+        order = get_object_or_404(Order, id=order_id)
+        # 🔥 SUPPRIMER LA COMMANDE SI LE PAIEMENT ÉCHOUE
+        order.delete()
+    except:
+        pass
+
+    messages.error(request,
+                   "Le paiement a échoué. Votre commande n'a pas été créée. "
+                   "Veuillez réessayer ou choisir une autre méthode de paiement.")
+
+    return redirect('shop:checkout')
+
+
 def payment_cancel(request, order_id):
     """
     Vue appelée quand l'utilisateur annule le paiement
     """
-    order = get_object_or_404(Order, id=order_id)
+    try:
+        order = get_object_or_404(Order, id=order_id)
+        # 🔥 SUPPRIMER LA COMMANDE SI L'UTILISATEUR ANNULE
+        order.delete()
+    except:
+        pass
 
-    # Marquer le paiement comme annulé
-    order.payment_status = 'FAILED'
-    order.save()
-
-    messages.warning(request, f"Paiement annulé pour la commande #{order.order_number}")
+    messages.warning(request, "Paiement annulé. Votre commande n'a pas été créée.")
     return redirect('shop:checkout')
 
 
@@ -666,7 +680,7 @@ def checkout(request):
             messages.error(request, "Veuillez remplir tous les champs obligatoires.")
             return redirect('shop:checkout')
 
-        # Créer la commande
+        # 🔥 CRÉER LA COMMANDE UNIQUEMENT APRÈS VALIDATION
         order = Order(
             full_name=full_name,
             email=email,
@@ -692,19 +706,20 @@ def checkout(request):
             )
             order_item.save()
 
-            # Mettre à jour les stocks IMMÉDIATEMENT
-            cart_item.product.stock -= cart_item.quantity
-            cart_item.product.save()
-
-        # 🔥 CORRECTION : Vider le panier SEULEMENT pour paiement à la livraison
+        # 🔥 CORRECTION CRITIQUE : GESTION DIFFÉRENCIÉE DES PAIEMENTS
         if payment_method == 'CASH':
+            # Pour paiement à la livraison : vider le panier et mettre à jour le stock
+            for cart_item in cart_items:
+                cart_item.product.stock -= cart_item.quantity
+                cart_item.product.save()
+
             cart.items.all().delete()
             messages.success(request,
                              f"Votre commande #{order.order_number} a été passée avec succès ! Paiement à la livraison.")
             return redirect('shop:order_confirmation', order_id=order.id)
         else:
-            # 🔥 CORRECTION : NE PAS VIDER LE PANIER pour paiements en ligne
-            # Le panier sera vidé après confirmation du paiement
+            # Pour paiements en ligne : NE PAS vider le panier ni mettre à jour le stock
+            # Le stock sera mis à jour seulement après confirmation du paiement
             return redirect('shop:process_payment', order_id=order.id)
 
     context = {
@@ -731,22 +746,19 @@ def order_history(request):
     """
     Vue pour afficher l'historique des commandes
     """
-    orders = Order.objects.none()  # QuerySet vide par défaut
+    orders = Order.objects.none()
 
     if request.user.is_authenticated:
-        # Pour les utilisateurs connectés : filtrer par email
         orders = Order.objects.filter(
             email=request.user.email
         ).prefetch_related('items').order_by('-created_at')
 
     elif request.session.session_key:
-        # Pour les utilisateurs non connectés : filtrer par session_key
         orders = Order.objects.filter(
             session_key=request.session.session_key
         ).prefetch_related('items').order_by('-created_at')
 
     else:
-        # Aucune session, afficher un message
         messages.info(request,
                       "Votre historique de commandes n'est pas disponible. Passez une commande ou connectez-vous.")
 
@@ -757,13 +769,7 @@ def order_history(request):
     return render(request, 'shop/order_history.html', context)
 
 
-    # ========================= VUES ADMINISTRATION ======================
-
 # ========================= VUES ADMINISTRATEUR ======================
-
-    """
-    Ici est decrit toute la logique de la partie administrateur du site internet.
-    """
 
 def admin_required(view_func):
     def _wrapped_view(request, *args, **kwargs):
@@ -771,32 +777,23 @@ def admin_required(view_func):
             messages.error(request, "Accès réservé aux administrateurs.")
             return redirect('shop:home')
         return view_func(request, *args, **kwargs)
+
     return _wrapped_view
 
 
-
 def admin_redirect(request):
-    """Redirige les accès non autorisés vers l'accueil"""
-    # UN SEUL message au lieu de plusieurs
     messages.error(request, "Accès réservé aux administrateurs.")
     return redirect('shop:home')
 
+
 def is_admin_user(user):
-    """Vérifie si l'utilisateur est un administrateur"""
     return user.is_authenticated and user.is_staff
 
 
-
 def admin_login(request):
-    """
-    Vue pour la connexion administrateur
-    """
-
-    # SI l'utilisateur est déjà connecté, rediriger vers le dashboard
     if request.user.is_authenticated and request.user.is_staff:
         return redirect('/gestion-securisee/dashboard/')
 
-    # SI méthode POST : traiter la connexion
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -809,22 +806,17 @@ def admin_login(request):
             return redirect('/gestion-securisee/dashboard/')
         else:
             messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
-            # IMPORTANT: Utiliser notre template personnalisé
             return render(request, 'administration/login.html')
 
-    # SI méthode GET : afficher NOTRE formulaire de login
     return render(request, 'administration/login.html')
 
 
 @admin_required
 def admin_logout(request):
-    """Vue pour la déconnexion administrateur"""
-    # Déconnecter l'utilisateur s'il est connecté
     if request.user.is_authenticated:
         logout(request)
         messages.success(request, "Vous avez été déconnecté avec succès.")
 
-    # Rediriger vers notre page de login personnalisée
     return redirect('/gestion-securisee/login/')
 
 
@@ -832,18 +824,13 @@ def admin_logout(request):
 @login_required
 @user_passes_test(is_admin_user)
 def admin_dashboard(request):
-    """Vue du tableau de bord administrateur avec statistiques et graphique des ventes."""
-
-    # ✅ Récupération des statistiques globales
     total_products = Product.objects.count()
     total_orders = Order.objects.count()
     total_sales = Order.objects.aggregate(Sum('total_price'))['total_price__sum'] or 0
     total_repairs = RepairRequest.objects.count()
 
-    # ✅ Récupération de l'année courante
     current_year = datetime.now().year
 
-    # ✅ Agrégation des ventes par mois pour l'année courante
     sales_data = (
         Order.objects.filter(created_at__year=current_year)
         .annotate(month=ExtractMonth('created_at'))
@@ -852,13 +839,11 @@ def admin_dashboard(request):
         .order_by('month')
     )
 
-    # ✅ Construction du tableau des ventes mensuelles
     monthly_sales = [0] * 12
     for entry in sales_data:
         month_index = entry['month'] - 1
         monthly_sales[month_index] = float(entry['total_sales'])
 
-    # ✅ Statistiques sur les réparations
     repair_status_stats = (
         RepairRequest.objects.values('status')
         .annotate(total=Count('id'))
@@ -870,9 +855,13 @@ def admin_dashboard(request):
     repairs_completed = repair_stats_dict.get('COMPLETED', 0)
     repairs_cancelled = repair_stats_dict.get('CANCELLED', 0)
 
-    recent_orders = Order.objects.order_by('-created_at')[:5]  # les 5 dernières commandes
+    recent_orders = Order.objects.order_by('-created_at')[:5]
 
-    # ✅ Préparation du contexte
+    # COMPTAGE POUR LES BADGES
+    pending_orders_count = Order.objects.filter(status='PENDING').count()
+    pending_quotes_count = CustomQuoteRequest.objects.filter(status='PENDING').count()
+    pending_repairs_count = RepairRequest.objects.filter(status='PENDING').count()
+
     context = {
         'total_products': total_products,
         'total_orders': total_orders,
@@ -884,7 +873,10 @@ def admin_dashboard(request):
         'repairs_in_progress': repairs_in_progress,
         'repairs_completed': repairs_completed,
         'repairs_cancelled': repairs_cancelled,
-        'recent_orders':recent_orders
+        'recent_orders': recent_orders,
+        'pending_orders_count': pending_orders_count,
+        'pending_quotes_count': pending_quotes_count,
+        'pending_repairs_count': pending_repairs_count,
     }
 
     return render(request, 'administration/dashboard.html', context)

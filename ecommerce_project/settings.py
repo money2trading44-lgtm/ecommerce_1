@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-prct4r0m&#@h#i0vnm=z(8sx)!)@*a&2rc+cr6kq1us7tzr5%6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'dsd-general-trading.com',
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
 ]
 
 import os
+from dotenv import load_dotenv
 
 
 MEDIA_URL = '/media/'
@@ -83,6 +84,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'shop.context_processors.cart_context',
+                'shop.context_processors.admin_notifications',
             ],
         },
     },
@@ -154,11 +156,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Configuration PayDunya (Wave, Orange, MTN)
-PAYDUNYA_CONFIG = {
-    'MASTER_KEY': os.environ.get('PAYDUNYA_MASTER_KEY', ''),
-    'PRIVATE_KEY': os.environ.get('PAYDUNYA_PRIVATE_KEY', ''),
-    'PUBLIC_KEY': os.environ.get('PAYDUNYA_PUBLIC_KEY', ''),
-    'TOKEN': os.environ.get('PAYDUNYA_TOKEN', ''),
-    'MODE': 'test' if DEBUG else 'live',  # test ou live
-}
+load_dotenv()  # Charge les variables d'environnement
 
+# Configuration PayDunya
+PAYDUNYA_MASTER_KEY = os.environ.get('PAYDUNYA_MASTER_KEY')
+PAYDUNYA_PRIVATE_KEY = os.environ.get('PAYDUNYA_PRIVATE_KEY')
+PAYDUNYA_PUBLIC_KEY = os.environ.get('PAYDUNYA_PUBLIC_KEY')
+PAYDUNYA_TOKEN = os.environ.get('PAYDUNYA_TOKEN')
