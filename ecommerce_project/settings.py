@@ -19,14 +19,7 @@ load_dotenv()
 
 LOGIN_URL ='/gestion-securisee/login/'
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
 
-# Utilise Cloudinary pour les médias
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -61,8 +54,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary_storage',  # ← AJOUTE
-    'cloudinary',
     'shop',  # Notre app boutique
     'users', # Notre app utilisateurs
 ]
@@ -196,4 +187,8 @@ if CINETPAY_MODE == 'prod':
 else:
     CINETPAY_BASE_URL = "https://api-checkout.cinetpay.com/v1"
     CINETPAY_CHECKOUT_URL = "https://secure-checkout.cinetpay.com"
+
+if not DEBUG:
+    # WhiteNoise peut servir les médias en production
+    WHITENOISE_ROOT = os.path.join(BASE_DIR, 'media')
 
