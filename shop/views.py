@@ -1783,3 +1783,15 @@ def admin_edit_quote(request, quote_id):
         'status_choices': CustomQuoteRequest.STATUS_CHOICES
     }
     return render(request, 'administration/edit_quote.html', context)
+
+
+
+def test_cloudinary(request):
+    """Vue temporaire pour tester Cloudinary"""
+    try:
+        from cloudinary import uploader
+        # Test d'upload d'une image sample
+        result = uploader.upload("https://res.cloudinary.com/demo/image/upload/sample.jpg")
+        return HttpResponse(f"✅ Cloudinary fonctionne! URL: {result['url']}")
+    except Exception as e:
+        return HttpResponse(f"❌ Erreur Cloudinary: {str(e)}")
