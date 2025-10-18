@@ -12,8 +12,22 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 LOGIN_URL ='/gestion-securisee/login/'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+# Utilise Cloudinary pour les médias
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,16 +61,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'shop',  # Notre app boutique
-    'users', # Notre app utilisateurs
     'cloudinary_storage',  # ← AJOUTE
     'cloudinary',
+    'shop',  # Notre app boutique
+    'users', # Notre app utilisateurs
 ]
 
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 MEDIA_URL = '/media/'
@@ -171,8 +181,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 # Configuration PayDunya (Wave, Orange, MTN)
   # Charge les variables d'environnement
 
@@ -189,13 +197,3 @@ else:
     CINETPAY_BASE_URL = "https://api-checkout.cinetpay.com/v1"
     CINETPAY_CHECKOUT_URL = "https://secure-checkout.cinetpay.com"
 
-
-# Configuration Cloudinary
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
-
-# Utilise Cloudinary pour les médias
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
