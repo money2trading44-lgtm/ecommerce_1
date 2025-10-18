@@ -159,7 +159,14 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 load_dotenv()  # Charge les variables d'environnement
 
 # Configuration PayDunya
-PAYDUNYA_MASTER_KEY = os.environ.get('PAYDUNYA_MASTER_KEY')
-PAYDUNYA_PRIVATE_KEY = os.environ.get('PAYDUNYA_PRIVATE_KEY')
-PAYDUNYA_PUBLIC_KEY = os.environ.get('PAYDUNYA_PUBLIC_KEY')
-PAYDUNYA_TOKEN = os.environ.get('PAYDUNYA_TOKEN')
+CINETPAY_API_KEY = os.environ.get('CINETPAY_API_KEY', '')
+CINETPAY_SITE_ID = os.environ.get('CINETPAY_SITE_ID', '')
+CINETPAY_MODE = os.environ.get('CINETPAY_MODE', 'test')
+
+# URLs CinetPay
+if CINETPAY_MODE == 'prod':
+    CINETPAY_BASE_URL = "https://api.cinetpay.com/v1"
+    CINETPAY_CHECKOUT_URL = "https://secure.cinetpay.com"
+else:
+    CINETPAY_BASE_URL = "https://api-checkout.cinetpay.com/v1"
+    CINETPAY_CHECKOUT_URL = "https://secure-checkout.cinetpay.com"

@@ -16,6 +16,8 @@ urlpatterns = [
     path('panier/supprimer/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('commande/',views.checkout,name='checkout'),
     path('commande/confirmation/<int:order_id>/',views.order_confirmation,name='order_confirmation'),
+
+    # Paiement
     path('commande/paiement/<int:order_id>/', views.process_payment, name='process_payment'),
     path('commande/annulation/<int:order_id>/', views.payment_cancel, name='payment_cancel'),
     path('commande/echec-paiement/<int:order_id>/', views.payment_failed, name='payment_failed'),

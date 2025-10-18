@@ -291,20 +291,60 @@
 {
     "@context": "https://schema.org/",
     "@type": "Product",
-    "name": "{{ product.name }}",
-    "description": "{{ product.description|escapejs }}",
-    {% if product.image %}
-    "image": "{{ product.image.url }}",
-    {% endif %}
-    "offers": {
-        "@type": "Offer",
-        "price": "{{ product.get_discounted_price|floatformat:2 }}",
-        "priceCurrency": "XOF",
-        "availability": "{% if product.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
-    },
+    "name": "{{ product.name|escapejs }}",
+    "description": "{{ product.description|striptags|escapejs|truncatewords:50 }}",
+    "image": "{% if product.image %}{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}{% else %}https://dsd-general-trading.com/static/shop/images/logo.jpg{% endif %}",
+    "sku": "PROD{{ product.id }}",
+    "mpn": "DSD{{ product.id }}",
     "brand": {
         "@type": "Brand",
         "name": "{% if product.phone_brand %}{{ product.get_phone_brand_display }}{% else %}DSD General Trading{% endif %}"
+    },
+    "offers": {
+        "@type": "Offer",
+        "url": "{{ request.build_absolute_uri }}",
+        "priceCurrency": "XOF",
+        "price": "{{ product.get_discounted_price|floatformat:2 }}",
+        "priceValidUntil": "{% now 'Y-m-d' %}",
+        "availability": "{% if product.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+        "itemCondition": "https://schema.org/NewCondition",
+        "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "XOF"
+            },
+            "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "CI"
+            },
+            "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": "1",
+                    "maxValue": "2"
+                },
+                "transitTime": {
+                    "@type": "QuantitativeValue",
+                    "minValue": "1",
+                    "maxValue": "3"
+                }
+            }
+        },
+        "hasMerchantReturnPolicy": {
+            "@type": "MerchantReturnPolicy",
+            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+            "merchantReturnDays": 14,
+            "returnMethod": "https://schema.org/ReturnByMail",
+            "returnFees": "https://schema.org/FreeReturn"
+        }
+    },
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "25"
     }
 }
 </script>

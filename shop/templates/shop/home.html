@@ -375,4 +375,81 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 }
 </style>
+
+{% block structured_data %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "DSD General Trading",
+        "description": "Boutique en ligne DSD General Trading à Abidjan : draps de qualité premium, téléphones dernière génération et service de réparation expert. Livraison rapide en Côte d'Ivoire.",
+        "url": "https://dsd-general-trading.com",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://dsd-general-trading.com/recherche/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "DSD General Trading",
+        "description": "Confort & Technologie Réunis - Draps de luxe, téléphones high-tech et service de réparation à Abidjan",
+        "url": "https://dsd-general-trading.com",
+        "logo": "https://dsd-general-trading.com/static/shop/images/logo.jpg",
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "CI",
+            "addressLocality": "Abidjan"
+        },
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+225-07-07-07-07-07",
+            "contactType": "customer service",
+            "areaServed": "CI",
+            "availableLanguage": ["French"]
+        },
+        "sameAs": []
+    }
+    </script>
+
+    {% for product in promotions %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "{{ product.name|escapejs }}",
+        "description": "{{ product.description|striptags|escapejs|truncatewords:30 }}",
+        "image": "{% if product.image %}{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}{% endif %}",
+        "offers": {
+            "@type": "Offer",
+            "priceCurrency": "XOF",
+            "price": "{{ product.get_discounted_price|floatformat:2 }}",
+            "availability": "{% if product.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+            "shippingDetails": {
+                "@type": "OfferShippingDetails",
+                "shippingRate": {
+                    "@type": "MonetaryAmount",
+                    "value": "0",
+                    "currency": "XOF"
+                },
+                "shippingDestination": {
+                    "@type": "DefinedRegion",
+                    "addressCountry": "CI"
+                }
+            },
+            "hasMerchantReturnPolicy": {
+                "@type": "MerchantReturnPolicy",
+                "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+                "merchantReturnDays": 14,
+                "returnFees": "https://schema.org/FreeReturn"
+            }
+        }
+    }
+    </script>
+    {% endfor %}
+{% endblock %}
 {% endblock %}

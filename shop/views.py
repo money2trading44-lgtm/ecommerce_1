@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Avg, Count
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
+
+from ecommerce_project import settings
 from shop.models import Category, Product, RepairRequest, Cart, CartItem, Order, OrderItem,CustomQuoteRequest
 from django.db.models import Sum, Q
 from datetime import timedelta, datetime
@@ -440,9 +442,9 @@ def remove_from_cart(request, item_id):
 
 def process_payment(request, order_id):
     """
-    Vue pour traiter le paiement en ligne via PayDunya
+    Vue pour traiter le paiement en ligne via CinetPay
     """
-    print("🎯 PROCESS_PAYMENT appelée")
+    print("🎯 PROCESS_PAYMENT CinetPay appelée")
     order = get_object_or_404(Order, id=order_id)
     print(f"🎯 Commande #{order.order_number} - Méthode: {order.payment_method}")
 
@@ -456,159 +458,156 @@ def process_payment(request, order_id):
         print("🎯 Paiement cash - redirection confirmation")
         return redirect('shop:order_confirmation', order_id=order.id)
 
-    # Configuration PayDunya
-    PAYDUNYA_CONFIG = {
-        'MASTER_KEY': os.environ.get('PAYDUNYA_MASTER_KEY', ''),
-        'PRIVATE_KEY': os.environ.get('PAYDUNYA_PRIVATE_KEY', ''),
-        'PUBLIC_KEY': os.environ.get('PAYDUNYA_PUBLIC_KEY', ''),
-        'TOKEN': os.environ.get('PAYDUNYA_TOKEN', ''),
-        'MODE': 'test'
-    }
+    # Configuration CinetPay
+    CINETPAY_API_KEY = settings.CINETPAY_API_KEY
+    CINETPAY_SITE_ID = settings.CINETPAY_SITE_ID
 
-    if not all([PAYDUNYA_CONFIG['MASTER_KEY'], PAYDUNYA_CONFIG['PRIVATE_KEY'],
-                PAYDUNYA_CONFIG['PUBLIC_KEY'], PAYDUNYA_CONFIG['TOKEN']]):
-        print("❌ Clés PayDunya manquantes")
+    if not all([CINETPAY_API_KEY, CINETPAY_SITE_ID]):
+        print("❌ Clés CinetPay manquantes")
         messages.error(request, "Configuration de paiement incomplète. Veuillez réessayer plus tard.")
         return redirect('shop:checkout')
 
     try:
-        print("🎯 Tentative de création de facture PayDunya...")
+        print("🎯 Tentative de création de paiement CinetPay...")
 
-        # Préparer les données pour PayDunya
-        store = {
-            "name": "DSD General Trading",
-            "tagline": "Confort & Technologie Réunis",
-            "postal_address": "Abidjan, Côte d'Ivoire",
-            "phone_number": "+2250102030405",
-            "website_url": "https://dsd-general-trading.com",
-            "logo_url": "https://dsd-general-trading.com/static/shop/images/logo.jpg"
+        # Préparer les données pour CinetPay
+        import uuid
+        transaction_id = str(uuid.uuid4())
+
+        # Déterminer le canal de paiement
+        payment_channels = {
+            'WAVE': 'CM_WAVE',
+            'ORANGE': 'CM_OM',
+            'MTN': 'CM_MTN'
         }
 
-        items = []
-        for item in order.items.all():
-            items.append({
-                "name": item.product_name,
-                "quantity": item.quantity,
-                "unit_price": str(float(item.product_price)),
-                "total_price": str(float(item.get_total_price())),
-                "description": f"{item.product_name} - {order.get_payment_method_display()}"
-            })
+        channel = payment_channels.get(order.payment_method, 'CM_MOBILE_MONEY')
 
-        # Données de la requête PayDunya
+        # Données de la requête CinetPay
         payload = {
-            "invoice": {
-                "items": items,
-                "total_amount": str(float(order.total_price)),
-                "description": f"Commande #{order.order_number}"
-            },
-            "store": store,
-            "custom_data": {
-                "order_id": order.id,
-                "order_number": order.order_number
-            },
-            "actions": {
-                "cancel_url": f"http://127.0.0.1:8000/commande/echec-paiement/{order.id}/",
-                "return_url": f"http://127.0.0.1:8000/commande/confirmation/{order.id}/",
-                "callback_url": f"http://127.0.0.1:8000/payment/webhook/"
-            }
+            "apikey": CINETPAY_API_KEY,
+            "site_id": CINETPAY_SITE_ID,
+            "transaction_id": transaction_id,
+            "amount": str(int(float(order.total_price))),  # Montant en entier
+            "currency": "XOF",
+            "description": f"Commande #{order.order_number}",
+            "customer_name": order.full_name,
+            "customer_surname": order.full_name.split(' ')[0] if ' ' in order.full_name else order.full_name,
+            "customer_phone_number": order.phone_number,
+            "customer_email": order.email,
+            "customer_address": order.address,
+            "customer_city": order.city,
+            "customer_country": "CI",
+            "channels": channel,
+            "notify_url": f"http://127.0.0.1:8000/payment/webhook/",
+            "return_url": f"http://127.0.0.1:8000/commande/confirmation/{order.id}/",
+            "metadata": f"order_{order.id}"
         }
 
-        # Headers pour l'API PayDunya
-        headers = {
-            "PAYDUNYA-MASTER-KEY": PAYDUNYA_CONFIG['MASTER_KEY'],
-            "PAYDUNYA-PRIVATE-KEY": PAYDUNYA_CONFIG['PRIVATE_KEY'],
-            "PAYDUNYA-PUBLIC-KEY": PAYDUNYA_CONFIG['PUBLIC_KEY'],
-            "PAYDUNYA-TOKEN": PAYDUNYA_CONFIG['TOKEN'],
-            "Content-Type": "application/json"
-        }
+        # Envoyer la requête à CinetPay
+        print("🎯 Envoi requête à CinetPay...")
+        api_url = f"{settings.CINETPAY_BASE_URL}/payment/init"
 
-        # Envoyer la requête à PayDunya
-        print("🎯 Envoi requête à PayDunya...")
-        if PAYDUNYA_CONFIG['MODE'] == 'test':
-            response = requests.post(
-                "https://app.paydunya.com/api/v1/checkout-invoice/create",
-                json=payload,
-                headers=headers,
-                timeout=30
-            )
-        else:
-            response = requests.post(
-                "https://app.paydunya.com/api/v1/checkout-invoice/create",
-                json=payload,
-                headers=headers,
-                timeout=30
-            )
+        response = requests.post(
+            api_url,
+            json=payload,
+            headers={'Content-Type': 'application/json'},
+            timeout=30
+        )
 
-        print(f"🎯 Statut HTTP: {response.status_code}")
-        print(f"🎯 Réponse PayDunya: {response.text}")
+        print(f"🎯 Statut HTTP CinetPay: {response.status_code}")
+        print(f"🎯 Réponse CinetPay: {response.text}")
 
         if response.status_code == 200:
             data = response.json()
-            print(f"🎯 Données reçues: {data}")
+            print(f"🎯 Données reçues CinetPay: {data}")
 
-            if data.get('response_code') == '00':
-                print("✅ Succès PayDunya - Redirection...")
-                order.payment_reference = data['token']
+            if data.get('code') == '0':  # Succès CinetPay
+                print("✅ Succès CinetPay - Redirection...")
+                order.payment_reference = transaction_id
                 order.save()
-                return redirect(data['response_text'])
+
+                # Rediriger vers la page de paiement CinetPay
+                payment_url = data['data']['payment_url']
+                return redirect(payment_url)
             else:
-                print(f"❌ Erreur PayDunya: {data}")
-                # 🔥 SUPPRIMER LA COMMANDE SI LE PAIEMENT ÉCHOUE
-                order.delete()
-                messages.error(request, f"Erreur de paiement: {data.get('response_text', 'Erreur inconnue')}")
+                print(f"❌ Erreur CinetPay: {data}")
+                error_message = data.get('description', 'Erreur inconnue de CinetPay')
+                messages.error(request, f"Erreur de paiement: {error_message}")
                 return redirect('shop:checkout')
 
         else:
-            print(f"❌ Erreur HTTP: {response.status_code}")
-            # 🔥 SUPPRIMER LA COMMANDE SI LE PAIEMENT ÉCHOUE
-            order.delete()
+            print(f"❌ Erreur HTTP CinetPay: {response.status_code}")
             messages.error(request, "Erreur de connexion avec le service de paiement")
             return redirect('shop:checkout')
 
     except Exception as e:
-        print(f"❌ Exception: {str(e)}")
-        # 🔥 SUPPRIMER LA COMMANDE SI LE PAIEMENT ÉCHOUE
-        order.delete()
+        print(f"❌ Exception CinetPay: {str(e)}")
         messages.error(request, f"Erreur lors du traitement du paiement: {str(e)}")
         return redirect('shop:checkout')
 
 
 def payment_webhook(request):
-    """Webhook pour recevoir les confirmations de paiement de PayDunya"""
+    """Webhook pour recevoir les confirmations de paiement de CinetPay"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            order_id = data.get('custom_data', {}).get('order_id')
-            status = data.get('status')
+            print(f"🔔 Webhook CinetPay reçu: {data}")
 
-            if order_id and status:
+            # Structure de réponse CinetPay
+            transaction_id = data.get('cpm_trans_id')
+            payment_status = data.get('cpm_result')
+            metadata = data.get('cpm_custom', '')
+
+            # Extraire l'ID de commande du metadata
+            order_id = None
+            if metadata and metadata.startswith('order_'):
                 try:
-                    order = Order.objects.get(id=order_id)
+                    order_id = int(metadata.replace('order_', ''))
+                except ValueError:
+                    pass
 
-                    if status == 'completed':
-                        # PAIEMENT RÉUSSI
-                        order.payment_status = 'PAID'
-                        order.status = 'CONFIRMED'
-                        order.save()
+            if not order_id:
+                print("❌ Impossible d'extraire l'ID de commande du metadata")
+                return HttpResponse(status=400)
 
-                        # Vider le panier
-                        cart = get_or_create_cart(request)
-                        cart.items.all().delete()
+            try:
+                order = Order.objects.get(id=order_id)
+                print(f"🔔 Commande trouvée: #{order.order_number}")
 
-                        print(f"✅ Paiement confirmé pour la commande #{order.order_number}")
+                if payment_status == '00':  # Paiement réussi CinetPay
+                    # PAIEMENT RÉUSSI
+                    order.payment_status = 'PAID'
+                    order.status = 'CONFIRMED'
+                    order.payment_reference = transaction_id
+                    order.save()
 
-                    else:
-                        # PAIEMENT ÉCHOUÉ - SUPPRIMER LA COMMANDE
-                        order.delete()
-                        print(f"❌ Paiement échoué - Commande #{order.order_number} supprimée")
+                    # Mettre à jour le stock
+                    for item in order.items.all():
+                        if item.product:
+                            item.product.stock -= item.quantity
+                            item.product.save()
 
-                except Order.DoesNotExist:
-                    print(f"❌ Commande {order_id} non trouvée")
+                    # Vider le panier
+                    cart = get_or_create_cart(request)
+                    cart.items.all().delete()
+
+                    print(f"✅ Paiement CinetPay confirmé pour la commande #{order.order_number}")
+
+                else:
+                    # PAIEMENT ÉCHOUÉ
+                    order.payment_status = 'FAILED'
+                    order.save()
+                    print(f"❌ Paiement CinetPay échoué pour la commande #{order.order_number}")
+
+            except Order.DoesNotExist:
+                print(f"❌ Commande {order_id} non trouvée")
+                return HttpResponse(status=404)
 
             return HttpResponse(status=200)
 
         except Exception as e:
-            print(f"Erreur webhook: {str(e)}")
+            print(f"❌ Erreur webhook CinetPay: {str(e)}")
             return HttpResponse(status=400)
 
     return HttpResponse(status=405)
