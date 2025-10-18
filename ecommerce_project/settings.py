@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'shop',  # Notre app boutique
     'users', # Notre app utilisateurs
+    'cloudinary_storage',  # ← AJOUTE
+    'cloudinary',
 ]
 
 import os
@@ -186,3 +188,14 @@ if CINETPAY_MODE == 'prod':
 else:
     CINETPAY_BASE_URL = "https://api-checkout.cinetpay.com/v1"
     CINETPAY_CHECKOUT_URL = "https://secure-checkout.cinetpay.com"
+
+
+# Configuration Cloudinary
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+# Utilise Cloudinary pour les médias
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
