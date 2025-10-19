@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 
 from django.db.models.functions import ExtractMonth
 from django.utils import timezone as django_timezone, timezone
@@ -1205,14 +1206,15 @@ def admin_add_product(request):
             product = Product(
                 name=name,
                 description=description,
-                price=price if not needs_custom_quote else 0,
+                # ✅ CORRECTION : CONVERSION EN DECIMAL
+                price=Decimal(price) if not needs_custom_quote else Decimal('0'),
                 product_type=product_type,
                 stock=stock,
                 discount_percentage=discount_percentage,
                 on_sale=bool(discount_percentage and int(discount_percentage) > 0),
                 needs_custom_quote=needs_custom_quote,
                 decoration_type=decoration_type if product_type == 'DECORATION' else None,
-                price_per_sqm=price_per_sqm if product_type == 'DECORATION' else None,
+                price_per_sqm=Decimal(price_per_sqm) if product_type == 'DECORATION' and price_per_sqm else None,
                 phone_brand=request.POST.get('phone_brand') if product_type == 'PHONE' else None,
                 phone_category=request.POST.get('phone_category') if product_type == 'PHONE' else None,
                 storage=request.POST.get('storage') if product_type == 'PHONE' else None,
