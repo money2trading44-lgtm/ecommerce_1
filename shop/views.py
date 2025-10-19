@@ -1152,6 +1152,10 @@ def admin_add_product(request):
     """Vue pour ajouter un produit"""
 
     if request.method == 'POST':
+
+        print("=== DEBUG ADMIN_ADD_PRODUCT ===")
+        print("Fichiers reçus:", dict(request.FILES))
+        print("Données POST:", dict(request.POST))
         # Récupérer les données du formulaire de base
         name = request.POST.get('name')
         description = request.POST.get('description')
@@ -1160,6 +1164,12 @@ def admin_add_product(request):
         stock = request.POST.get('stock')
         discount_percentage = request.POST.get('discount_percentage', 0)
         image = request.FILES.get('image')
+
+        print("Nom:", name)
+        print("Description:", description)
+        print("Image reçue:", image)
+        print("Nom de l'image:", image.name if image else "Aucune image")
+        print("Taille de l'image:", image.size if image else 0)
 
         # Gestion des produits de décoration (inclut maintenant les draps)
         needs_custom_quote = request.POST.get('needs_custom_quote') == 'on'
@@ -1254,17 +1264,24 @@ def admin_add_product(request):
 
             # ✅ SAUVEGARDE INITIALE DU PRODUIT
             product.save()
+            print("✅ Produit sauvegardé, ID:", product.id)
 
             # ✅ SAUVEGARDE DE L'IMAGE (CRITIQUE !)
             if image:
+                print("🖼️ Tentative de sauvegarde de l'image...")
                 product.image.save(image.name, image, save=True)
+                print("✅ Image sauvegardée")
+                print("📁 Chemin de l'image:", product.image.path if hasattr(product.image, 'path') else "Pas de chemin")
+                print("🌐 URL de l'image:", product.image.url)
             else:
                 product.save()  # Resauvegarder même sans image
+                print("❌ Aucune image à sauvegarder")
 
             messages.success(request, f"Le produit '{name}' a été créé avec succès !")
             return redirect('/gestion-securisee/products/')
 
         except Exception as e:
+            print("❌ Erreur:", str(e))
             messages.error(request, f"Erreur lors de la création du produit: {str(e)}")
             return redirect('/gestion-securisee/products/add/')
 
