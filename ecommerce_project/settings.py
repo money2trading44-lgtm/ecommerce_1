@@ -16,36 +16,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Import Cloudinary
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-
-# Configuration Cloudinary
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
-
-# Configuration Cloudinary supplémentaire
-cloudinary.config(
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
-    secure=True
-)
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-LOGIN_URL ='/gestion-securisee/login/'
-
-# Debug Cloudinary (à supprimer après test)
-print("=== CONFIG CLOUDINARY ===")
-print("Cloud Name:", os.environ.get('CLOUDINARY_CLOUD_NAME'))
-print("API Key présent:", bool(os.environ.get('CLOUDINARY_API_KEY')))
-print("API Secret présent:", bool(os.environ.get('CLOUDINARY_API_SECRET')))
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -71,22 +41,56 @@ CSRF_TRUSTED_ORIGINS = ['https://dsd-general-trading.com', 'https://www.dsd-gene
 # Application definition
 
 INSTALLED_APPS = [
-    'cloudinary_storage',
+    'cloudinary_storage',  # DOIT ÊTRE EN PREMIER
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary',
+    'cloudinary',          # APRÈS cloudinary_storage
     'shop',  # Notre app boutique
     'users', # Notre app utilisateurs
 ]
 
-# Configuration des médias (Cloudinary gère le stockage)
+# Configuration Cloudinary - PRODUCTION ONLY
+if not DEBUG:
+    import cloudinary
+    import cloudinary.uploader
+    import cloudinary.api
+
+    # Vérifiez d'abord si les variables existent
+    cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME')
+    api_key = os.environ.get('CLOUDINARY_API_KEY')
+    api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+
+    if cloud_name and api_key and api_secret:
+        cloudinary.config(
+            cloud_name=cloud_name,
+            api_key=api_key,
+            api_secret=api_secret,
+            secure=True
+        )
+        DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+        print("=== CLOUDINARY ACTIVÉ EN PRODUCTION ===")
+        print(f"Cloud Name: {cloud_name}")
+        print(f"API Key présent: {bool(api_key)}")
+        print(f"API Secret présent: {bool(api_secret)}")
+    else:
+        print("=== VARIABLES CLOUDINARY MANQUANTES ===")
+        print(f"Cloud Name: {cloud_name}")
+        print(f"API Key: {api_key}")
+        print(f"API Secret: {api_secret}")
+else:
+    # En développement, utilisez le stockage local
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_URL = '/media/'
+    print("=== STOCKAGE LOCAL (DÉVELOPPEMENT) ===")
+
+# Configuration des médias (utilisée dans les deux cas)
 MEDIA_URL = '/media/'
-# SUPPRIMEZ ou COMMENCEZ cette ligne :
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+LOGIN_URL ='/gestion-securisee/login/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
