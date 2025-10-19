@@ -1152,11 +1152,15 @@ def admin_repair_delete(request, repair_id):
 def admin_add_product(request):
     """Vue pour ajouter un produit"""
 
+    # NOTE: Bien que la liste des catégories ne soit pas utilisée dans le template actuel,
+    # vous pourriez vouloir la passer au contexte si vous ajoutez un select pour Category plus tard.
+    # categories = Category.objects.all()
+
     if request.method == 'POST':
-        print("=== DÉBOGAGE ADMIN_ADD_PRODUCT ===")
+        print("=== DÉBOGAGE ADMIN_ADD_PRODUCT (Corrigé) ===")
         print("Fichiers reçus:", dict(request.FILES))
 
-        # Récupérer les données du formulaire de base
+        # Récupérer les données du formulaire
         name = request.POST.get('name')
         description = request.POST.get('description')
         price = request.POST.get('price')
@@ -1165,12 +1169,12 @@ def admin_add_product(request):
         discount_percentage = request.POST.get('discount_percentage', 0)
         image = request.FILES.get('image')
 
-        # Gestion des produits de décoration
+        # Champs spécifiques à DECORATION
         needs_custom_quote = request.POST.get('needs_custom_quote') == 'on'
         decoration_type = request.POST.get('decoration_type')
         price_per_sqm = request.POST.get('price_per_sqm')
 
-        # Validation
+        # Validation de base
         required_fields = [
             ('name', 'Nom'),
             ('description', 'Description'),
@@ -1178,27 +1182,32 @@ def admin_add_product(request):
             ('stock', 'Stock')
         ]
 
+        # Si ce n'est pas un produit sur devis, le prix est obligatoire
         if not needs_custom_quote:
             required_fields.append(('price', 'Prix'))
 
+        # Vérification des champs de base
         missing_fields = []
         for field, field_name in required_fields:
             value = request.POST.get(field)
             if not value or not value.strip():
+                # On permet au prix d'être vide s'il est sur devis
+                if field == 'price' and needs_custom_quote:
+                    continue
                 missing_fields.append(field_name)
 
         if missing_fields:
             messages.error(request, f"Champs obligatoires manquants: {', '.join(missing_fields)}")
             return redirect('/gestion-securisee/products/add/')
 
+        # Vérification de l'image (si pas de fichier, le FieldFile échouera)
         if not image:
             messages.error(request, "Veuillez sélectionner une image.")
             return redirect('/gestion-securisee/products/add/')
 
-        # Validation spécifique
+        # Validation spécifique (pour ne pas casser la DB avec des champs vides)
         if product_type == 'PHONE':
-            phone_brand = request.POST.get('phone_brand')
-            if not phone_brand:
+            if not request.POST.get('phone_brand'):
                 messages.error(request, "Pour les téléphones, la marque est obligatoire.")
                 return redirect('/gestion-securisee/products/add/')
 
@@ -1211,15 +1220,11 @@ def admin_add_product(request):
                 sheet_size = request.POST.get('sheet_size')
                 color = request.POST.get('color')
                 if not sheet_size or not color:
-                    missing_specs = []
-                    if not sheet_size: missing_specs.append("taille")
-                    if not color: missing_specs.append("couleur")
-                    messages.error(request,
-                                   f"Pour les draps, les champs suivants sont obligatoires: {', '.join(missing_specs)}")
+                    messages.error(request, "Pour les draps, la taille et la couleur sont obligatoires.")
                     return redirect('/gestion-securisee/products/add/')
 
         try:
-            # Création du produit
+            # Création de l'objet produit AVEC l'image vide
             product = Product(
                 name=name,
                 description=description,
@@ -1229,93 +1234,66 @@ def admin_add_product(request):
                 discount_percentage=discount_percentage,
                 on_sale=bool(discount_percentage and int(discount_percentage) > 0),
                 needs_custom_quote=needs_custom_quote,
+
+                # Champs spécifiques (doivent être réinitialisés s'ils ne sont pas pertinents)
                 decoration_type=decoration_type if product_type == 'DECORATION' else None,
-                price_per_sqm=price_per_sqm if product_type == 'DECORATION' and price_per_sqm else None
+                price_per_sqm=price_per_sqm if product_type == 'DECORATION' and price_per_sqm else None,
+
+                # Champs PHONE (même si vides dans le POST, ils seront null/vide dans le modèle)
+                phone_brand=request.POST.get('phone_brand') if product_type == 'PHONE' else None,
+                phone_category=request.POST.get('phone_category') if product_type == 'PHONE' else None,
+                storage=request.POST.get('storage') if product_type == 'PHONE' else None,
+                screen_size=request.POST.get('screen_size') if product_type == 'PHONE' else None,
+                processor=request.POST.get('processor') if product_type == 'PHONE' else None,
+                ram=request.POST.get('ram') if product_type == 'PHONE' else None,
+                camera=request.POST.get('camera') if product_type == 'PHONE' else None,
+                battery=request.POST.get('battery') if product_type == 'PHONE' else None,
+                operating_system=request.POST.get('operating_system') if product_type == 'PHONE' else None,
+                connectivity=request.POST.get('connectivity') if product_type == 'PHONE' else None,
+
+                # Champs DECORATION SHEET (même si vides, ils seront null/vide dans le modèle)
+                sheet_size=request.POST.get('sheet_size') if decoration_type == 'SHEET' else None,
+                color=request.POST.get('color') if decoration_type == 'SHEET' else None,
+                material=request.POST.get('material') if decoration_type == 'SHEET' else None,
+
+                # S'assurer que le champ category_id est géré si existant
+                # category_id=request.POST.get('category_id') # Décommenter si vous ajoutez un select Category
             )
 
-            # Gestion des spécifications par type
-            if product_type == 'PHONE':
-                product.phone_brand = request.POST.get('phone_brand')
-                product.phone_category = request.POST.get('phone_category')
-                product.storage = request.POST.get('storage')
-                product.screen_size = request.POST.get('screen_size')
-                product.processor = request.POST.get('processor')
-                product.ram = request.POST.get('ram')
-                product.camera = request.POST.get('camera')
-                product.battery = request.POST.get('battery')
-                product.operating_system = request.POST.get('operating_system')
-                product.connectivity = request.POST.get('connectivity')
-
-            elif product_type == 'DECORATION':
-                if decoration_type == 'SHEET':
-                    product.sheet_size = request.POST.get('sheet_size')
-                    product.color = request.POST.get('color')
-                    product.material = request.POST.get('material')
-
-            # Sauvegarde initiale du produit
+            # Sauvegarde initiale du produit SANS L'IMAGE
+            # Ceci génère l'ID dont nous avons besoin pour l'image
             product.save()
             print("✅ Produit sauvegardé, ID:", product.id)
 
-            # SAUVEGARDE DE L'IMAGE AVEC CLOUDINARY FORCÉ
-            if image:
-                print("🖼️ Tentative de sauvegarde de l'image...")
-                print("📏 Taille de l'image:", image.size)
-                print("📝 Nom de l'image:", image.name)
+            # 🖼️ CORRECTION CRITIQUE: SAUVEGARDE DE L'IMAGE
+            try:
+                # Utiliser simplement la méthode .save() de Django FileField
+                # L'utilisation de cloudinary_storage est gérée par la configuration DEFAULT_FILE_STORAGE.
+                product.image.save(image.name, image)
+                print("✅ Image sauvegardée via le stockage par défaut (Cloudinary)")
 
-                try:
-                    # Méthode 1: Utiliser le stockage par défaut (Cloudinary)
-                    product.image.save(image.name, image, save=True)
-                    print("✅ Image sauvegardée via stockage par défaut")
-                    print("🌐 URL de l'image:", product.image.url)
+            except Exception as e:
+                print(f"❌ Erreur critique lors de l'upload de l'image: {str(e)}")
+                messages.error(request, f"Erreur critique lors de l'upload de l'image: {str(e)}")
 
-                    # Vérifier si c'est Cloudinary
-                    if 'res.cloudinary.com' in product.image.url:
-                        print("🎉 SUCCÈS: Image sur Cloudinary!")
-                    else:
-                        print("⚠️ Attention: Image toujours en local")
-
-                except Exception as e:
-                    print("❌ Erreur sauvegarde image:", e)
-
-                    # Méthode 2: Upload direct Cloudinary
-                    try:
-                        print("🔄 Tentative d'upload direct Cloudinary...")
-                        import cloudinary
-                        import cloudinary.uploader
-
-                        # Réinitialiser le fichier
-                        image.seek(0)
-
-                        # Upload vers Cloudinary
-                        result = cloudinary.uploader.upload(
-                            image,
-                            folder="products",
-                            public_id=f"product_{product.id}"
-                        )
-
-                        cloudinary_url = result['secure_url']
-                        print("✅ Upload Cloudinary réussi:", cloudinary_url)
-
-                        # Mettre à jour le produit
-                        product.image = cloudinary_url
-                        product.save()
-                        print("✅ Produit mis à jour avec URL Cloudinary")
-
-                    except Exception as cloudinary_error:
-                        print("❌ Erreur Cloudinary:", cloudinary_error)
-                        messages.error(request, f"Erreur lors de l'upload de l'image: {str(cloudinary_error)}")
-                        return redirect('/gestion-securisee/products/add/')
+                # Nettoyage : Supprimer le produit créé s'il n'a pas d'image
+                product.delete()
+                messages.error(request, "Produit annulé en raison de l'échec de l'upload de l'image.")
+                return redirect('/gestion-securisee/products/add/')
 
             messages.success(request, f"Le produit '{name}' a été créé avec succès !")
             return redirect('/gestion-securisee/products/')
 
         except Exception as e:
-            print("❌ Erreur générale:", e)
+            print(f"❌ Erreur générale: {e}")
             messages.error(request, f"Erreur lors de la création du produit: {str(e)}")
             return redirect('/gestion-securisee/products/add/')
 
     # GET request - afficher le formulaire
-    return render(request, 'administration/add_product.html')
+    context = {}
+    return render(request, 'administration/add_product.html', context)
+
+
 @admin_required
 @login_required
 @user_passes_test(is_admin_user)
