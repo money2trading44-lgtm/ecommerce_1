@@ -66,7 +66,7 @@ class Product(models.Model):
     # Attributs spécifiques aux draps
     sheet_size = models.CharField(max_length=10, choices=SHEET_SIZES, blank=True, null=True, verbose_name="Taille")
     color = models.CharField(max_length=10, choices=COLORS, blank=True, null=True, verbose_name="Couleur")
-    material = models.CharField(max_length=100, blank=True, verbose_name="Matière")
+    material = models.CharField(max_length=100,null=True,blank=True,verbose_name="Matière")
 
     # Attributs spécifiques aux téléphones
     phone_brand = models.CharField(max_length=20, choices=PHONE_BRANDS, blank=True, null=True, verbose_name="Marque")
