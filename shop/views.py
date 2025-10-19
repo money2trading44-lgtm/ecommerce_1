@@ -1252,11 +1252,14 @@ def admin_add_product(request):
                     product.color = request.POST.get('color')
                     product.material = request.POST.get('material')
 
-            if image:
-                product.image = image
-
-            # ✅ SAUVEGARDE (la catégorie sera assignée automatiquement via save())
+            # ✅ SAUVEGARDE INITIALE DU PRODUIT
             product.save()
+
+            # ✅ SAUVEGARDE DE L'IMAGE (CRITIQUE !)
+            if image:
+                product.image.save(image.name, image, save=True)
+            else:
+                product.save()  # Resauvegarder même sans image
 
             messages.success(request, f"Le produit '{name}' a été créé avec succès !")
             return redirect('/gestion-securisee/products/')
