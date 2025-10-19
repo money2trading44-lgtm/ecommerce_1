@@ -71,16 +71,16 @@ class Product(models.Model):
     # Attributs spécifiques aux téléphones
     phone_brand = models.CharField(max_length=20, choices=PHONE_BRANDS, blank=True, null=True, verbose_name="Marque")
     phone_category = models.CharField(max_length=20, choices=PHONE_CATEGORIES, blank=True, null=True, verbose_name="Catégorie téléphone")
-    storage = models.CharField(max_length=50, blank=True, verbose_name="Stockage")
-    screen_size = models.CharField(max_length=50, blank=True, verbose_name="Taille écran")
+    storage = models.CharField(max_length=50, null=True,blank=True, verbose_name="Stockage")
+    screen_size = models.CharField(max_length=50, null=True, blank=True, verbose_name="Taille écran")
 
     # NOUVEAUX CHAMPS pour les spécifications techniques
-    processor = models.CharField(max_length=100, blank=True, verbose_name="Processeur")
-    camera = models.CharField(max_length=200, blank=True, verbose_name="Appareil photo")
-    battery = models.CharField(max_length=50, blank=True, verbose_name="Batterie")
+    processor = models.CharField(max_length=100, null=True, blank=True, verbose_name="Processeur")
+    camera = models.CharField(max_length=200, null=True, blank=True, verbose_name="Appareil photo")
+    battery = models.CharField(max_length=50, null=True, blank=True, verbose_name="Batterie")
     operating_system = models.CharField(max_length=50, blank=True, verbose_name="Système d'exploitation")
-    ram = models.CharField(max_length=50, blank=True, verbose_name="Mémoire RAM")
-    connectivity = models.CharField(max_length=200, blank=True, verbose_name="Connectivité")
+    ram = models.CharField(max_length=50, null=True, blank=True, verbose_name="Mémoire RAM")
+    connectivity = models.CharField(max_length=200, null=True, blank=True, verbose_name="Connectivité")
 
     stock = models.IntegerField(default=0, verbose_name="Stock")
     image = models.ImageField(upload_to='products/', blank=True, null=True, verbose_name="Image")
