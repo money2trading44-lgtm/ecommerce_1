@@ -11,34 +11,43 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
+# Import Cloudinary
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
-
-
-
-
-
+# Configuration Cloudinary
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
+# Configuration Cloudinary supplémentaire
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+    secure=True
+)
+
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 LOGIN_URL ='/gestion-securisee/login/'
 
-
-
+# Debug Cloudinary (à supprimer après test)
+print("=== CONFIG CLOUDINARY ===")
+print("Cloud Name:", os.environ.get('CLOUDINARY_CLOUD_NAME'))
+print("API Key présent:", bool(os.environ.get('CLOUDINARY_API_KEY')))
+print("API Secret présent:", bool(os.environ.get('CLOUDINARY_API_SECRET')))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -74,11 +83,10 @@ INSTALLED_APPS = [
     'users', # Notre app utilisateurs
 ]
 
-
-
+# Configuration des médias (Cloudinary gère le stockage)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+# SUPPRIMEZ ou COMMENCEZ cette ligne :
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -117,7 +125,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecommerce_project.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -138,7 +145,6 @@ else:
         }
     }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -157,7 +163,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
@@ -168,7 +173,6 @@ TIME_ZONE = 'Europe/Paris'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -189,7 +193,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Configuration PayDunya (Wave, Orange, MTN)
-  # Charge les variables d'environnement
+# Charge les variables d'environnement
 
 # Configuration PayDunya
 CINETPAY_API_KEY = os.environ.get('CINETPAY_API_KEY', '')
@@ -203,5 +207,3 @@ if CINETPAY_MODE == 'prod':
 else:
     CINETPAY_BASE_URL = "https://api-checkout.cinetpay.com/v1"
     CINETPAY_CHECKOUT_URL = "https://secure-checkout.cinetpay.com"
-
-
