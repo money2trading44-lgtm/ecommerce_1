@@ -93,13 +93,13 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Méthodes de paiement -->
+
                     <!-- Méthodes de paiement -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                         <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-4">Méthode de paiement</h2>
 
                         <div class="space-y-3">
-                            <!-- Paiement à la livraison -->
+                            <!-- Paiement à la livraison (ACTIF) -->
                             <div class="flex items-center gap-3 p-3 border-2 border-primary rounded-lg bg-blue-50">
                                 <input type="radio" id="cash_payment" name="payment_method" value="CASH" checked
                                        class="text-primary focus:ring-primary h-4 w-4">
@@ -114,6 +114,8 @@
                                 </label>
                             </div>
 
+                            {# COMMENTÉ POUR ACTIVATION FUTURE - DÉCOMMENTER QUAND BESOIN #}
+                            {#
                             <!-- Wave -->
                             <div class="flex items-center gap-3 p-3 border border-slate-300 rounded-lg hover:border-purple-500 transition-colors">
                                 <input type="radio" id="wave_payment" name="payment_method" value="WAVE"
@@ -158,9 +160,9 @@
                                     </div>
                                 </label>
                             </div>
+                            #}
+                            {# FIN DE LA SECTION COMMENTÉE #}
                         </div>
-
-
 
                         <!-- Information sécurité -->
                         <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
@@ -174,7 +176,7 @@
                         </div>
                     </div>
 
-                    <!-- Informations de contact (gardée mais déplacée) -->
+                    <!-- Informations de contact -->
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div class="flex items-start gap-3">
                             <span class="material-symbols-outlined text-blue-500 text-lg mt-0.5 flex-shrink-0">info</span>
@@ -213,7 +215,7 @@
                             {% else %}
                                 <div class="w-10 h-10 sm:w-12 sm:h-12 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <span class="text-base sm:text-lg text-slate-400">
-                                        {% if item.product.product_type == 'SHEET' %}🛏️
+                                        {% if item.product.product_type == 'DECORATION' %}🛏️
                                         {% elif item.product.product_type == 'PHONE' %}📱
                                         {% else %}🔧{% endif %}
                                     </span>
