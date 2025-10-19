@@ -25,6 +25,7 @@ urlpatterns = [
     path('orders/<int:order_id>/export/', admin_order_export, name='admin_order_export'),
     path('custom-quotes/', views.admin_custom_quotes, name='admin_custom_quotes'),
     path('custom-quotes/edit/<int:quote_id>/', views.admin_edit_quote, name='admin_edit_quote'),
+    path('products/delete/<int:product_id>/', views.admin_delete_product, name='admin_delete_product'),
     # Réparations
     path('repairs/', views.admin_repairs, name='admin_repairs'),
     path('repairs/<int:repair_id>/', views.admin_repair_detail, name='admin_repair_detail'),

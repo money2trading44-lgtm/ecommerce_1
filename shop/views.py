@@ -1626,6 +1626,7 @@ def export_html_fallback(request, order):
     response['Content-Disposition'] = f'attachment; filename="commande_{order.order_number}.html"'
     return response
 
+
 @admin_required
 @login_required
 @user_passes_test(is_admin_user)
@@ -1640,13 +1641,13 @@ def admin_edit_product(request, product_id):
             description = request.POST.get('description')
             price = request.POST.get('price')
             stock = request.POST.get('stock')
-            product_type = request.POST.get('product_type')
+            product_type = request.POST.get('product_type')  # 'PHONE' ou 'DECORATION'
             discount_percentage = request.POST.get('discount_percentage', 0)
             image = request.FILES.get('image')
 
-            # NOUVEAU : Gestion des produits de décoration
+            # Gestion des produits de décoration
             needs_custom_quote = request.POST.get('needs_custom_quote') == 'on'
-            decoration_type = request.POST.get('decoration_type')
+            decoration_type = request.POST.get('decoration_type')  # 'SHEET', 'CURTAIN', etc.
             price_per_sqm = request.POST.get('price_per_sqm')
 
             # Mettre à jour les champs de base
@@ -1657,7 +1658,8 @@ def admin_edit_product(request, product_id):
             product.product_type = product_type
             product.discount_percentage = discount_percentage
             product.on_sale = bool(discount_percentage and int(discount_percentage) > 0)
-            # NOUVEAUX CHAMPS
+
+            # NOUVEAUX CHAMPS POUR LA DÉCORATION
             product.needs_custom_quote = needs_custom_quote
             product.decoration_type = decoration_type if product_type == 'DECORATION' else None
             product.price_per_sqm = price_per_sqm if product_type == 'DECORATION' and price_per_sqm else None
@@ -1666,25 +1668,9 @@ def admin_edit_product(request, product_id):
             if image:
                 product.image = image
 
-            # Mettre à jour les spécifications selon le type
-            if product_type == 'SHEET':
-                product.sheet_size = request.POST.get('sheet_size')
-                product.color = request.POST.get('color')
-                product.material = request.POST.get('material')
-
-                # Réinitialiser les champs téléphone et décoration
-                product.phone_brand = None
-                product.phone_category = None
-                product.storage = ''
-                product.screen_size = ''
-                product.processor = ''
-                product.ram = ''
-                product.camera = ''
-                product.battery = ''
-                product.operating_system = ''
-                product.connectivity = ''
-
-            elif product_type == 'PHONE':
+            # ✅ CORRECTION : GESTION UNIFIÉE DES SPÉCIFICATIONS
+            if product_type == 'PHONE':
+                # Spécifications téléphone
                 product.phone_brand = request.POST.get('phone_brand')
                 product.phone_category = request.POST.get('phone_category')
                 product.storage = request.POST.get('storage')
@@ -1696,16 +1682,13 @@ def admin_edit_product(request, product_id):
                 product.operating_system = request.POST.get('operating_system')
                 product.connectivity = request.POST.get('connectivity')
 
-                # Réinitialiser les champs draps et décoration
+                # Réinitialiser les champs draps
                 product.sheet_size = None
                 product.color = None
                 product.material = ''
 
             elif product_type == 'DECORATION':
-                # Réinitialiser les champs spécifiques aux autres types
-                product.sheet_size = None
-                product.color = None
-                product.material = ''
+                # Spécifications décoration
                 product.phone_brand = None
                 product.phone_category = None
                 product.storage = ''
@@ -1716,6 +1699,17 @@ def admin_edit_product(request, product_id):
                 product.battery = ''
                 product.operating_system = ''
                 product.connectivity = ''
+
+                # Spécifications pour les draps (si decoration_type == 'SHEET')
+                if decoration_type == 'SHEET':
+                    product.sheet_size = request.POST.get('sheet_size')
+                    product.color = request.POST.get('color')
+                    product.material = request.POST.get('material')
+                else:
+                    # Réinitialiser si ce n'est pas un drap
+                    product.sheet_size = None
+                    product.color = None
+                    product.material = ''
 
             # Sauvegarder les modifications
             product.save()
@@ -1729,7 +1723,6 @@ def admin_edit_product(request, product_id):
     # Préparer les données pour le template
     context = {
         'product': product,
-        'categories': Category.objects.all(),
     }
 
     return render(request, 'administration/edit_product.html', context)
@@ -1759,5 +1752,21 @@ def admin_edit_quote(request, quote_id):
         'status_choices': CustomQuoteRequest.STATUS_CHOICES
     }
     return render(request, 'administration/edit_quote.html', context)
+
+
+@admin_required
+@login_required
+@user_passes_test(is_admin_user)
+def admin_delete_product(request, product_id):
+    """Vue pour supprimer un produit"""
+    if request.method == 'POST':
+        product = get_object_or_404(Product, id=product_id)
+        product_name = product.name
+        product.delete()
+
+        messages.success(request, f"Le produit '{product_name}' a été supprimé avec succès !")
+        return redirect('/gestion-securisee/products/')
+
+    return redirect('/gestion-securisee/products/')
 
 

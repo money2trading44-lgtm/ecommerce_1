@@ -15,7 +15,7 @@
                     <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Modifier le produit</h3>
                     <p class="text-sm text-gray-600">Modifiez les informations de "{{ product.name }}"</p>
                 </div>
-                <a href="/gestion-securisee/products/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start">
+                <a href="/gestion-securisee/products/" class="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start">
                     <span class="material-symbols-outlined text-base">arrow_back</span>
                     Retour à la liste
                 </a>
@@ -57,9 +57,9 @@
                 <div>
                     <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Prix (FCFA) *</label>
                     <input type="number" id="price" name="price" step="0.01" min="0" required
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                       placeholder="0.00"
-                       value="{{ product.price|stringformat:'f' }}">
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                           placeholder="0.00"
+                           value="{{ product.price|floatformat:2 }}">
                 </div>
             </div>
 
@@ -76,20 +76,6 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Type de produit *</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4" id="product-type-selector">
                     <label class="relative flex cursor-pointer rounded-lg border border-gray-300 p-3 sm:p-4 focus:outline-none product-type-option transition-all duration-200">
-                        <input type="radio" name="product_type" value="SHEET" class="sr-only" required
-                               {% if product.product_type == 'SHEET' %}checked{% endif %}>
-                        <div class="flex w-full items-center justify-between">
-                            <div class="flex items-center">
-                                <div class="text-xs sm:text-sm">
-                                    <span class="font-medium text-gray-900">Draps</span>
-                                    <p class="text-gray-500 hidden xs:block">Literie et linge de maison</p>
-                                </div>
-                            </div>
-                            <span class="material-symbols-outlined text-gray-400 text-base sm:text-lg">bed</span>
-                        </div>
-                    </label>
-
-                    <label class="relative flex cursor-pointer rounded-lg border border-gray-300 p-3 sm:p-4 focus:outline-none product-type-option transition-all duration-200">
                         <input type="radio" name="product_type" value="PHONE" class="sr-only" required
                                {% if product.product_type == 'PHONE' %}checked{% endif %}>
                         <div class="flex w-full items-center justify-between">
@@ -102,75 +88,125 @@
                             <span class="material-symbols-outlined text-gray-400 text-base sm:text-lg">smartphone</span>
                         </div>
                     </label>
+
+                    <!-- OPTION MODIFIÉE : Déco & Aménagement (remplace Draps) -->
+                    <label class="relative flex cursor-pointer rounded-lg border border-gray-300 p-3 sm:p-4 focus:outline-none product-type-option transition-all duration-200">
+                        <input type="radio" name="product_type" value="DECORATION" class="sr-only" required
+                               {% if product.product_type == 'DECORATION' %}checked{% endif %}>
+                        <div class="flex w-full items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="text-xs sm:text-sm">
+                                    <span class="font-medium text-gray-900">Déco & Aménagement</span>
+                                    <p class="text-gray-500 hidden xs:block">Draps, rideaux, tapis et linge de maison</p>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-400 text-base sm:text-lg">home</span>
+                        </div>
+                    </label>
                 </div>
             </div>
 
-            <!-- Stock et promotion -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <!-- Stock -->
+            <!-- SECTION MODIFIÉE : Spécifications pour la DÉCORATION (inclut maintenant les draps) -->
+            <div id="decoration-specs" class="{% if product.product_type != 'DECORATION' %}hidden{% endif %} space-y-4 sm:space-y-6 p-3 sm:p-4 bg-purple-50 rounded-lg">
+                <h4 class="font-semibold text-purple-900 text-sm sm:text-base">Spécifications de la décoration</h4>
+
+                <!-- Type de décoration -->
                 <div>
-                    <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stock *</label>
-                    <input type="number" id="stock" name="stock" min="0" required
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                           placeholder="0"
-                           value="{{ product.stock }}">
+                    <label for="decoration_type" class="block text-sm font-medium text-gray-700 mb-2">Type de produit *</label>
+                    <select id="decoration_type" name="decoration_type"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                        <option value="">Sélectionnez un type</option>
+                        <option value="SHEET" {% if product.decoration_type == 'SHEET' %}selected{% endif %}>Draps</option>
+                        <option value="CURTAIN" {% if product.decoration_type == 'CURTAIN' %}selected{% endif %}>Rideaux</option>
+                        <option value="CARPET" {% if product.decoration_type == 'CARPET' %}selected{% endif %}>Tapis</option>
+                        <option value="OTHER" {% if product.decoration_type == 'OTHER' %}selected{% endif %}>Autre décoration</option>
+                    </select>
                 </div>
 
-                <!-- Promotion -->
-                <div>
-                    <label for="discount_percentage" class="block text-sm font-medium text-gray-700 mb-2">Promotion (%)</label>
-                    <input type="number" id="discount_percentage" name="discount_percentage" min="0" max="100"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                           placeholder="0"
-                           value="{{ product.discount_percentage }}">
+                <!-- Spécifications pour les DRAPS (intégrées dans la décoration) -->
+                <div id="sheet-specs" class="{% if product.decoration_type != 'SHEET' %}hidden{% endif %} space-y-4 sm:space-y-6 p-3 sm:p-4 bg-blue-50 rounded-lg">
+                    <h4 class="font-semibold text-blue-900 text-sm sm:text-base">Spécifications des draps</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <!-- Taille -->
+                        <div>
+                            <label for="sheet_size" class="block text-sm font-medium text-gray-700 mb-2">Taille</label>
+                            <select id="sheet_size" name="sheet_size"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                                <option value="">Sélectionnez une taille</option>
+                                <option value="SIMPLE" {% if product.sheet_size == 'SIMPLE' %}selected{% endif %}>Simple (90x190cm)</option>
+                                <option value="DOUBLE" {% if product.sheet_size == 'DOUBLE' %}selected{% endif %}>Double (140x190cm)</option>
+                                <option value="QUEEN" {% if product.sheet_size == 'QUEEN' %}selected{% endif %}>Queen (160x200cm)</option>
+                                <option value="KING" {% if product.sheet_size == 'KING' %}selected{% endif %}>King (180x200cm)</option>
+                            </select>
+                        </div>
+
+                        <!-- Couleur -->
+                        <div>
+                            <label for="color" class="block text-sm font-medium text-gray-700 mb-2">Couleur</label>
+                            <select id="color" name="color"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                                <option value="">Sélectionnez une couleur</option>
+                                <option value="WHITE" {% if product.color == 'WHITE' %}selected{% endif %}>Blanc</option>
+                                <option value="GRAY" {% if product.color == 'GRAY' %}selected{% endif %}>Gris</option>
+                                <option value="BLUE" {% if product.color == 'BLUE' %}selected{% endif %}>Bleu</option>
+                                <option value="PINK" {% if product.color == 'PINK' %}selected{% endif %}>Rose</option>
+                                <option value="GREEN" {% if product.color == 'GREEN' %}selected{% endif %}>Vert</option>
+                                <option value="BEIGE" {% if product.color == 'BEIGE' %}selected{% endif %}>Beige</option>
+                            </select>
+                        </div>
+
+                        <!-- Matière -->
+                        <div class="md:col-span-2">
+                            <label for="material" class="block text-sm font-medium text-gray-700 mb-2">Matière</label>
+                            <input type="text" id="material" name="material"
+                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                   placeholder="Ex: Coton 100%, Polyester..."
+                                   value="{{ product.material|default:'' }}">
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Spécifications pour les DRAPS -->
-            <div id="sheet-specs" class="hidden space-y-4 sm:space-y-6 p-3 sm:p-4 bg-blue-50 rounded-lg">
-                <h4 class="font-semibold text-blue-900 text-sm sm:text-base">Spécifications des draps</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <!-- Taille -->
+                <!-- Option "Sur devis personnalisé" -->
+                <div class="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
+                    <input type="checkbox" id="needs_custom_quote" name="needs_custom_quote"
+                           class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                           {% if product.needs_custom_quote %}checked{% endif %}>
                     <div>
-                        <label for="sheet_size" class="block text-sm font-medium text-gray-700 mb-2">Taille</label>
-                        <select id="sheet_size" name="sheet_size"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
-                            <option value="">Sélectionnez une taille</option>
-                            <option value="SIMPLE" {% if product.sheet_size == 'SIMPLE' %}selected{% endif %}>Simple (90x190cm)</option>
-                            <option value="DOUBLE" {% if product.sheet_size == 'DOUBLE' %}selected{% endif %}>Double (140x190cm)</option>
-                            <option value="QUEEN" {% if product.sheet_size == 'QUEEN' %}selected{% endif %}>Queen (160x200cm)</option>
-                            <option value="KING" {% if product.sheet_size == 'KING' %}selected{% endif %}>King (180x200cm)</option>
-                        </select>
+                        <label for="needs_custom_quote" class="block text-sm font-medium text-gray-700">
+                            Produit sur devis personnalisé
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Cochez si ce produit nécessite une visite et un devis personnalisé (prix à 0)
+                        </p>
                     </div>
+                </div>
 
-                    <!-- Couleur -->
-                    <div>
-                        <label for="color" class="block text-sm font-medium text-gray-700 mb-2">Couleur</label>
-                        <select id="color" name="color"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
-                            <option value="">Sélectionnez une couleur</option>
-                            <option value="WHITE" {% if product.color == 'WHITE' %}selected{% endif %}>Blanc</option>
-                            <option value="GRAY" {% if product.color == 'GRAY' %}selected{% endif %}>Gris</option>
-                            <option value="BLUE" {% if product.color == 'BLUE' %}selected{% endif %}>Bleu</option>
-                            <option value="PINK" {% if product.color == 'PINK' %}selected{% endif %}>Rose</option>
-                            <option value="GREEN" {% if product.color == 'GREEN' %}selected{% endif %}>Vert</option>
-                            <option value="BEIGE" {% if product.color == 'BEIGE' %}selected{% endif %}>Beige</option>
-                        </select>
-                    </div>
+                <!-- Prix au m² (pour les tapis) -->
+                <div id="price-per-sqm-container" class="{% if product.decoration_type != 'CARPET' %}hidden{% endif %}">
+                    <label for="price_per_sqm" class="block text-sm font-medium text-gray-700 mb-2">Prix au m² (FCFA)</label>
+                    <input type="number" id="price_per_sqm" name="price_per_sqm" step="0.01" min="0"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                           placeholder="0.00"
+                           value="{{ product.price_per_sqm|default:'' }}">
+                    <p class="text-xs text-gray-500 mt-1">Pour les tapis vendus au mètre carré</p>
+                </div>
 
-                    <!-- Matière -->
-                    <div class="md:col-span-2">
-                        <label for="material" class="block text-sm font-medium text-gray-700 mb-2">Matière</label>
-                        <input type="text" id="material" name="material"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                               placeholder="Ex: Coton 100%, Polyester..."
-                               value="{{ product.material|default:'' }}">
+                <!-- Message d'information pour les produits sur devis -->
+                <div id="custom-quote-info" class="{% if not product.needs_custom_quote %}hidden{% endif %} p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-yellow-600 text-sm mt-0.5">info</span>
+                        <div>
+                            <p class="text-sm font-medium text-yellow-800">Produit sur devis</p>
+                            <p class="text-xs text-yellow-700 mt-1">
+                                Le prix sera fixé à 0 FCFA. Les clients devront demander un devis personnalisé.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Spécifications pour les TÉLÉPHONES -->
-            <div id="phone-specs" class="hidden space-y-4 sm:space-y-6 p-3 sm:p-4 bg-green-50 rounded-lg">
+            <div id="phone-specs" class="{% if product.product_type != 'PHONE' %}hidden{% endif %} space-y-4 sm:space-y-6 p-3 sm:p-4 bg-green-50 rounded-lg">
                 <h4 class="font-semibold text-green-900 text-sm sm:text-base">Spécifications du téléphone</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <!-- Marque -->
@@ -275,6 +311,27 @@
                 </div>
             </div>
 
+            <!-- Stock et promotion -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <!-- Stock -->
+                <div>
+                    <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stock *</label>
+                    <input type="number" id="stock" name="stock" min="0" required
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                           placeholder="0"
+                           value="{{ product.stock }}">
+                </div>
+
+                <!-- Promotion -->
+                <div>
+                    <label for="discount_percentage" class="block text-sm font-medium text-gray-700 mb-2">Promotion (%)</label>
+                    <input type="number" id="discount_percentage" name="discount_percentage" min="0" max="100"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                           placeholder="0"
+                           value="{{ product.discount_percentage|default:'0' }}">
+                </div>
+            </div>
+
             <!-- Image du produit -->
             <div>
                 <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
@@ -349,15 +406,17 @@
     // Gestion de l'affichage des spécifications par type de produit
     document.addEventListener('DOMContentLoaded', function() {
         const productTypeRadios = document.querySelectorAll('input[name="product_type"]');
-        const sheetSpecs = document.getElementById('sheet-specs');
         const phoneSpecs = document.getElementById('phone-specs');
+        const decorationSpecs = document.getElementById('decoration-specs');
+        const sheetSpecs = document.getElementById('sheet-specs');
 
         function updateSpecifications() {
             const selectedType = document.querySelector('input[name="product_type"]:checked');
 
             // Masquer toutes les spécifications
-            sheetSpecs.classList.add('hidden');
             phoneSpecs.classList.add('hidden');
+            decorationSpecs.classList.add('hidden');
+            sheetSpecs.classList.add('hidden');
 
             // Réinitialiser tous les styles des options
             document.querySelectorAll('.product-type-option').forEach(option => {
@@ -366,7 +425,7 @@
 
                 // Réinitialiser les icônes
                 const icon = option.querySelector('.material-symbols-outlined');
-                icon.classList.remove('text-blue-600', 'text-green-600');
+                icon.classList.remove('text-green-600', 'text-purple-600');
                 icon.classList.add('text-gray-400');
             });
 
@@ -380,13 +439,49 @@
                 const icon = selectedOption.querySelector('.material-symbols-outlined');
                 icon.classList.remove('text-gray-400');
 
-                if (selectedType.value === 'SHEET') {
-                    sheetSpecs.classList.remove('hidden');
-                    icon.classList.add('text-blue-600');
-                } else if (selectedType.value === 'PHONE') {
+                if (selectedType.value === 'PHONE') {
                     phoneSpecs.classList.remove('hidden');
                     icon.classList.add('text-green-600');
+                } else if (selectedType.value === 'DECORATION') {
+                    decorationSpecs.classList.remove('hidden');
+                    icon.classList.add('text-purple-600');
+                    updateDecorationSpecs(); // Gérer les sous-options de décoration
                 }
+            }
+        }
+
+        // Gestion des spécifications de décoration
+        function updateDecorationSpecs() {
+            const decorationType = document.getElementById('decoration_type').value;
+            const needsCustomQuote = document.getElementById('needs_custom_quote').checked;
+            const pricePerSqmContainer = document.getElementById('price-per-sqm-container');
+            const customQuoteInfo = document.getElementById('custom-quote-info');
+            const priceInput = document.getElementById('price');
+
+            // Afficher/masquer les spécifications des draps
+            if (decorationType === 'SHEET') {
+                sheetSpecs.classList.remove('hidden');
+            } else {
+                sheetSpecs.classList.add('hidden');
+            }
+
+            // Afficher/masquer le prix au m² pour les tapis
+            if (decorationType === 'CARPET') {
+                pricePerSqmContainer.classList.remove('hidden');
+            } else {
+                pricePerSqmContainer.classList.add('hidden');
+            }
+
+            // Gérer l'affichage pour les produits sur devis
+            if (needsCustomQuote) {
+                customQuoteInfo.classList.remove('hidden');
+                priceInput.value = '0';
+                priceInput.disabled = true;
+                priceInput.placeholder = 'Prix fixé à 0 (sur devis)';
+            } else {
+                customQuoteInfo.classList.add('hidden');
+                priceInput.disabled = false;
+                priceInput.placeholder = '0.00';
             }
         }
 
@@ -394,6 +489,10 @@
         productTypeRadios.forEach(radio => {
             radio.addEventListener('change', updateSpecifications);
         });
+
+        // Écouter les changements dans les options de décoration
+        document.getElementById('decoration_type').addEventListener('change', updateDecorationSpecs);
+        document.getElementById('needs_custom_quote').addEventListener('change', updateDecorationSpecs);
 
         // Mise à jour initiale
         updateSpecifications();
