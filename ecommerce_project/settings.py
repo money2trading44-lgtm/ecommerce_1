@@ -41,15 +41,9 @@ INSTALLED_APPS = [
     'users',
 ]
 
-# --- CONFIGURATION CLOUDINARY & MEDIA ---
-# 1. Définit le moteur de stockage par défaut pour les médias
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# 2. Ajout des variables lues de l'environnement pour Cloudinary
-# Cette section était manquante et empêchait la bonne génération des URLs Cloudinary.
-CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
-CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
-CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
+
 
 # MEDIA_URL reste nécessaire pour Django, mais Cloudinary l'ignore
 MEDIA_URL = '/media/'
@@ -157,12 +151,3 @@ else:
     CINETPAY_BASE_URL = "https://api-checkout.cinetpay.com/v1"
     CINETPAY_CHECKOUT_URL = "https://secure-checkout.cinetpay.com"
 
-# --- SECTION DE DÉBOGAGE (pour vous) ---
-print("=== CONFIGURATION CLOUDINARY (Vérif finale) ===")
-print("DEFAULT_FILE_STORAGE:", DEFAULT_FILE_STORAGE)
-print("CLOUDINARY_CLOUD_NAME:", CLOUDINARY_CLOUD_NAME)
-# Si vous utilisez un système pour lire les variables, le résultat ici doit être le nom de votre cloud (pas None).
-from django.core.files.storage import default_storage
-print("Stockage par défaut (Classe):", default_storage.__class__.__name__)
-print("Module de stockage:", default_storage.__class__.__module__)
-# ---------------------------------------------
