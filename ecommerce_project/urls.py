@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse, HttpRequest
+from django.conf.urls.static import static
 
 
 def sitemap_xml(request):
@@ -54,5 +55,4 @@ urlpatterns = [
     path('administration/', include('shop.urls_admin')),
 ]
 
-# ⚠️ SUPPRIMEZ TOUTE CONFIGURATION MEDIA ICI
-# Cloudinary gère automatiquement les URLs des images
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
