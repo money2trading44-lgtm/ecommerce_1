@@ -1145,6 +1145,7 @@ def admin_repair_delete(request, repair_id):
 
         return redirect('/gestion-securisee/repairs/')
 
+
 @admin_required
 @login_required
 @user_passes_test(is_admin_user)
@@ -1152,31 +1153,24 @@ def admin_add_product(request):
     """Vue pour ajouter un produit"""
 
     if request.method == 'POST':
-
-        print("=== DEBUG ADMIN_ADD_PRODUCT ===")
+        print("=== DÉBOGAGE ADMIN_ADD_PRODUCT ===")
         print("Fichiers reçus:", dict(request.FILES))
-        print("Données POST:", dict(request.POST))
+
         # Récupérer les données du formulaire de base
         name = request.POST.get('name')
         description = request.POST.get('description')
         price = request.POST.get('price')
-        product_type = request.POST.get('product_type')  # Soit 'PHONE' soit 'DECORATION'
+        product_type = request.POST.get('product_type')
         stock = request.POST.get('stock')
         discount_percentage = request.POST.get('discount_percentage', 0)
         image = request.FILES.get('image')
 
-        print("Nom:", name)
-        print("Description:", description)
-        print("Image reçue:", image)
-        print("Nom de l'image:", image.name if image else "Aucune image")
-        print("Taille de l'image:", image.size if image else 0)
-
-        # Gestion des produits de décoration (inclut maintenant les draps)
+        # Gestion des produits de décoration
         needs_custom_quote = request.POST.get('needs_custom_quote') == 'on'
-        decoration_type = request.POST.get('decoration_type')  # 'SHEET', 'CURTAIN', etc.
+        decoration_type = request.POST.get('decoration_type')
         price_per_sqm = request.POST.get('price_per_sqm')
 
-        # ✅ VALIDATION SIMPLIFIÉE - Plus de distinction SHEET/PHONE/DECORATION
+        # Validation
         required_fields = [
             ('name', 'Nom'),
             ('description', 'Description'),
@@ -1184,7 +1178,6 @@ def admin_add_product(request):
             ('stock', 'Stock')
         ]
 
-        # Si pas sur devis, le prix est obligatoire
         if not needs_custom_quote:
             required_fields.append(('price', 'Prix'))
 
@@ -1198,12 +1191,11 @@ def admin_add_product(request):
             messages.error(request, f"Champs obligatoires manquants: {', '.join(missing_fields)}")
             return redirect('/gestion-securisee/products/add/')
 
-        # Validation de l'image
         if not image:
             messages.error(request, "Veuillez sélectionner une image.")
             return redirect('/gestion-securisee/products/add/')
 
-        # ✅ NOUVELLE VALIDATION UNIFIÉE
+        # Validation spécifique
         if product_type == 'PHONE':
             phone_brand = request.POST.get('phone_brand')
             if not phone_brand:
@@ -1215,7 +1207,6 @@ def admin_add_product(request):
                 messages.error(request, "Pour les produits de décoration, le type est obligatoire.")
                 return redirect('/gestion-securisee/products/add/')
 
-            # Validation spécifique pour les draps
             if decoration_type == 'SHEET':
                 sheet_size = request.POST.get('sheet_size')
                 color = request.POST.get('color')
@@ -1223,26 +1214,26 @@ def admin_add_product(request):
                     missing_specs = []
                     if not sheet_size: missing_specs.append("taille")
                     if not color: missing_specs.append("couleur")
-                    messages.error(request, f"Pour les draps, les champs suivants sont obligatoires: {', '.join(missing_specs)}")
+                    messages.error(request,
+                                   f"Pour les draps, les champs suivants sont obligatoires: {', '.join(missing_specs)}")
                     return redirect('/gestion-securisee/products/add/')
 
         try:
-            # ✅ CRÉATION DU PRODUIT AVEC STRUCTURE UNIFIÉE
+            # Création du produit
             product = Product(
                 name=name,
                 description=description,
-                price=price if not needs_custom_quote else 0,  # Prix à 0 si sur devis
+                price=price if not needs_custom_quote else 0,
                 product_type=product_type,
                 stock=stock,
                 discount_percentage=discount_percentage,
                 on_sale=bool(discount_percentage and int(discount_percentage) > 0),
-                # Champs pour la décoration (utilisés aussi pour les draps maintenant)
                 needs_custom_quote=needs_custom_quote,
                 decoration_type=decoration_type if product_type == 'DECORATION' else None,
                 price_per_sqm=price_per_sqm if product_type == 'DECORATION' and price_per_sqm else None
             )
 
-            # ✅ GESTION DES SPÉCIFICATIONS PAR TYPE
+            # Gestion des spécifications par type
             if product_type == 'PHONE':
                 product.phone_brand = request.POST.get('phone_brand')
                 product.phone_category = request.POST.get('phone_category')
@@ -1256,60 +1247,75 @@ def admin_add_product(request):
                 product.connectivity = request.POST.get('connectivity')
 
             elif product_type == 'DECORATION':
-                # Spécifications pour les draps
                 if decoration_type == 'SHEET':
                     product.sheet_size = request.POST.get('sheet_size')
                     product.color = request.POST.get('color')
                     product.material = request.POST.get('material')
 
-            # ✅ SAUVEGARDE INITIALE DU PRODUIT
+            # Sauvegarde initiale du produit
             product.save()
             print("✅ Produit sauvegardé, ID:", product.id)
 
-            # ✅ SAUVEGARDE DE L'IMAGE (CRITIQUE !)
+            # SAUVEGARDE DE L'IMAGE AVEC CLOUDINARY FORCÉ
             if image:
                 print("🖼️ Tentative de sauvegarde de l'image...")
+                print("📏 Taille de l'image:", image.size)
+                print("📝 Nom de l'image:", image.name)
 
-                # Méthode 1: Sauvegarde normale (devrait utiliser Cloudinary)
-                product.image.save(image.name, image, save=True)
-                print("✅ Image sauvegardée")
-                print("🌐 URL de l'image:", product.image.url)
+                try:
+                    # Méthode 1: Utiliser le stockage par défaut (Cloudinary)
+                    product.image.save(image.name, image, save=True)
+                    print("✅ Image sauvegardée via stockage par défaut")
+                    print("🌐 URL de l'image:", product.image.url)
 
-                # Vérifier si c'est Cloudinary
-                if 'res.cloudinary.com' in product.image.url:
-                    print("✅ Image sur Cloudinary!")
-                else:
-                    print("❌ Image toujours en local, forçons Cloudinary...")
+                    # Vérifier si c'est Cloudinary
+                    if 'res.cloudinary.com' in product.image.url:
+                        print("🎉 SUCCÈS: Image sur Cloudinary!")
+                    else:
+                        print("⚠️ Attention: Image toujours en local")
 
-                    # Méthode 2: Upload direct vers Cloudinary
-                    import cloudinary.uploader
+                except Exception as e:
+                    print("❌ Erreur sauvegarde image:", e)
+
+                    # Méthode 2: Upload direct Cloudinary
                     try:
+                        print("🔄 Tentative d'upload direct Cloudinary...")
+                        import cloudinary
+                        import cloudinary.uploader
+
+                        # Réinitialiser le fichier
+                        image.seek(0)
+
                         # Upload vers Cloudinary
-                        result = cloudinary.uploader.upload(image)
+                        result = cloudinary.uploader.upload(
+                            image,
+                            folder="products",
+                            public_id=f"product_{product.id}"
+                        )
+
                         cloudinary_url = result['secure_url']
                         print("✅ Upload Cloudinary réussi:", cloudinary_url)
 
-                        # Mettre à jour le produit avec l'URL Cloudinary
+                        # Mettre à jour le produit
                         product.image = cloudinary_url
                         product.save()
                         print("✅ Produit mis à jour avec URL Cloudinary")
-                    except Exception as e:
-                        print("❌ Erreur Cloudinary:", e)
-            else:
-                product.save()  # Resauvegarder même sans image
-                print("❌ Aucune image à sauvegarder")
+
+                    except Exception as cloudinary_error:
+                        print("❌ Erreur Cloudinary:", cloudinary_error)
+                        messages.error(request, f"Erreur lors de l'upload de l'image: {str(cloudinary_error)}")
+                        return redirect('/gestion-securisee/products/add/')
 
             messages.success(request, f"Le produit '{name}' a été créé avec succès !")
             return redirect('/gestion-securisee/products/')
 
         except Exception as e:
-            print("❌ Erreur:", str(e))
+            print("❌ Erreur générale:", e)
             messages.error(request, f"Erreur lors de la création du produit: {str(e)}")
             return redirect('/gestion-securisee/products/add/')
 
     # GET request - afficher le formulaire
     return render(request, 'administration/add_product.html')
-
 @admin_required
 @login_required
 @user_passes_test(is_admin_user)
