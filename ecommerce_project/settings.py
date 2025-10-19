@@ -39,13 +39,22 @@ INSTALLED_APPS = [
     'users',
 ]
 
-# Configuration Cloudinary
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# Configuration Cloudinary SÉCURISÉE
+try:
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': 'debxh9hje',
+        'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+    }
+
+    # Test simple sans import complexe
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+    print("✅ Cloudinary activé")
+
+except Exception as e:
+    print("❌ Erreur Cloudinary, stockage local conservé:", str(e)[:100])
+    # Rien à faire, le stockage local reste actif
 
 # ⚠️ SUPPRIMEZ MEDIA_ROOT - Cloudinary gère le stockage
 MEDIA_URL = '/media/'  # Gardé pour la compatibilité
