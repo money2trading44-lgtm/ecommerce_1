@@ -71,13 +71,13 @@ CSRF_TRUSTED_ORIGINS = ['https://dsd-general-trading.com', 'https://www.dsd-gene
 # Application definition
 
 INSTALLED_APPS = [
+    'cloudinary_storage',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary_storage',
     'cloudinary',
     'shop',  # Notre app boutique
     'users', # Notre app utilisateurs
