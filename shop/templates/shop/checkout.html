@@ -94,88 +94,6 @@
                         </div>
                     </div>
 
-                    <!-- Méthodes de paiement -->
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
-                        <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-4">Méthode de paiement</h2>
-
-                        <div class="space-y-3">
-                            <!-- Paiement à la livraison (ACTIF) -->
-                            <div class="flex items-center gap-3 p-3 border-2 border-primary rounded-lg bg-blue-50">
-                                <input type="radio" id="cash_payment" name="payment_method" value="CASH" checked
-                                       class="text-primary focus:ring-primary h-4 w-4">
-                                <label for="cash_payment" class="flex items-center gap-3 flex-grow cursor-pointer">
-                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <span class="material-symbols-outlined text-green-600 text-lg">local_shipping</span>
-                                    </div>
-                                    <div>
-                                        <span class="font-medium text-slate-900 block">Paiement à la livraison</span>
-                                        <p class="text-xs text-slate-600">Payez cash à la réception</p>
-                                    </div>
-                                </label>
-                            </div>
-
-                            {# COMMENTÉ POUR ACTIVATION FUTURE - DÉCOMMENTER QUAND BESOIN #}
-                            {#
-                            <!-- Wave -->
-                            <div class="flex items-center gap-3 p-3 border border-slate-300 rounded-lg hover:border-purple-500 transition-colors">
-                                <input type="radio" id="wave_payment" name="payment_method" value="WAVE"
-                                       class="text-primary focus:ring-primary h-4 w-4">
-                                <label for="wave_payment" class="flex items-center gap-3 flex-grow cursor-pointer">
-                                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 border border-slate-200">
-                                        <img src="{% static 'shop/images/payments/wave.png' %}" alt="Wave" class="w-10 h-10">
-                                    </div>
-                                    <div>
-                                        <span class="font-medium text-slate-900 block">Wave</span>
-                                        <p class="text-xs text-slate-600">Paiement mobile sécurisé</p>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <!-- Orange Money -->
-                            <div class="flex items-center gap-3 p-3 border border-slate-300 rounded-lg hover:border-orange-500 transition-colors">
-                                <input type="radio" id="orange_payment" name="payment_method" value="ORANGE"
-                                       class="text-primary focus:ring-primary h-4 w-4">
-                                <label for="orange_payment" class="flex items-center gap-3 flex-grow cursor-pointer">
-                                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 border border-slate-200">
-                                        <img src="{% static 'shop/images/payments/orange-money.png' %}" alt="Orange Money" class="w-10 h-10">
-                                    </div>
-                                    <div>
-                                        <span class="font-medium text-slate-900 block">Orange Money</span>
-                                        <p class="text-xs text-slate-600">Paiement mobile sécurisé</p>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <!-- MTN Money -->
-                            <div class="flex items-center gap-3 p-3 border border-slate-300 rounded-lg hover:border-yellow-500 transition-colors">
-                                <input type="radio" id="mtn_payment" name="payment_method" value="MTN"
-                                       class="text-primary focus:ring-primary h-4 w-4">
-                                <label for="mtn_payment" class="flex items-center gap-3 flex-grow cursor-pointer">
-                                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 border border-slate-200">
-                                        <img src="{% static 'shop/images/payments/mtn-money.png' %}" alt="MTN Money" class="w-8 h-8">
-                                    </div>
-                                    <div>
-                                        <span class="font-medium text-slate-900 block">MTN Money</span>
-                                        <p class="text-xs text-slate-600">Paiement mobile sécurisé</p>
-                                    </div>
-                                </label>
-                            </div>
-                            #}
-                            {# FIN DE LA SECTION COMMENTÉE #}
-                        </div>
-
-                        <!-- Information sécurité -->
-                        <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                            <div class="flex items-start gap-2">
-                                <span class="material-symbols-outlined text-green-500 text-sm mt-0.5">lock</span>
-                                <div class="text-xs text-slate-600">
-                                    <p class="font-medium">Paiements 100% sécurisés</p>
-                                    <p>Tous les paiements en ligne sont cryptés et sécurisés par PayDunya</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Informations de contact -->
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div class="flex items-start gap-3">
@@ -184,7 +102,7 @@
                                 <p class="font-medium mb-1">Comment procéderons-nous ?</p>
                                 <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm">
                                     <li>Nous vous contacterons par téléphone pour confirmer votre commande</li>
-                                    <li>Paiement sécurisé en ligne ou à la livraison</li>
+                                    <li>Paiement à la livraison uniquement</li>
                                     <li>Livraison sous 2-3 jours ouvrés</li>
                                 </ul>
                             </div>
@@ -236,20 +154,13 @@
 
                     <!-- Total -->
                     <div class="border-t border-slate-200 pt-3 sm:pt-4 space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Sous-total</span>
-                            <span class="font-medium text-slate-900">{{ cart.get_total_price|floatformat:2 }} FCFA</span>
-                        </div>
-
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-600">Livraison</span>
-                            <span class="font-medium text-green-600">Gratuit</span>
-                        </div>
-
-                        <div class="flex justify-between text-base font-bold pt-2 border-t border-slate-200">
+                        <div class="flex justify-between text-base font-bold">
                             <span class="text-slate-900">Total</span>
                             <span class="text-slate-900">{{ cart.get_total_price|floatformat:2 }} FCFA</span>
                         </div>
+                        <p class="text-xs text-slate-500 text-center">
+                            Les frais de livraison seront communiqués lors de la confirmation
+                        </p>
                     </div>
 
                     <!-- Sécurités -->
@@ -260,7 +171,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-green-500 text-sm sm:text-base">local_shipping</span>
-                            <span class="text-xs sm:text-sm">Livraison offerte</span>
+                            <span class="text-xs sm:text-sm">Livraison rapide</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-green-500 text-sm sm:text-base">support_agent</span>
