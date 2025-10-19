@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-prct4r0m&#@h#i0vnm=z(8sx)!)@*a&2rc+cr6kq1us7tzr5%6'
 
 # 🔥 Mets False après test, mais pour déboguer l’affichage des images mets True temporairement
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'dsd-general-trading.com',
@@ -34,6 +34,8 @@ CSRF_TRUSTED_ORIGINS = [
 
 # --- APPLICATIONS ---
 INSTALLED_APPS = [
+    'cloudinary',
+    'cloudinary_storage',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +47,15 @@ INSTALLED_APPS = [
     'shop',
     'users',
 ]
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Cloudinary configuration
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+}
 
 LOGIN_URL = '/gestion-securisee/login/'
 
