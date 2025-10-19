@@ -1269,10 +1269,32 @@ def admin_add_product(request):
             # ✅ SAUVEGARDE DE L'IMAGE (CRITIQUE !)
             if image:
                 print("🖼️ Tentative de sauvegarde de l'image...")
+
+                # Méthode 1: Sauvegarde normale (devrait utiliser Cloudinary)
                 product.image.save(image.name, image, save=True)
                 print("✅ Image sauvegardée")
-                print("📁 Chemin de l'image:", product.image.path if hasattr(product.image, 'path') else "Pas de chemin")
                 print("🌐 URL de l'image:", product.image.url)
+
+                # Vérifier si c'est Cloudinary
+                if 'res.cloudinary.com' in product.image.url:
+                    print("✅ Image sur Cloudinary!")
+                else:
+                    print("❌ Image toujours en local, forçons Cloudinary...")
+
+                    # Méthode 2: Upload direct vers Cloudinary
+                    import cloudinary.uploader
+                    try:
+                        # Upload vers Cloudinary
+                        result = cloudinary.uploader.upload(image)
+                        cloudinary_url = result['secure_url']
+                        print("✅ Upload Cloudinary réussi:", cloudinary_url)
+
+                        # Mettre à jour le produit avec l'URL Cloudinary
+                        product.image = cloudinary_url
+                        product.save()
+                        print("✅ Produit mis à jour avec URL Cloudinary")
+                    except Exception as e:
+                        print("❌ Erreur Cloudinary:", e)
             else:
                 product.save()  # Resauvegarder même sans image
                 print("❌ Aucune image à sauvegarder")
