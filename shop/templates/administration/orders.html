@@ -242,6 +242,16 @@
                                     <span class="material-symbols-outlined text-base">cancel</span>
                                 </button>
                                 {% endif %}
+
+                                <!-- SUPPRIMER - Nouveau bouton -->
+                                <form method="post" action="/gestion-securisee/orders/{{ order.id }}/delete/" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            onclick="return confirm('⚠️ ATTENTION : Supprimer définitivement la commande #{{ order.order_number }} ?\\n\\nCette action supprimera également tous les articles associés et est IRREVERSIBLE.')"
+                                            class="text-gray-600 hover:text-red-700 transition-all duration-200" title="Supprimer définitivement">
+                                        <span class="material-symbols-outlined text-base">delete</span>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -367,6 +377,16 @@
                             <span class="material-symbols-outlined text-lg">cancel</span>
                         </button>
                         {% endif %}
+
+                        <!-- SUPPRIMER - Nouveau bouton -->
+                        <form method="post" action="/gestion-securisee/orders/{{ order.id }}/delete/" class="inline">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    onclick="return confirm('⚠️ ATTENTION : Supprimer définitivement la commande #{{ order.order_number }} ?\\n\\nCette action supprimera également tous les articles associés et est IRREVERSIBLE.')"
+                                    class="text-gray-600 hover:text-red-700 transition-all duration-200" title="Supprimer définitivement">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
