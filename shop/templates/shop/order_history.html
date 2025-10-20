@@ -3,30 +3,6 @@
 {% block title %}Mes Commandes{% endblock %}
 
 {% block content %}
-<!-- ⚠️ BLOC DEBUG - À SUPPRIMER APRÈS -->
-<div class="container mx-auto px-4 py-4 bg-red-100 border border-red-400 rounded-lg mb-4">
-    <p class="font-bold text-red-800">🔍 DEBUG INFORMATION:</p>
-    <p><strong>Utilisateur:</strong> {{ user }}</p>
-    <p><strong>Authentifié:</strong> {{ user.is_authenticated }}</p>
-    <p><strong>Email utilisateur:</strong> {{ user.email }}</p>
-    <p><strong>Clé de session:</strong> {{ request.session.session_key }}</p>
-    <p><strong>Nombre de commandes:</strong> {{ orders.count }}</p>
-
-    {% if orders %}
-    <div class="mt-3">
-        <p class="font-bold text-red-800">Commandes trouvées:</p>
-        {% for order in orders %}
-        <div class="bg-white p-2 rounded mt-1">
-            <p>#{{ order.order_number }} - {{ order.email }} - {{ order.session_key }}</p>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <p class="text-red-800 font-bold mt-2">❌ AUCUNE COMMANDE TROUVÉE</p>
-    {% endif %}
-</div>
-<!-- FIN DU BLOC DEBUG -->
-
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
     <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 sm:mb-8">Mes Commandes</h1>
 

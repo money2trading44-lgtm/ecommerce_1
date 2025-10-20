@@ -27,5 +27,4 @@ urlpatterns = [
     path('recherche/', views.search_products, name='search_products'),
     path('gestion-securisee/',include('shop.urls_admin')),
     path('administration/',views.admin_redirect,name='admin_redirect'),
-    path('debug-link-orders/', views.debug_link_orders, name='debug_link_orders'),
 ]
