@@ -5,6 +5,8 @@ from .views import admin_order_detail, admin_order_confirm, admin_order_update_s
     admin_order_export
 
 
+app_name = 'administration'
+
 urlpatterns = [
     # Authentification
     path('', views.admin_login, name='admin_login'),
