@@ -32,5 +32,6 @@ urlpatterns = [
     path('repairs/<int:repair_id>/update-status/', views.admin_repair_update_status, name='admin_repair_update_status'),
     path('repairs/<int:repair_id>/complete/', views.admin_repair_complete, name='admin_repair_complete'),
     path('repairs/<int:repair_id>/delete/', views.admin_repair_delete, name='admin_repair_delete'),
+    path('orders/<int:order_id>/delete/', views.admin_delete_order, name='delete_order'),
 
 ]

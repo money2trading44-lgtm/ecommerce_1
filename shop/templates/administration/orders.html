@@ -244,7 +244,7 @@
                                 {% endif %}
 
                                 <!-- SUPPRIMER - Nouveau bouton -->
-                                <form method="post" action="/gestion-securisee/orders/{{ order.id }}/delete/" class="inline">
+                                <form method="post" action="{% url 'administration:admin_delete_order' order.id %}" class="inline">
                                     {% csrf_token %}
                                     <button type="submit"
                                             onclick="return confirm('⚠️ ATTENTION : Supprimer définitivement la commande #{{ order.order_number }} ?\\n\\nCette action supprimera également tous les articles associés et est IRREVERSIBLE.')"
@@ -348,7 +348,7 @@
 
                         <!-- Confirmer - seulement si en attente -->
                         {% if order.status == 'PENDING' %}
-                        <form method="post" action="/gestion-securisee/orders/{{ order.id }}/confirm/" class="inline">
+                        <form method="post" action="{% url 'administration:admin_delete_order' order.id %}" class="inline">
                             {% csrf_token %}
                             <button type="submit"
                                     onclick="return confirm('Confirmer la commande #{{ order.order_number }} ?')"

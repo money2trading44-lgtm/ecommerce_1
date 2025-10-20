@@ -1362,6 +1362,35 @@ def admin_order_update_status(request, order_id):
 
     return redirect('/gestion-securisee/orders/')
 
+
+
+@admin_required
+@login_required
+@user_passes_test(is_admin_user)
+def admin_delete_order(request, order_id):
+    """
+    Vue pour supprimer définitivement une commande
+    """
+    if not request.user.is_superuser:
+        messages.error(request, "Accès non autorisé.")
+        return redirect('administration:dashboard')
+
+    try:
+        order = Order.objects.get(id=order_id)
+        order_number = order.order_number
+
+        # Supprimer la commande (cela supprimera aussi les OrderItems grâce à CASCADE)
+        order.delete()
+
+        messages.success(request, f"Commande #{order_number} supprimée définitivement.")
+
+    except Order.DoesNotExist:
+        messages.error(request, "Commande non trouvée.")
+    except Exception as e:
+        messages.error(request, f"Erreur lors de la suppression : {str(e)}")
+
+    return redirect('administration:orders')
+
 @admin_required
 @login_required
 @user_passes_test(is_admin_user)
