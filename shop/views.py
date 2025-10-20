@@ -749,18 +749,28 @@ def order_history(request):
     orders = Order.objects.none()
 
     if request.user.is_authenticated:
+        print(f"DEBUG: Utilisateur connecté - {request.user.email}")
+        # Chercher les commandes par email
         orders = Order.objects.filter(
             email=request.user.email
         ).prefetch_related('items').order_by('-created_at')
+        print(f"DEBUG: Commandes trouvées par email: {orders.count()}")
 
     elif request.session.session_key:
+        print(f"DEBUG: Session non connectée - {request.session.session_key}")
+        # Chercher les commandes par session
         orders = Order.objects.filter(
             session_key=request.session.session_key
         ).prefetch_related('items').order_by('-created_at')
+        print(f"DEBUG: Commandes trouvées par session: {orders.count()}")
 
     else:
-        messages.info(request,
-                      "Votre historique de commandes n'est pas disponible. Passez une commande ou connectez-vous.")
+        print("DEBUG: Pas d'utilisateur ni de session")
+        messages.info(request, "Votre historique de commandes n'est pas disponible.")
+
+    # Afficher le détail des commandes trouvées
+    for order in orders:
+        print(f"DEBUG: Commande #{order.order_number} - Email: {order.email}")
 
     context = {
         'orders': orders,
