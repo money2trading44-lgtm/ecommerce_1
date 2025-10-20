@@ -783,6 +783,32 @@ def order_history(request):
     return render(request, 'shop/order_history.html', context)
 
 
+def debug_link_orders(request):
+    """
+    Vue temporaire pour lier les commandes à l'utilisateur
+    À SUPPRIMER APRÈS USAGE
+    """
+    if not request.user.is_superuser:
+        return HttpResponse("Accès non autorisé")
+
+    from django.contrib.auth.models import User
+    from shop.models import Order
+
+    # Lier les commandes à l'admin
+    admin_user = User.objects.get(username='admin')
+    orders_updated = Order.objects.filter(email=admin_user.email).update(user=admin_user)
+
+    # Vérifier
+    total_orders = Order.objects.filter(user=admin_user).count()
+
+    return HttpResponse(f"""
+    <h1>Debug Railway</h1>
+    <p>Commandes liées à l'admin : {orders_updated}</p>
+    <p>Commandes totales de l'admin : {total_orders}</p>
+    <p><a href="/mes-commandes/">Vérifier l'historique</a></p>
+    """)
+
+
 # ========================= VUES ADMINISTRATEUR ======================
 
 def admin_required(view_func):
