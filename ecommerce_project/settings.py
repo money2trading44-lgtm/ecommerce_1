@@ -121,14 +121,25 @@ TIME_ZONE = 'Europe/Paris'
 USE_I18N = True
 USE_TZ = True
 
+
+if 'RAILWAY_STATIC_URL' in os.environ:
+    # En production sur Railway
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = '/tmp/media'  # Railway a un système de fichiers temporaire
+else:
+    # En développement local
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # --- STATIC & MEDIA FILES ---
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'shop/static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # ✅ Le plus important pour ton problème
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # --- DEFAULT PK ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
