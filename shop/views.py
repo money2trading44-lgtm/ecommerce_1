@@ -1373,7 +1373,7 @@ def admin_delete_order(request, order_id):
     """
     if not request.user.is_superuser:
         messages.error(request, "Accès non autorisé.")
-        return redirect('/gestion-securisee/dashboard.html')
+        return redirect('/gestion-securisee/dashboard')
 
     try:
         order = Order.objects.get(id=order_id)
@@ -1389,7 +1389,7 @@ def admin_delete_order(request, order_id):
     except Exception as e:
         messages.error(request, f"Erreur lors de la suppression : {str(e)}")
 
-    return redirect('/gestion-securisee/orders.html')
+    return redirect('/gestion-securisee/orders')
 
 @admin_required
 @login_required
