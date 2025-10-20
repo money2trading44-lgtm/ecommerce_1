@@ -218,12 +218,14 @@
                         <select id="phone_brand" name="phone_brand"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                             <option value="">Sélectionnez une marque</option>
-                            <option value="TECHGIANT" {% if request.POST.phone_brand == 'TECHGIANT' %}selected{% endif %}>TechGiant</option>
-                            <option value="GALAXY" {% if request.POST.phone_brand == 'GALAXY' %}selected{% endif %}>Galaxy</option>
-                            <option value="PIXEL" {% if request.POST.phone_brand == 'PIXEL' %}selected{% endif %}>Pixel</option>
-                            <option value="ONEPLUS" {% if request.POST.phone_brand == 'ONEPLUS' %}selected{% endif %}>OnePlus</option>
-                            <option value="XIAOMI" {% if request.POST.phone_brand == 'XIAOMI' %}selected{% endif %}>Xiaomi</option>
                             <option value="APPLE" {% if request.POST.phone_brand == 'APPLE' %}selected{% endif %}>Apple</option>
+                            <option value="SAMSUNG" {% if request.POST.phone_brand == 'SAMSUNG' %}selected{% endif %}>Samsung</option>
+                            <option value="ITEL" {% if request.POST.phone_brand == 'ITEL' %}selected{% endif %}>Itel</option>
+                            <option value="TECHNO" {% if request.POST.phone_brand == 'TECHNO' %}selected{% endif %}>Techno</option>
+                            <option value="HUAWEI" {% if request.POST.phone_brand == 'HUAWEI' %}selected{% endif %}>Huawei</option>
+                            <option value="INFINIX" {% if request.POST.phone_brand == 'INFINIX' %}selected{% endif %}>Infinix</option>
+                            <option value="XIAOMI" {% if request.POST.phone_brand == 'XIAOMI' %}selected{% endif %}>Xiaomi</option>
+                            <option value="PIXEL" {% if request.POST.phone_brand == 'PIXEL' %}selected{% endif %}>Pixel</option>
                         </select>
                     </div>
 
@@ -237,6 +239,7 @@
                             <option value="OFFER" {% if request.POST.phone_category == 'OFFER' %}selected{% endif %}>Offres spéciales</option>
                             <option value="REFURBISHED" {% if request.POST.phone_category == 'REFURBISHED' %}selected{% endif %}>Reconditionnés</option>
                             <option value="ACCESSORY" {% if request.POST.phone_category == 'ACCESSORY' %}selected{% endif %}>Accessoires</option>
+
                         </select>
                     </div>
 

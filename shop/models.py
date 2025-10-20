@@ -47,7 +47,10 @@ class Product(models.Model):
         ('ITEL','Itel'),
         ('TECHNO','Techno'),
         ('HUAWEI','Huawei'),
-        ('INFINIX','Infinix')
+        ('INFINIX','Infinix'),
+        ('XIAOMI', 'Xiaomi'),
+        ('PIXEL', 'Pixel'),
+
 
     ]
 
