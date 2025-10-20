@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+from django.conf import settings
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name="Nom")
@@ -311,6 +312,13 @@ class Order(models.Model):
         ('CASH_ON_DELIVERY', 'À payer à la livraison'),
     ]
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Utilisateur"
+    )
     order_number = models.CharField(max_length=20, unique=True, verbose_name='Numéro de commande')
     full_name = models.CharField(max_length=200, verbose_name="Nom complet")
     email = models.EmailField(verbose_name="Adresse email")

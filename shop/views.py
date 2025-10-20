@@ -660,7 +660,7 @@ def checkout(request):
     for item in cart_items:
         if item.quantity > item.product.stock:
             messages.error(request,
-                           f"Stock insuffisant pour {item.product.name}. Il ne reste que {item.product.stock} unité(s) disponible(s).")
+                           f"Stock insuffisant pour {item.item.product.name}. Il ne reste que {item.product.stock} unité(s) disponible(s).")
             return redirect('shop:cart_detail')
 
     if request.method == 'POST':
@@ -682,6 +682,10 @@ def checkout(request):
 
         # 🔥 CRÉER LA COMMANDE UNIQUEMENT APRÈS VALIDATION
         order = Order(
+            # ⭐⭐ AJOUTEZ CETTE LIGNE : Lier la commande à l'utilisateur connecté
+            user=request.user if request.user.is_authenticated else None,
+
+            # Vos champs existants :
             full_name=full_name,
             email=email,
             phone_number=phone_number,
@@ -752,7 +756,7 @@ def order_history(request):
         print(f"DEBUG: Utilisateur connecté - {request.user.email}")
         # Chercher les commandes par email
         orders = Order.objects.filter(
-            email=request.user.email
+            user=request.user
         ).prefetch_related('items').order_by('-created_at')
         print(f"DEBUG: Commandes trouvées par email: {orders.count()}")
 
