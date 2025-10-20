@@ -37,16 +37,18 @@ class Product(models.Model):
         ('PINK', 'Rose'),
         ('GREEN', 'Vert'),
         ('BEIGE', 'Beige'),
+        ('BLACK','Noir')
     ]
 
     # MARQUES pour les téléphones
     PHONE_BRANDS = [
-        ('TECHGIANT', 'TechGiant'),
-        ('GALAXY', 'Galaxy'),
-        ('PIXEL', 'Pixel'),
-        ('ONEPLUS', 'OnePlus'),
-        ('XIAOMI', 'Xiaomi'),
-        ('APPLE','Apple')
+        ('APPLE','Apple'),
+        ('SAMSUNG','Samsung'),
+        ('ITEL','Itel'),
+        ('TECHNO','Techno'),
+        ('HUAWEI','Huawei'),
+        ('INFINIX','Infinix')
+
     ]
 
     PHONE_CATEGORIES = [
