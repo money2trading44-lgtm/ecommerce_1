@@ -8,14 +8,25 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 import dj_database_url
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 load_dotenv()
+
+# Configuration Cloudinary - version corrigée
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+    secure=True  # Important pour HTTPS
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-prct4r0m&#@h#i0vnm=z(8sx)!)@*a&2rc+cr6kq1us7tzr5%6'
 
-# 🔥 Mets False après test, mais pour déboguer l’affichage des images mets True temporairement
+# 🔥 Mets False après test, mais pour déboguer l'affichage des images mets True temporairement
 DEBUG = True
 
 ALLOWED_HOSTS = [
@@ -30,24 +41,22 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     'https://dsd-general-trading.com',
     'https://www.dsd-general-trading.com',
+    'https://*.up.railway.app',  # Ajout pour Railway
 ]
 
-# --- APPLICATIONS ---
+# --- APPLICATIONS --- Corrigé l'ordre
 INSTALLED_APPS = [
+    'cloudinary_storage',  # Doit être avant django.contrib.staticfiles
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # Tes apps
+    'cloudinary',  # Après staticfiles
     'shop',
     'users',
 ]
-
-
-
 
 LOGIN_URL = '/gestion-securisee/login/'
 
@@ -121,25 +130,17 @@ TIME_ZONE = 'Europe/Paris'
 USE_I18N = True
 USE_TZ = True
 
+# --- CONFIGURATION CLOUDINARY UNIFIÉE ---
+# Utilise Cloudinary pour les médias dans tous les environnements
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-if 'RAILWAY_STATIC_URL' in os.environ:
-    # En production sur Railway
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = '/tmp/media'  # Railway a un système de fichiers temporaire
-else:
-    # En développement local
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# --- STATIC & MEDIA FILES ---
+# Configuration pour les fichiers statiques et médias
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'shop/static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# ✅ Le plus important pour ton problème
-# MEDIA_URL = '/media/'
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Les médias sont gérés par Cloudinary, donc pas besoin de MEDIA_ROOT local
+MEDIA_URL = '/media/'  # Cette URL sera redirigée vers Cloudinary
 
 # --- DEFAULT PK ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
