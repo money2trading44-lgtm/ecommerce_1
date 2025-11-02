@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-prct4r0m&#@h#i0vnm=z(8sx)!)@*a&2rc+cr6kq1us7tzr5%6'
 
 # 🔥 Mets False après test, mais pour déboguer l'affichage des images mets True temporairement
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'dsd-general-trading.com',
