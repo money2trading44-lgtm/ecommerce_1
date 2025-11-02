@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse, HttpRequest
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 
 
 def sitemap_xml(request):
@@ -53,6 +54,7 @@ urlpatterns = [
     path('sitemap.xml', sitemap_xml),
     path('',include('shop.urls')),
     path('administration/', include('shop.urls_admin')),
+    path('<path:unknown_path>/', RedirectView.as_view(url='/', permanent=False)),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

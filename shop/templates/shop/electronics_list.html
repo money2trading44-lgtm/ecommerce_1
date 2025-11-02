@@ -22,7 +22,7 @@
                     <div>
                         <h3 class="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">Nouveautés</h3>
                         <div class="space-y-1 sm:space-y-2">
-                            {% for category_value, category_label in phone_categories %}
+                            {% for category_value, category_label in electronics_categories %}
                             <label class="flex items-center">
                                 <input type="checkbox" name="category" value="{{ category_value }}"
                                        class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
@@ -68,7 +68,7 @@
                         <button type="submit" class="w-full bg-primary text-white font-bold py-2 px-4 rounded text-sm hover:bg-primary/90">
                             Appliquer
                         </button>
-                        <a href="{% url 'shop:phones_list' %}" class="w-full bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded text-sm text-center hover:bg-slate-300 block">
+                        <a href="{% url 'shop:electronics_list' %}" class="w-full bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded text-sm text-center hover:bg-slate-300 block">
                             Réinitialiser
                         </a>
                     </div>
@@ -80,7 +80,7 @@
         <div class="flex-1">
             <!-- En-tête avec tri -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4 sm:gap-0">
-                <h1 class="text-2xl sm:text-3xl font-bold">Téléphones</h1>
+                <h1 class="text-2xl sm:text-3xl font-bold">Téléphones & Accessoires</h1>
                 <div class="flex items-center gap-2">
                     <span class="text-xs sm:text-sm text-slate-500">Trier par:</span>
                     <select class="rounded-lg text-xs sm:text-sm border border-slate-300 bg-white focus:ring-primary px-2 sm:px-3 py-1.5 sm:py-2"
@@ -95,7 +95,7 @@
 
             <!-- GRILLE DE PRODUITS -->
             <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {% for phone in phones %}
+                {% for phone in electronics %}
                 <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-shadow">
                     <a href="{% url 'shop:product_detail' product_id=phone.id %}" class="block">
                         <div class="relative">
@@ -167,7 +167,7 @@
                 </div>
                 {% empty %}
                 <div class="col-span-1 xs:col-span-2 md:col-span-3 lg:col-span-3 xl:col-span-4 text-center py-8 sm:py-12">
-                    <p class="text-gray-500 text-base sm:text-lg">Aucun téléphone trouvé.</p>
+                    <p class="text-gray-500 text-base sm:text-lg">Aucun produit électronique trouvé.</p>
                     <p class="text-xs sm:text-sm text-gray-400 mt-2">Ajoute des téléphones via l'administration.</p>
                 </div>
                 {% endfor %}

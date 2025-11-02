@@ -107,8 +107,8 @@
                             Accueil
                         </a>
                         <a class="text-sm font-medium {% if request.resolver_match.url_name == 'phones_list' %}text-primary font-semibold{% else %}text-slate-600 hover:text-primary{% endif %} transition-colors"
-                           href="{% url 'shop:phones_list' %}">
-                            Téléphones
+                           href="{% url 'shop:electronics_list' %}">
+                            Téléphones & Accessoires
                         </a>
                         <a class="text-sm font-medium {% if request.resolver_match.url_name == 'decoration_list' %}text-primary font-semibold{% else %}text-slate-600 hover:text-primary{% endif %} transition-colors"
                            href="{% url 'shop:decoration_list' %}">
@@ -177,8 +177,8 @@
                                         Accueil
                                     </a>
                                     <a class="text-sm font-medium py-2 px-3 rounded-lg {% if request.resolver_match.url_name == 'phones_list' %}bg-primary text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %} transition-colors"
-                                       href="{% url 'shop:phones_list' %}">
-                                        Téléphones
+                                       href="{% url 'shop:electronics_list' %}">
+                                        Téléphones & Accessoires
                                     </a>
                                     <a class="text-sm font-medium py-2 px-3 rounded-lg {% if request.resolver_match.url_name == 'decoration_list' %}bg-primary text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %} transition-colors"
                                        href="{% url 'shop:decoration_list' %}">
@@ -234,7 +234,7 @@
                     <h3 class="font-semibold text-slate-900 mb-3 text-sm">Navigation</h3>
                     <ul class="space-y-2 text-sm">
                         <li><a href="{% url 'shop:home' %}" class="text-slate-600 hover:text-primary transition-colors">Accueil</a></li>
-                        <li><a href="{% url 'shop:phones_list' %}" class="text-slate-600 hover:text-primary transition-colors">Téléphones</a></li>
+                        <li><a href="{% url 'shop:electronics_list' %}" class="text-slate-600 hover:text-primary transition-colors">Téléphones & Accessoires</a></li>
                         <li><a href="{% url 'shop:decoration_list' %}" class="text-slate-600 hover:text-primary transition-colors">Déco & Aménagement</a></li>
                         <li><a href="{% url 'shop:repair_request' %}" class="text-slate-600 hover:text-primary transition-colors">Réparations</a></li>
                     </ul>

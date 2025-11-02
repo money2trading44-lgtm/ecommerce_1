@@ -49,7 +49,7 @@
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nom du produit *</label>
                     <input type="text" id="name" name="name" required
                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                           placeholder="Ex: Draps en coton bio"
+                           placeholder="Ex: iPhone 15 Pro Max"
                            value="{{ product.name }}">
                 </div>
 
@@ -75,21 +75,22 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Type de produit *</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4" id="product-type-selector">
+                    <!-- OPTION MODIFIÉE : Électronique & Accessoires -->
                     <label class="relative flex cursor-pointer rounded-lg border border-gray-300 p-3 sm:p-4 focus:outline-none product-type-option transition-all duration-200">
-                        <input type="radio" name="product_type" value="PHONE" class="sr-only" required
-                               {% if product.product_type == 'PHONE' %}checked{% endif %}>
+                        <input type="radio" name="product_type" value="ELECTRONICS" class="sr-only" required
+                               {% if product.product_type == 'ELECTRONICS' %}checked{% endif %}>
                         <div class="flex w-full items-center justify-between">
                             <div class="flex items-center">
                                 <div class="text-xs sm:text-sm">
-                                    <span class="font-medium text-gray-900">Téléphone</span>
-                                    <p class="text-gray-500 hidden xs:block">Smartphones et accessoires</p>
+                                    <span class="font-medium text-gray-900">Électronique & Accessoires</span>
+                                    <p class="text-gray-500 hidden xs:block">Smartphones, tablettes, accessoires</p>
                                 </div>
                             </div>
-                            <span class="material-symbols-outlined text-gray-400 text-base sm:text-lg">smartphone</span>
+                            <span class="material-symbols-outlined text-gray-400 text-base sm:text-lg">devices</span>
                         </div>
                     </label>
 
-                    <!-- OPTION MODIFIÉE : Déco & Aménagement (remplace Draps) -->
+                    <!-- OPTION : Déco & Aménagement -->
                     <label class="relative flex cursor-pointer rounded-lg border border-gray-300 p-3 sm:p-4 focus:outline-none product-type-option transition-all duration-200">
                         <input type="radio" name="product_type" value="DECORATION" class="sr-only" required
                                {% if product.product_type == 'DECORATION' %}checked{% endif %}>
@@ -106,7 +107,7 @@
                 </div>
             </div>
 
-            <!-- SECTION MODIFIÉE : Spécifications pour la DÉCORATION (inclut maintenant les draps) -->
+            <!-- SECTION : Spécifications pour la DÉCORATION -->
             <div id="decoration-specs" class="{% if product.product_type != 'DECORATION' %}hidden{% endif %} space-y-4 sm:space-y-6 p-3 sm:p-4 bg-purple-50 rounded-lg">
                 <h4 class="font-semibold text-purple-900 text-sm sm:text-base">Spécifications de la décoration</h4>
 
@@ -123,7 +124,7 @@
                     </select>
                 </div>
 
-                <!-- Spécifications pour les DRAPS (intégrées dans la décoration) -->
+                <!-- Spécifications pour les DRAPS -->
                 <div id="sheet-specs" class="{% if product.decoration_type != 'SHEET' %}hidden{% endif %} space-y-4 sm:space-y-6 p-3 sm:p-4 bg-blue-50 rounded-lg">
                     <h4 class="font-semibold text-blue-900 text-sm sm:text-base">Spécifications des draps</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -205,40 +206,42 @@
                 </div>
             </div>
 
-            <!-- Spécifications pour les TÉLÉPHONES -->
-            <div id="phone-specs" class="{% if product.product_type != 'PHONE' %}hidden{% endif %} space-y-4 sm:space-y-6 p-3 sm:p-4 bg-green-50 rounded-lg">
-                <h4 class="font-semibold text-green-900 text-sm sm:text-base">Spécifications du téléphone</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <!-- Marque -->
-                    <div>
-                        <label for="phone_brand" class="block text-sm font-medium text-gray-700 mb-2">Marque</label>
-                        <select id="phone_brand" name="phone_brand"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
-                            <option value="">Sélectionnez une marque</option>
-                            <option value="TECHGIANT" {% if product.phone_brand == 'TECHGIANT' %}selected{% endif %}>TechGiant</option>
-                            <option value="GALAXY" {% if product.phone_brand == 'GALAXY' %}selected{% endif %}>Galaxy</option>
-                            <option value="PIXEL" {% if product.phone_brand == 'PIXEL' %}selected{% endif %}>Pixel</option>
-                            <option value="ONEPLUS" {% if product.phone_brand == 'ONEPLUS' %}selected{% endif %}>OnePlus</option>
-                            <option value="XIAOMI" {% if product.phone_brand == 'XIAOMI' %}selected{% endif %}>Xiaomi</option>
-                            <option value="APPLE" {% if product.phone_brand == 'APPLE' %}selected{% endif %}>Apple</option>
-                        </select>
-                    </div>
+            <!-- SECTION MODIFIÉE : Spécifications pour les PRODUITS ÉLECTRONIQUES -->
+            <div id="electronics-specs" class="{% if product.product_type != 'ELECTRONICS' %}hidden{% endif %} space-y-4 sm:space-y-6 p-3 sm:p-4 bg-green-50 rounded-lg">
+                <h4 class="font-semibold text-green-900 text-sm sm:text-base">Spécifications des produits électroniques</h4>
 
-                    <!-- Catégorie téléphone -->
-                    <div>
-                        <label for="phone_category" class="block text-sm font-medium text-gray-700 mb-2">Catégorie</label>
-                        <select id="phone_category" name="phone_category"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
-                            <option value="">Sélectionnez une catégorie</option>
-                            <option value="BESTSELLER" {% if product.phone_category == 'BESTSELLER' %}selected{% endif %}>Meilleures ventes</option>
-                            <option value="OFFER" {% if product.phone_category == 'OFFER' %}selected{% endif %}>Offres spéciales</option>
-                            <option value="REFURBISHED" {% if product.phone_category == 'REFURBISHED' %}selected{% endif %}>Reconditionnés</option>
-                            <option value="ACCESSORY" {% if product.phone_category == 'ACCESSORY' %}selected{% endif %}>Accessoires</option>
-                        </select>
+                <!-- Catégorie électronique -->
+                <div>
+                    <label for="electronics_category" class="block text-sm font-medium text-gray-700 mb-2">Catégorie *</label>
+                    <select id="electronics_category" name="electronics_category" required
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                        <option value="">Sélectionnez une catégorie</option>
+                        <option value="SMARTPHONE" {% if product.electronics_category == 'SMARTPHONE' %}selected{% endif %}>Smartphones</option>
+                        <option value="TABLET" {% if product.electronics_category == 'TABLET' %}selected{% endif %}>Tablettes</option>
+                        <option value="HEADPHONE" {% if product.electronics_category == 'HEADPHONE' %}selected{% endif %}>Casques audio</option>
+                        <option value="CHARGER" {% if product.electronics_category == 'CHARGER' %}selected{% endif %}>Chargeurs & Câbles</option>
+                        <option value="SMARTWATCH" {% if product.electronics_category == 'SMARTWATCH' %}selected{% endif %}>Montres connectées</option>
+                        <option value="EARBUDS" {% if product.electronics_category == 'EARBUDS' %}selected{% endif %}>Écouteurs</option>
+                        <option value="POWERBANK" {% if product.electronics_category == 'POWERBANK' %}selected{% endif %}>Power banks</option>
+                        <option value="PHONE_CASE" {% if product.electronics_category == 'PHONE_CASE' %}selected{% endif %}>Coques & Protection</option>
+                        <option value="REFURBISHED" {% if product.electronics_category == 'REFURBISHED' %}selected{% endif %}>Reconditionnés</option>
+                        <option value="OTHER_ACCESSORY" {% if product.electronics_category == 'OTHER_ACCESSORY' %}selected{% endif %}>Autres accessoires</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6" id="electronics-fields">
+                    <!-- Marque -->
+                    <div class="electronics-field" data-categories="all">
+                        <label for="phone_brand" class="block text-sm font-medium text-gray-700 mb-2">Marque *</label>
+                        <input type="text" id="phone_brand" name="phone_brand" required
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                               placeholder="Ex: Apple, Samsung, Huawei, Sony, JBL..."
+                               value="{{ product.phone_brand|default:'' }}">
+                        <p class="text-xs text-gray-500 mt-1">Entrez le nom de la marque du produit</p>
                     </div>
 
                     <!-- Stockage -->
-                    <div>
+                    <div class="electronics-field" data-categories="SMARTPHONE,TABLET,REFURBISHED">
                         <label for="storage" class="block text-sm font-medium text-gray-700 mb-2">Stockage</label>
                         <input type="text" id="storage" name="storage"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
@@ -247,25 +250,25 @@
                     </div>
 
                     <!-- Taille écran -->
-                    <div>
+                    <div class="electronics-field" data-categories="SMARTPHONE,TABLET,SMARTWATCH,REFURBISHED">
                         <label for="screen_size" class="block text-sm font-medium text-gray-700 mb-2">Taille écran</label>
                         <input type="text" id="screen_size" name="screen_size"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                               placeholder="Ex: 6.1 pouces"
+                               placeholder="Ex: 6.1 pouces, 10.9 pouces..."
                                value="{{ product.screen_size|default:'' }}">
                     </div>
 
                     <!-- Processeur -->
-                    <div>
+                    <div class="electronics-field" data-categories="SMARTPHONE,TABLET,REFURBISHED">
                         <label for="processor" class="block text-sm font-medium text-gray-700 mb-2">Processeur</label>
                         <input type="text" id="processor" name="processor"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                               placeholder="Ex: Snapdragon 8 Gen 2"
+                               placeholder="Ex: Snapdragon 8 Gen 2, A17 Pro..."
                                value="{{ product.processor|default:'' }}">
                     </div>
 
                     <!-- RAM -->
-                    <div>
+                    <div class="electronics-field" data-categories="SMARTPHONE,TABLET,REFURBISHED">
                         <label for="ram" class="block text-sm font-medium text-gray-700 mb-2">Mémoire RAM</label>
                         <input type="text" id="ram" name="ram"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
@@ -274,7 +277,7 @@
                     </div>
 
                     <!-- Appareil photo -->
-                    <div class="md:col-span-2">
+                    <div class="electronics-field md:col-span-2" data-categories="SMARTPHONE,TABLET,REFURBISHED">
                         <label for="camera" class="block text-sm font-medium text-gray-700 mb-2">Appareil photo</label>
                         <input type="text" id="camera" name="camera"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
@@ -283,25 +286,25 @@
                     </div>
 
                     <!-- Batterie -->
-                    <div>
+                    <div class="electronics-field" data-categories="SMARTPHONE,TABLET,SMARTWATCH,EARBUDS,POWERBANK,REFURBISHED">
                         <label for="battery" class="block text-sm font-medium text-gray-700 mb-2">Batterie</label>
                         <input type="text" id="battery" name="battery"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                               placeholder="Ex: 5000 mAh"
+                               placeholder="Ex: 5000 mAh, 20h d'autonomie..."
                                value="{{ product.battery|default:'' }}">
                     </div>
 
                     <!-- Système d'exploitation -->
-                    <div>
+                    <div class="electronics-field" data-categories="SMARTPHONE,TABLET,SMARTWATCH,REFURBISHED">
                         <label for="operating_system" class="block text-sm font-medium text-gray-700 mb-2">Système d'exploitation</label>
                         <input type="text" id="operating_system" name="operating_system"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                               placeholder="Ex: Android 14, iOS 17..."
+                               placeholder="Ex: Android 14, iOS 17, WatchOS..."
                                value="{{ product.operating_system|default:'' }}">
                     </div>
 
                     <!-- Connectivité -->
-                    <div class="md:col-span-2">
+                    <div class="electronics-field md:col-span-2" data-categories="SMARTPHONE,TABLET,SMARTWATCH,HEADPHONE,EARBUDS,REFURBISHED">
                         <label for="connectivity" class="block text-sm font-medium text-gray-700 mb-2">Connectivité</label>
                         <input type="text" id="connectivity" name="connectivity"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
@@ -406,7 +409,7 @@
     // Gestion de l'affichage des spécifications par type de produit
     document.addEventListener('DOMContentLoaded', function() {
         const productTypeRadios = document.querySelectorAll('input[name="product_type"]');
-        const phoneSpecs = document.getElementById('phone-specs');
+        const electronicsSpecs = document.getElementById('electronics-specs');
         const decorationSpecs = document.getElementById('decoration-specs');
         const sheetSpecs = document.getElementById('sheet-specs');
 
@@ -414,7 +417,7 @@
             const selectedType = document.querySelector('input[name="product_type"]:checked');
 
             // Masquer toutes les spécifications
-            phoneSpecs.classList.add('hidden');
+            electronicsSpecs.classList.add('hidden');
             decorationSpecs.classList.add('hidden');
             sheetSpecs.classList.add('hidden');
 
@@ -439,15 +442,32 @@
                 const icon = selectedOption.querySelector('.material-symbols-outlined');
                 icon.classList.remove('text-gray-400');
 
-                if (selectedType.value === 'PHONE') {
-                    phoneSpecs.classList.remove('hidden');
+                if (selectedType.value === 'ELECTRONICS') {
+                    electronicsSpecs.classList.remove('hidden');
                     icon.classList.add('text-green-600');
+                    updateElectronicsFields(); // Mettre à jour les champs électroniques
                 } else if (selectedType.value === 'DECORATION') {
                     decorationSpecs.classList.remove('hidden');
                     icon.classList.add('text-purple-600');
                     updateDecorationSpecs(); // Gérer les sous-options de décoration
                 }
             }
+        }
+
+        // Gestion des champs électroniques selon la catégorie
+        function updateElectronicsFields() {
+            const category = document.getElementById('electronics_category').value;
+            const allFields = document.querySelectorAll('.electronics-field');
+
+            allFields.forEach(field => {
+                const fieldCategories = field.getAttribute('data-categories').split(',');
+                // "all" signifie que le champ est toujours visible
+                if (fieldCategories.includes('all') || fieldCategories.includes(category)) {
+                    field.style.display = 'block';
+                } else {
+                    field.style.display = 'none';
+                }
+            });
         }
 
         // Gestion des spécifications de décoration
@@ -490,6 +510,9 @@
             radio.addEventListener('change', updateSpecifications);
         });
 
+        // Écouter les changements dans les options électroniques
+        document.getElementById('electronics_category').addEventListener('change', updateElectronicsFields);
+
         // Écouter les changements dans les options de décoration
         document.getElementById('decoration_type').addEventListener('change', updateDecorationSpecs);
         document.getElementById('needs_custom_quote').addEventListener('change', updateDecorationSpecs);
@@ -498,7 +521,7 @@
         updateSpecifications();
     });
 
-    // Fonctions pour la prévisualisation d'image (identique à add_product.html)
+    // Fonctions pour la prévisualisation d'image
     function previewImage(input) {
         const preview = document.getElementById('preview');
         const previewContainer = document.getElementById('image-preview');

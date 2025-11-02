@@ -14,7 +14,7 @@
             {% if product.product_type == 'SHEET' %}
                 <a href="{% url 'shop:sheets_list' %}" class="hover:text-primary transition-colors">Draps</a>
             {% elif product.product_type == 'PHONE' %}
-                <a href="{% url 'shop:phones_list' %}" class="hover:text-primary transition-colors">Téléphones</a>
+                <a href="{% url 'shop:electronics_list' %}" class="hover:text-primary transition-colors">Téléphones</a>
             {% endif %}
             <span class="material-symbols-outlined text-xs">chevron_right</span>
             <span class="text-slate-800 font-medium truncate">{{ product.name }}</span>
@@ -246,7 +246,7 @@
         <section class="mt-8 sm:mt-12">
             <div class="flex items-center justify-between mb-4 sm:mb-6">
                 <h2 class="text-lg sm:text-xl font-bold text-slate-900">Produits similaires</h2>
-                <a href="{% if product.product_type == 'SHEET' %}{% url 'shop:sheets_list' %}{% else %}{% url 'shop:phones_list' %}{% endif %}"
+                <a href="{% if product.product_type == 'SHEET' %}{% url 'shop:electronics_list' %}{% else %}{% url 'shop:electronics_list' %}{% endif %}"
                    class="text-primary hover:underline text-xs sm:text-sm">
                     Voir tout
                 </a>

@@ -12,8 +12,8 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'price', 'category', 'product_type', 'decoration_type', 'needs_custom_quote', 'on_sale', 'stock']  # MODIFIÉ
-    list_filter = ['category', 'product_type', 'decoration_type', 'needs_custom_quote', 'on_sale']  # MODIFIÉ
+    list_display = ['name', 'price', 'category', 'product_type', 'electronics_category', 'decoration_type', 'needs_custom_quote', 'on_sale', 'stock']
+    list_filter = ['category', 'product_type', 'electronics_category', 'decoration_type', 'needs_custom_quote','on_sale']
     search_fields = ['name', 'description']
     fieldsets = (
         ('Informations générales', {
@@ -31,9 +31,9 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('sheet_size', 'color', 'material'),
             'classes': ('collapse',)
         }),
-        ('Spécifications Téléphones', {
-            'fields': ('phone_brand', 'phone_category', 'storage', 'screen_size',
-                      'processor', 'ram', 'camera', 'battery', 'operating_system', 'connectivity'),
+        ('Spécifications Électronique', {
+            'fields': ('phone_brand', 'electronics_category', 'storage', 'screen_size',
+                       'processor', 'ram', 'camera', 'battery', 'operating_system', 'connectivity'),
             'classes': ('collapse',)
         }),
         ('Statut', {

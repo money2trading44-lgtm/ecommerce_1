@@ -18,7 +18,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     PRODUCT_TYPES = [
-        ('PHONE', 'Téléphone'),
+        ('ELECTRONICS', 'Électronique & Accessoires'),
         ('DECORATION','Déco & Aménagement')
     ]
 
@@ -61,12 +61,24 @@ class Product(models.Model):
         ('REFURBISHED', 'Reconditionnés'),
         ('ACCESSORY', 'Accessoires'),
     ]
+    ELECTRONICS_CATEGORIES = [
+        ('SMARTPHONE', 'Smartphones'),
+        ('TABLET', 'Tablettes'),
+        ('HEADPHONE', 'Casques audio'),
+        ('CHARGER', 'Chargeurs & Câbles'),
+        ('SMARTWATCH', 'Montres connectées'),
+        ('EARBUDS', 'Écouteurs'),
+        ('POWERBANK', 'Power banks'),
+        ('PHONE_CASE', 'Coques & Protection'),
+        ('REFURBISHED', 'Reconditionnés'),
+        ('OTHER_ACCESSORY', 'Autres accessoires'),
+    ]
 
     name = models.CharField(max_length=200, verbose_name="Nom")
     description = models.TextField(verbose_name="Description")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Prix")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Catégorie")
-    product_type = models.CharField(max_length=10, choices=PRODUCT_TYPES, verbose_name="Type de produit")
+    product_type = models.CharField(max_length=15, choices=PRODUCT_TYPES, verbose_name="Type de produit")
 
     # Attributs spécifiques aux draps
     sheet_size = models.CharField(max_length=10, choices=SHEET_SIZES, blank=True, null=True, verbose_name="Taille")
@@ -75,6 +87,13 @@ class Product(models.Model):
 
     # Attributs spécifiques aux téléphones
     phone_brand = models.CharField(max_length=20, choices=PHONE_BRANDS, blank=True, null=True, verbose_name="Marque")
+    electronics_category = models.CharField(
+        max_length=20,
+        choices=ELECTRONICS_CATEGORIES,
+        blank=True,
+        null=True,
+        verbose_name="Catégorie électronique"
+    )
     phone_category = models.CharField(max_length=20, choices=PHONE_CATEGORIES, blank=True, null=True, verbose_name="Catégorie téléphone")
     storage = models.CharField(max_length=50, null=True,blank=True, verbose_name="Stockage")
     screen_size = models.CharField(max_length=50, null=True, blank=True, verbose_name="Taille écran")
@@ -136,8 +155,8 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         # Déterminer la catégorie automatiquement
-        if self.product_type == 'PHONE':
-            category_name = "Téléphones"
+        if self.product_type == 'ELECTRONICS':
+            category_name = "Électronique & Accessoires"
         else:  # DECORATION
             category_name = "Déco & Aménagement Intérieur"
 

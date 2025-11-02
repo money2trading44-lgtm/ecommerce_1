@@ -126,8 +126,8 @@ def decoration_list(request):
     return render(request, 'shop/decoration_list.html', context)
 
 
-def phone_list(request):
-    phones = Product.objects.filter(product_type='PHONE', is_active=True)
+def electronics_list(request):
+    electronics = Product.objects.filter(product_type='ELECTRONICS', is_active=True)
 
     # Filtres
     selected_brand = request.GET.get('brand', '')
@@ -136,38 +136,37 @@ def phone_list(request):
     max_price = request.GET.get('max_price', '')
 
     if selected_brand:
-        phones = phones.filter(phone_brand=selected_brand)
+        electronics = electronics.filter(phone_brand=selected_brand)
     if selected_category:
-        phones = phones.filter(phone_category=selected_category)
+        electronics = electronics.filter(electronics_category=selected_category)  # ⭐ CHANGÉ
     if min_price:
-        phones = phones.filter(price__gte=min_price)
+        electronics = electronics.filter(price__gte=min_price)
     if max_price:
-        phones = phones.filter(price__lte=max_price)
+        electronics = electronics.filter(price__lte=max_price)
 
     # Tri
     sort_by = request.GET.get('sort', '')
     if sort_by == 'price_asc':
-        phones = phones.order_by('price')
+        electronics = electronics.order_by('price')
     elif sort_by == 'price_desc':
-        phones = phones.order_by('-price')
+        electronics = electronics.order_by('-price')
     elif sort_by == 'new':
-        phones = phones.order_by('-created_at')
+        electronics = electronics.order_by('-created_at')
     else:
-        phones = phones.order_by('-created_at')  # Par défaut: nouveautés
+        electronics = electronics.order_by('-created_at')  # Par défaut: nouveautés
 
     context = {
-        'phones': phones,
+        'electronics': electronics,  # ⭐ CHANGÉ
         'selected_brand': selected_brand,
         'selected_category': selected_category,
         'min_price': min_price,
         'max_price': max_price,
         'sort_by': sort_by,
-        'phone_brands': Product.PHONE_BRANDS,
-        'phone_categories': Product.PHONE_CATEGORIES
+        'electronics_brands': Product.PHONE_BRANDS,  # ⭐ CHANGÉ (on garde les marques)
+        'electronics_categories': Product.ELECTRONICS_CATEGORIES  # ⭐ CHANGÉ
     }
 
-    return render(request, 'shop/phones_list.html', context)
-
+    return render(request, 'shop/electronics_list.html', context)  # ⭐ CHANGÉ
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_active=True)
@@ -1203,7 +1202,7 @@ def admin_add_product(request):
             return redirect('/gestion-securisee/products/add/')
 
         # Validation spécifique
-        if product_type == 'PHONE' and not request.POST.get('phone_brand'):
+        if product_type == 'ELECTRONICS' and not request.POST.get('phone_brand'):
             messages.error(request, "Pour les téléphones, la marque est obligatoire.")
             return redirect('/gestion-securisee/products/add/')
 
@@ -1230,16 +1229,18 @@ def admin_add_product(request):
                 needs_custom_quote=needs_custom_quote,
                 decoration_type=decoration_type if product_type == 'DECORATION' else None,
                 price_per_sqm=Decimal(price_per_sqm) if product_type == 'DECORATION' and price_per_sqm else None,
-                phone_brand=request.POST.get('phone_brand') if product_type == 'PHONE' else None,
-                phone_category=request.POST.get('phone_category') if product_type == 'PHONE' else None,
-                storage=request.POST.get('storage') if product_type == 'PHONE' else None,
-                screen_size=request.POST.get('screen_size') if product_type == 'PHONE' else None,
-                processor=request.POST.get('processor') if product_type == 'PHONE' else None,
-                ram=request.POST.get('ram') if product_type == 'PHONE' else None,
-                camera=request.POST.get('camera') if product_type == 'PHONE' else None,
-                battery=request.POST.get('battery') if product_type == 'PHONE' else None,
-                operating_system=request.POST.get('operating_system') if product_type == 'PHONE' else None,
-                connectivity=request.POST.get('connectivity') if product_type == 'PHONE' else None,
+                phone_brand=request.POST.get('phone_brand') if product_type == 'ELECTRONICS' else None,
+                electronics_category=request.POST.get(
+                    'electronics_category') if product_type == 'ELECTRONICS' else None,
+                phone_category=request.POST.get('phone_category') if product_type == 'ELECTRONICS' else None,
+                storage=request.POST.get('storage') if product_type == 'ELECTRONICS' else None,
+                screen_size=request.POST.get('screen_size') if product_type == 'ELECTRONICS' else None,
+                processor=request.POST.get('processor') if product_type == 'ELECTRONICS' else None,
+                ram=request.POST.get('ram') if product_type == 'ELECTRONICS' else None,
+                camera=request.POST.get('camera') if product_type == 'ELECTRONICS' else None,
+                battery=request.POST.get('battery') if product_type == 'ELECTRONICS' else None,
+                operating_system=request.POST.get('operating_system') if product_type == 'ELECTRONICS' else None,
+                connectivity=request.POST.get('connectivity') if product_type == 'ELECTRONICS' else None,
                 sheet_size=request.POST.get('sheet_size') if decoration_type == 'SHEET' else None,
                 color=request.POST.get('color') if decoration_type == 'SHEET' else None,
                 material=request.POST.get('material') if decoration_type == 'SHEET' else None,
@@ -1425,10 +1426,10 @@ def admin_order_export(request, order_id):
 
         # === INFORMATIONS SOCIÉTÉ ET DATE ===
         company_data = [
-            ["Tech & Home", f"Date: {order.created_at.strftime('%d/%m/%Y')}"],
+            ["DSD General Trading", f"Date: {order.created_at.strftime('%d/%m/%Y')}"],
             ["Abidjan, Côte d'Ivoire", f"Heure: {order.created_at.strftime('%H:%M')}"],
-            ["Tél: +225 07 07 07 07 07", f"Statut: {order.get_status_display()}"],
-            ["Email: contact@techandhome.ci", f"Ref: {order.order_number}"],
+            ["Tél: +225 07 67 49 58 04", f"Statut: {order.get_status_display()}"],
+            ["Email: dsdgeneraltrading20@gmail.com", f"Ref: {order.order_number}"],
         ]
 
         company_table = Table(company_data, colWidths=[100 * mm, 90 * mm])
@@ -1546,7 +1547,7 @@ def admin_order_export(request, order_id):
         <para alignment="center">
         <font size="8" color="gray">
         DSD General Trading - Abidjan, Côte d'Ivoire<br/>
-        Tél: +225 07 07 07 07 07 - Email: contact@techandhome.ci<br/>
+        Tél: +225 07 67 49 58 04 - Email: dsdgeneraltrading20@gmail.com<br/>
         Ce document a une valeur informative et constitue une preuve d'achat.
         </font>
         </para>
@@ -1687,7 +1688,7 @@ def admin_edit_product(request, product_id):
             description = request.POST.get('description')
             price = request.POST.get('price')
             stock = request.POST.get('stock')
-            product_type = request.POST.get('product_type')  # 'PHONE' ou 'DECORATION'
+            product_type = request.POST.get('product_type')  # 'ELECTRONICS' ou 'DECORATION'
             discount_percentage = request.POST.get('discount_percentage', 0)
             image = request.FILES.get('image')
 
@@ -1705,7 +1706,7 @@ def admin_edit_product(request, product_id):
             product.discount_percentage = discount_percentage
             product.on_sale = bool(discount_percentage and int(discount_percentage) > 0)
 
-            # NOUVEAUX CHAMPS POUR LA DÉCORATION
+            # CHAMPS POUR LA DÉCORATION
             product.needs_custom_quote = needs_custom_quote
             product.decoration_type = decoration_type if product_type == 'DECORATION' else None
             product.price_per_sqm = price_per_sqm if product_type == 'DECORATION' and price_per_sqm else None
@@ -1714,11 +1715,11 @@ def admin_edit_product(request, product_id):
             if image:
                 product.image = image
 
-            # ✅ CORRECTION : GESTION UNIFIÉE DES SPÉCIFICATIONS
-            if product_type == 'PHONE':
-                # Spécifications téléphone
+            # ✅ NOUVELLE LOGIQUE : GESTION UNIFIÉE POUR ELECTRONICS
+            if product_type == 'ELECTRONICS':
+                # Spécifications produits électroniques
                 product.phone_brand = request.POST.get('phone_brand')
-                product.phone_category = request.POST.get('phone_category')
+                product.electronics_category = request.POST.get('electronics_category')
                 product.storage = request.POST.get('storage')
                 product.screen_size = request.POST.get('screen_size')
                 product.processor = request.POST.get('processor')
@@ -1736,7 +1737,7 @@ def admin_edit_product(request, product_id):
             elif product_type == 'DECORATION':
                 # Spécifications décoration
                 product.phone_brand = None
-                product.phone_category = None
+                product.electronics_category = None
                 product.storage = ''
                 product.screen_size = ''
                 product.processor = ''

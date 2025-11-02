@@ -19,7 +19,7 @@
                 Confort & Technologie
                 <span class="block text-xl sm:text-2xl md:text-3xl mt-2 font-light">Réunis</span>
             </h1>
-            <p class="mt-4 max-w-2xl text-base sm:text-lg md:text-xl text-slate-100">Découvrez l'excellence dans chaque détail : draps de luxe, téléphones high-tech et service de réparation expert.</p>
+            <p class="mt-4 max-w-2xl text-base sm:text-lg md:text-xl text-slate-100">Décoration d'intérieur raffinée, électronique high-tech et service de réparation expert.</p>
             <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <a class="bg-white text-primary font-bold py-2 sm:py-3 px-6 sm:px-8 rounded-full hover:bg-slate-100 transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
                    href="#prestations">
@@ -65,7 +65,7 @@
                     <ul class="space-y-2 mb-4 sm:mb-6">
                         <li class="flex items-center text-xs sm:text-sm text-slate-600">
                             <span class="material-symbols-outlined text-green-500 mr-2 text-sm sm:text-base">check_circle</span>
-                            Coton égyptien 100%
+                            Très bonne qualité
                         </li>
                         <li class="flex items-center text-xs sm:text-sm text-slate-600">
                             <span class="material-symbols-outlined text-green-500 mr-2 text-sm sm:text-base">check_circle</span>
@@ -99,10 +99,10 @@
                     </div>
                 </div>
                 <div class="p-4 sm:p-6">
-                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-3">Téléphones High-Tech</h3>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-3">Téléphones High-Tech & Accessoires</h3>
                     <p class="text-slate-600 mb-4 leading-relaxed text-sm sm:text-base">
-                        Les derniers smartphones des grandes marques. Performances, design et innovation
-                        au service de votre quotidien connecté.
+                        Découvrez notre univers électronique complet. Des smartphones performants
+                        aux accessoires innovants, tout pour votre quotidien connecté.
                     </p>
                     <ul class="space-y-2 mb-4 sm:mb-6">
                         <li class="flex items-center text-xs sm:text-sm text-slate-600">
@@ -118,7 +118,7 @@
                             Prix compétitifs
                         </li>
                     </ul>
-                    <a href="{% url 'shop:phones_list' %}"
+                    <a href="{% url 'shop:electronics_list' %}"
                        class="inline-flex items-center justify-center w-full bg-purple-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-purple-700 transition-colors group text-sm sm:text-base">
                         Découvrir les modèles
                         <span class="material-symbols-outlined ml-2 group-hover:translate-x-1 transition-transform text-sm sm:text-base">arrow_forward</span>
@@ -171,7 +171,7 @@
     </section>
 
     <!-- PROMOTIONS SECTION -->
-    <section class="mb-12 sm:mb-16">
+    <<section class="mb-12 sm:mb-16">
         <div class="text-center mb-8 sm:mb-12">
             <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-4">Promotions du Moment</h2>
             <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto px-4">Profitez de nos offres spéciales sur une sélection de produits</p>
@@ -179,71 +179,73 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
             {% for product in promotions %}
-            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300">
-                <div class="relative overflow-hidden">
-                    {% if product.image %}
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}"
-                             class="w-full h-40 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-500">
-                    {% else %}
-                        <div class="w-full h-40 sm:h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                            <span class="text-3xl sm:text-4xl text-slate-400">
-                                {% if product.product_type == 'SHEET' %}🛏️
-                                {% elif product.product_type == 'PHONE' %}📱
-                                {% else %}🔧{% endif %}
+                {% if not product.needs_custom_quote %}  {# ⭐ EXCLURE LES PRODUITS SUR DEVIS #}
+                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300">
+                    <div class="relative overflow-hidden">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                                 class="w-full h-40 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+                        {% else %}
+                            <div class="w-full h-40 sm:h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                                <span class="text-3xl sm:text-4xl text-slate-400">
+                                    {% if product.product_type == 'DECORATION' %}🏠
+                                    {% elif product.product_type == 'ELECTRONICS' %}📱
+                                    {% else %}🔧{% endif %}
+                                </span>
+                            </div>
+                        {% endif %}
+
+                        {% if product.on_sale %}
+                        <div class="absolute top-3 left-3">
+                            <span class="bg-red-500 text-white font-bold px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm shadow-lg">
+                                -{{ product.discount_percentage }}%
                             </span>
                         </div>
-                    {% endif %}
-
-                    {% if product.on_sale %}
-                    <div class="absolute top-3 left-3">
-                        <span class="bg-red-500 text-white font-bold px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm shadow-lg">
-                            -{{ product.discount_percentage }}%
-                        </span>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div class="p-4 sm:p-6">
-                    <div class="flex items-start justify-between mb-3">
-                        <h3 class="font-bold text-base sm:text-lg text-slate-900 pr-2 line-clamp-2">{{ product.name }}</h3>
-                        <span class="bg-slate-100 text-slate-700 text-xs font-medium px-2 py-1 rounded shrink-0">
-                            {% if product.product_type == 'SHEET' %}Draps
-                            {% else %}Téléphone{% endif %}
-                        </span>
-                    </div>
-
-                    <p class="text-xs sm:text-sm text-slate-500 mb-4 line-clamp-2">{{ product.description|truncatewords:15 }}</p>
-
-                    <div class="flex items-center gap-3 mb-4">
-                        {% if product.on_sale %}
-                            <span class="text-lg sm:text-xl font-bold text-primary">{{ product.get_discounted_price|floatformat:2 }} FCFA</span>
-                            <span class="text-xs sm:text-sm text-red-500 line-through">{{ product.price|floatformat:2 }} FCFA</span>
-                        {% else %}
-                            <span class="text-lg sm:text-xl font-bold text-slate-900">{{ product.price|floatformat:2 }} FCFA</span>
                         {% endif %}
                     </div>
 
-                    <div class="flex gap-2">
-                        <a class="flex-1 bg-slate-100 text-slate-700 font-medium py-2 px-3 sm:px-4 rounded-lg hover:bg-slate-200 transition-colors text-xs sm:text-sm text-center"
-                           href="{% url 'shop:product_detail' product_id=product.id %}">
-                            Voir détails
-                        </a>
-                        {% if product.stock > 0 %}
-                            <button type="button"
-                                    data-add-to-cart
-                                    data-product-id="{{ product.id }}"
-                                    class="flex-1 bg-primary text-white font-medium py-2 px-3 sm:px-4 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm flex items-center justify-center gap-1">
-                                <span class="material-symbols-outlined text-sm sm:text-base">shopping_cart</span>
-                                Ajouter
-                            </button>
-                        {% else %}
-                            <button class="flex-1 bg-slate-300 text-slate-500 font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm cursor-not-allowed" disabled>
-                                Indisponible
-                            </button>
-                        {% endif %}
+                    <div class="p-4 sm:p-6">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="font-bold text-base sm:text-lg text-slate-900 pr-2 line-clamp-2">{{ product.name }}</h3>
+                            <span class="bg-slate-100 text-slate-700 text-xs font-medium px-2 py-1 rounded shrink-0">
+                                {% if product.product_type == 'DECORATION' %}Décoration
+                                {% else %}Électronique{% endif %}
+                            </span>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-500 mb-4 line-clamp-2">{{ product.description|truncatewords:15 }}</p>
+
+                        <div class="flex items-center gap-3 mb-4">
+                            {% if product.on_sale %}
+                                <span class="text-lg sm:text-xl font-bold text-primary">{{ product.get_discounted_price|floatformat:2 }} FCFA</span>
+                                <span class="text-xs sm:text-sm text-red-500 line-through">{{ product.price|floatformat:2 }} FCFA</span>
+                            {% else %}
+                                <span class="text-lg sm:text-xl font-bold text-slate-900">{{ product.price|floatformat:2 }} FCFA</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex gap-2">
+                            <a class="flex-1 bg-slate-100 text-slate-700 font-medium py-2 px-3 sm:px-4 rounded-lg hover:bg-slate-200 transition-colors text-xs sm:text-sm text-center"
+                               href="{% url 'shop:product_detail' product_id=product.id %}">
+                                Voir détails
+                            </a>
+                            {% if product.stock > 0 %}
+                                <button type="button"
+                                        data-add-to-cart
+                                        data-product-id="{{ product.id }}"
+                                        class="flex-1 bg-primary text-white font-medium py-2 px-3 sm:px-4 rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm flex items-center justify-center gap-1">
+                                    <span class="material-symbols-outlined text-sm sm:text-base">shopping_cart</span>
+                                    Ajouter
+                                </button>
+                            {% else %}
+                                <button class="flex-1 bg-slate-300 text-slate-500 font-medium py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm cursor-not-allowed" disabled>
+                                    Indisponible
+                                </button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
+                {% endif %}  {# ⭐ FIN DE LA CONDITION #}
             {% empty %}
             <div class="col-span-1 sm:col-span-2 xl:col-span-3 text-center py-8 sm:py-12">
                 <div class="max-w-md mx-auto">
