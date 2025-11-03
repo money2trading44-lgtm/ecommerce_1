@@ -973,6 +973,22 @@ def admin_products(request):
     return render(request, 'administration/products.html', context)
 
 
+@admin_required
+@login_required
+@user_passes_test(is_admin_user)
+def admin_delete_quote(request, quote_id):
+    """Vue pour supprimer une demande de devis"""
+    quote = get_object_or_404(CustomQuoteRequest, id=quote_id)
+
+    if request.method == 'POST':
+        try:
+            quote_name = f"{quote.full_name} - {quote.product.name}"
+            quote.delete()
+            messages.success(request, f"La demande de devis '{quote_name}' a été supprimée avec succès.")
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la suppression : {str(e)}")
+
+    return redirect('shop:admin_custom_quotes')
 
 @admin_required
 @login_required
@@ -1121,6 +1137,7 @@ def admin_custom_quotes(request):
         'current_type': type_filter,
     }
     return render(request, 'administration/custom_quotes.html', context)
+
 
 @admin_required
 @login_required
@@ -1278,7 +1295,6 @@ def admin_add_product(request):
 
     # GET request
     return render(request, 'administration/add_product.html')
-
 
 
 @admin_required

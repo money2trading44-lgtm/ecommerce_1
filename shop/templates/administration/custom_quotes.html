@@ -218,6 +218,14 @@
                                    title="Contacter sur WhatsApp">
                                     <span class="material-symbols-outlined text-sm">chat</span>
                                 </a>
+                                 <form method="post" action="{% url 'shop:admin_delete_quote' quote.id %}" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette demande de devis ?');">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="inline-flex items-center px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                                            title="Supprimer">
+                                        <span class="material-symbols-outlined text-sm">delete</span>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
