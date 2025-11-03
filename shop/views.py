@@ -1688,14 +1688,28 @@ def admin_edit_product(request, product_id):
             description = request.POST.get('description')
             price = request.POST.get('price')
             stock = request.POST.get('stock')
-            product_type = request.POST.get('product_type')  # 'ELECTRONICS' ou 'DECORATION'
+            product_type = request.POST.get('product_type')
             discount_percentage = request.POST.get('discount_percentage', 0)
             image = request.FILES.get('image')
 
             # Gestion des produits de décoration
             needs_custom_quote = request.POST.get('needs_custom_quote') == 'on'
-            decoration_type = request.POST.get('decoration_type')  # 'SHEET', 'CURTAIN', etc.
+            decoration_type = request.POST.get('decoration_type')
             price_per_sqm = request.POST.get('price_per_sqm')
+
+            # ✅ CORRECTION : Validation conditionnelle pour phone_brand
+            phone_brand = request.POST.get('phone_brand')
+            if product_type == 'ELECTRONICS' and not phone_brand:
+                messages.error(request, "Le champ 'Marque' est requis pour les produits électroniques.")
+                context = {'product': product}
+                return render(request, 'administration/edit_product.html', context)
+
+            # ✅ CORRECTION : Validation pour electronics_category
+            electronics_category = request.POST.get('electronics_category')
+            if product_type == 'ELECTRONICS' and not electronics_category:
+                messages.error(request, "Le champ 'Catégorie' est requis pour les produits électroniques.")
+                context = {'product': product}
+                return render(request, 'administration/edit_product.html', context)
 
             # Mettre à jour les champs de base
             product.name = name
@@ -1711,15 +1725,11 @@ def admin_edit_product(request, product_id):
             product.decoration_type = decoration_type if product_type == 'DECORATION' else None
             product.price_per_sqm = price_per_sqm if product_type == 'DECORATION' and price_per_sqm else None
 
-            # Mettre à jour l'image si une nouvelle est fournie
-            if image:
-                product.image = image
-
-            # ✅ NOUVELLE LOGIQUE : GESTION UNIFIÉE POUR ELECTRONICS
+            # ✅ CORRECTION : GESTION UNIFIÉE POUR ELECTRONICS
             if product_type == 'ELECTRONICS':
                 # Spécifications produits électroniques
-                product.phone_brand = request.POST.get('phone_brand')
-                product.electronics_category = request.POST.get('electronics_category')
+                product.phone_brand = phone_brand
+                product.electronics_category = electronics_category
                 product.storage = request.POST.get('storage')
                 product.screen_size = request.POST.get('screen_size')
                 product.processor = request.POST.get('processor')
@@ -1758,6 +1768,10 @@ def admin_edit_product(request, product_id):
                     product.color = None
                     product.material = ''
 
+            # Mettre à jour l'image si une nouvelle est fournie
+            if image:
+                product.image = image
+
             # Sauvegarder les modifications
             product.save()
 
@@ -1766,6 +1780,9 @@ def admin_edit_product(request, product_id):
 
         except Exception as e:
             messages.error(request, f"Erreur lors de la modification : {str(e)}")
+            # ✅ CORRECTION : Retourner le contexte avec le produit pour réafficher le formulaire
+            context = {'product': product}
+            return render(request, 'administration/edit_product.html', context)
 
     # Préparer les données pour le template
     context = {
