@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',  # NOUVEAU : pour Supabase Storage
     'shop',
     'users',
 ]
@@ -107,10 +108,31 @@ else:
         }
     }
 
-# --- STOCKAGE LOCAL SIMPLE (pas de Cloudinary) ---
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# --- SUPA BASE CONFIGURATION ---
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
+SUPABASE_BUCKET_NAME = 'dsd-trading-images'
+
+# Configuration du stockage pour Supabase
+if SUPABASE_URL and SUPABASE_KEY:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    AWS_ACCESS_KEY_ID = SUPABASE_KEY
+    AWS_SECRET_ACCESS_KEY = SUPABASE_KEY  # Supabase utilise la même clé
+    AWS_STORAGE_BUCKET_NAME = SUPABASE_BUCKET_NAME
+    AWS_S3_ENDPOINT_URL = f"{SUPABASE_URL}/storage/v1"
+    AWS_S3_CUSTOM_DOMAIN = f"{SUPABASE_URL.replace('https://', '')}/storage/v1/object/public/{SUPABASE_BUCKET_NAME}"
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False
+
+    # URL pour les médias
+    MEDIA_URL = f"{AWS_S3_CUSTOM_DOMAIN}/"
+else:
+    # Fallback local si Supabase n'est pas configuré
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # --- STATIC FILES ---
 STATIC_URL = '/static/'
