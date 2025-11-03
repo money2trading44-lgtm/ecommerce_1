@@ -213,7 +213,7 @@
                 <!-- Catégorie électronique -->
                 <div>
                     <label for="electronics_category" class="block text-sm font-medium text-gray-700 mb-2">Catégorie *</label>
-                    <select id="electronics_category" name="electronics_category" required
+                    <select id="electronics_category" name="electronics_category"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                         <option value="">Sélectionnez une catégorie</option>
                         <option value="SMARTPHONE" {% if product.electronics_category == 'SMARTPHONE' %}selected{% endif %}>Smartphones</option>
@@ -233,7 +233,7 @@
                     <!-- Marque -->
                     <div class="electronics-field" data-categories="all">
                         <label for="phone_brand" class="block text-sm font-medium text-gray-700 mb-2">Marque *</label>
-                        <input type="text" id="phone_brand" name="phone_brand" required
+                        <input type="text" id="phone_brand" name="phone_brand"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: Apple, Samsung, Huawei, Sony, JBL..."
                                value="{{ product.phone_brand|default:'' }}">
@@ -394,10 +394,10 @@
                 <a href="/gestion-securisee/products/" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-center text-sm sm:text-base">
                     Annuler
                 </a>
-                <button type="submit" class="bg-primary text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                <button type="submit"
+                        class="bg-primary text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
                     <span class="material-symbols-outlined text-base">save</span>
-                    <span class="hidden xs:inline">Modifier le produit</span>
-                    <span class="xs:hidden">Modifier</span>
+                    <span>Modifier le produit</span>
                 </button>
             </div>
         </form>
