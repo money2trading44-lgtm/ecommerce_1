@@ -16,6 +16,7 @@ from django.db.models import Sum, Q
 from datetime import timedelta, datetime
 import requests
 import json
+from .utils.emails import send_new_order_notification, send_quote_request_notification, send_repair_request_notification
 
 
 # ========================= VUES CLIENT ======================
@@ -208,6 +209,12 @@ def repair_request(request):
             description=description
         )
         repair_request.save()
+        # 🔥 NOTIFICATION EMAIL - DEMANDE DE RÉPARATION
+        try:
+            send_repair_request_notification(repair_request)
+            print("✅ Notification réparation envoyée !")
+        except Exception as e:
+            print(f"❌ Erreur notification réparation: {e}")
 
         messages.success(request, 'Votre demande de réparation a été envoyée avec succès !', extra_tags='repair')
         return redirect('shop:repair_request')
@@ -263,6 +270,12 @@ def custom_quote_request(request, product_id):
                 color_preferences=color_preferences
             )
             quote_request.save()
+            # 🔥 NOTIFICATION EMAIL - DEMANDE DE DEVIS
+            try:
+                send_quote_request_notification(quote_request)
+                print("✅ Notification devis envoyée !")
+            except Exception as e:
+                print(f"❌ Erreur notification devis: {e}")
 
             # Rediriger vers la page de confirmation
             return render(request, 'shop/quote_confirmation.html', {'quote_request': quote_request})
@@ -697,6 +710,12 @@ def checkout(request):
             payment_status='CASH_ON_DELIVERY' if payment_method == 'CASH' else 'PENDING'
         )
         order.save()
+        # 🔥 NOTIFICATION EMAIL - NOUVELLE COMMANDE
+        try:
+            send_new_order_notification(order)
+            print("✅ Notification commande envoyée !")
+        except Exception as e:
+            print(f"❌ Erreur notification commande: {e}")
 
         # Créer les OrderItems
         for cart_item in cart_items:
@@ -1715,123 +1734,6 @@ def admin_edit_product(request, product_id):
     return render(request, 'administration/edit_product.html', context)
 
 
-# @admin_required
-# @login_required
-# @user_passes_test(is_admin_user)
-# def admin_edit_product(request, product_id):
-#     """Vue pour modifier un produit existant"""
-#     product = get_object_or_404(Product, id=product_id)
-#
-#     if request.method == 'POST':
-#         try:
-#             # Récupérer les données du formulaire
-#             name = request.POST.get('name')
-#             description = request.POST.get('description')
-#             price = request.POST.get('price')
-#             stock = request.POST.get('stock')
-#             product_type = request.POST.get('product_type')
-#             discount_percentage = request.POST.get('discount_percentage', 0)
-#             image = request.FILES.get('image')
-#
-#             # Gestion des produits de décoration
-#             needs_custom_quote = request.POST.get('needs_custom_quote') == 'on'
-#             decoration_type = request.POST.get('decoration_type')
-#             price_per_sqm = request.POST.get('price_per_sqm')
-#
-#             # ✅ CORRECTION : Validation conditionnelle pour phone_brand
-#             phone_brand = request.POST.get('phone_brand')
-#             if product_type == 'ELECTRONICS' and not phone_brand:
-#                 messages.error(request, "Le champ 'Marque' est requis pour les produits électroniques.")
-#                 context = {'product': product}
-#                 return render(request, 'administration/edit_product.html', context)
-#
-#             # ✅ CORRECTION : Validation pour electronics_category
-#             electronics_category = request.POST.get('electronics_category')
-#             if product_type == 'ELECTRONICS' and not electronics_category:
-#                 messages.error(request, "Le champ 'Catégorie' est requis pour les produits électroniques.")
-#                 context = {'product': product}
-#                 return render(request, 'administration/edit_product.html', context)
-#
-#             # Mettre à jour les champs de base
-#             product.name = name
-#             product.description = description
-#             product.price = price if not needs_custom_quote else 0
-#             product.stock = stock
-#             product.product_type = product_type
-#             product.discount_percentage = discount_percentage
-#             product.on_sale = bool(discount_percentage and int(discount_percentage) > 0)
-#
-#             # CHAMPS POUR LA DÉCORATION
-#             product.needs_custom_quote = needs_custom_quote
-#             product.decoration_type = decoration_type if product_type == 'DECORATION' else None
-#             product.price_per_sqm = price_per_sqm if product_type == 'DECORATION' and price_per_sqm else None
-#
-#             # ✅ CORRECTION : GESTION UNIFIÉE POUR ELECTRONICS
-#             if product_type == 'ELECTRONICS':
-#                 # Spécifications produits électroniques
-#                 product.phone_brand = phone_brand
-#                 product.electronics_category = electronics_category
-#                 product.storage = request.POST.get('storage')
-#                 product.screen_size = request.POST.get('screen_size')
-#                 product.processor = request.POST.get('processor')
-#                 product.ram = request.POST.get('ram')
-#                 product.camera = request.POST.get('camera')
-#                 product.battery = request.POST.get('battery')
-#                 product.operating_system = request.POST.get('operating_system')
-#                 product.connectivity = request.POST.get('connectivity')
-#
-#                 # Réinitialiser les champs draps
-#                 product.sheet_size = None
-#                 product.color = None
-#                 product.material = ''
-#
-#             elif product_type == 'DECORATION':
-#                 # Spécifications décoration
-#                 product.phone_brand = None
-#                 product.electronics_category = None
-#                 product.storage = ''
-#                 product.screen_size = ''
-#                 product.processor = ''
-#                 product.ram = ''
-#                 product.camera = ''
-#                 product.battery = ''
-#                 product.operating_system = ''
-#                 product.connectivity = ''
-#
-#                 # Spécifications pour les draps (si decoration_type == 'SHEET')
-#                 if decoration_type == 'SHEET':
-#                     product.sheet_size = request.POST.get('sheet_size')
-#                     product.color = request.POST.get('color')
-#                     product.material = request.POST.get('material')
-#                 else:
-#                     # Réinitialiser si ce n'est pas un drap
-#                     product.sheet_size = None
-#                     product.color = None
-#                     product.material = ''
-#
-#             # Mettre à jour l'image si une nouvelle est fournie
-#             if image:
-#                 product.image = image
-#
-#             # Sauvegarder les modifications
-#             product.save()
-#
-#             messages.success(request, f"Le produit '{product.name}' a été modifié avec succès !")
-#             return redirect('/gestion-securisee/products/')
-#
-#         except Exception as e:
-#             messages.error(request, f"Erreur lors de la modification : {str(e)}")
-#             # ✅ CORRECTION : Retourner le contexte avec le produit pour réafficher le formulaire
-#             context = {'product': product}
-#             return render(request, 'administration/edit_product.html', context)
-#
-#     # Préparer les données pour le template
-#     context = {
-#         'product': product,
-#     }
-#
-#     return render(request, 'administration/edit_product.html', context)
-
 
 @admin_required
 @login_required
@@ -1873,5 +1775,7 @@ def admin_delete_product(request, product_id):
         return redirect('/gestion-securisee/products/')
 
     return redirect('/gestion-securisee/products/')
+
+
 
 
