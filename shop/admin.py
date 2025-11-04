@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from .models import Category, Product, RepairRequest, Cart, CartItem, Order, CustomQuoteRequest
+from django import forms
+from .supabase_storage import upload_to_supabase
 
 
 @admin.register(Category)
@@ -10,11 +12,20 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 
+class ProductForm(forms.ModelForm):
+    image_upload = forms.ImageField(required=False, label="Uploader une image")
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    form = ProductForm
     list_display = ['name', 'price', 'category', 'product_type', 'electronics_category', 'decoration_type', 'needs_custom_quote', 'on_sale', 'stock']
     list_filter = ['category', 'product_type', 'electronics_category', 'decoration_type', 'needs_custom_quote','on_sale']
     search_fields = ['name', 'description']
+    readonly_fields = ['created_at']
     fieldsets = (
         ('Informations générales', {
             'fields': ('name', 'description', 'price', 'category', 'product_type', 'stock', 'image')
@@ -41,7 +52,17 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         })
     )
-    readonly_fields = ['created_at']
+
+    def save_model(self, request, obj, form, change):
+        uploaded_file = form.cleaned_data.get('image_upload')
+        if uploaded_file:
+            supabase_url = upload_to_supabase(uploaded_file, 'products')
+            if supabase_url:
+                obj.image_url = supabase_url
+
+        super().save_model(request, obj, form, change)
+
+
 
 @admin.register(RepairRequest)
 class RepairRequestAdmin(admin.ModelAdmin):

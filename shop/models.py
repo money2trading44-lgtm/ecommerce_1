@@ -107,7 +107,7 @@ class Product(models.Model):
     connectivity = models.CharField(max_length=200, null=True, blank=True, verbose_name="Connectivité")
 
     stock = models.IntegerField(default=0, verbose_name="Stock")
-    image = models.ImageField(upload_to='products/', blank=True, null=True, verbose_name="Image")
+    image_url = models.URLField(blank=True, null=True, verbose_name="URL de l'image")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
     is_active = models.BooleanField(default=True, verbose_name="Actif")
     on_sale = models.BooleanField(default=False, verbose_name="En promotion")
@@ -225,6 +225,7 @@ class CustomQuoteRequest(models.Model):
     def __str__(self):
         return f"Devis {self.product.name} - {self.full_name}"
 
+
 class RepairRequest(models.Model):
     ISSUE_TYPES = [
         ('SCREEN', 'Écran cassé'),
@@ -301,9 +302,6 @@ class CartItem(models.Model):
         if self.product.on_sale:
             return self.product.get_discounted_price() * self.quantity
         return self.product.price * self.quantity
-
-
-
 
 
 class Order(models.Model):

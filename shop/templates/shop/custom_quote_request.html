@@ -21,8 +21,8 @@
         <div class="lg:col-span-1">
             <div class="bg-white border border-slate-200 rounded-2xl p-6 sticky top-6">
                 <div class="text-center mb-6">
-                    {% if product.image %}
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                    {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}"
                              class="w-32 h-32 mx-auto object-cover rounded-lg mb-4">
                     {% else %}
                         <div class="w-32 h-32 mx-auto bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg flex items-center justify-center mb-4">

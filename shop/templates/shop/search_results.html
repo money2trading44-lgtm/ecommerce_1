@@ -30,8 +30,8 @@
         <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
             <!-- Image du produit -->
             <div class="aspect-square bg-slate-100 relative">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                {% if product.image_url %}
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
                 {% else %}
                     <div class="w-full h-full flex items-center justify-center text-slate-400">
                         <span class="material-symbols-outlined text-3xl sm:text-4xl">

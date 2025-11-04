@@ -1201,7 +1201,7 @@ def admin_repair_delete(request, repair_id):
 @login_required
 @user_passes_test(is_admin_user)
 def admin_add_product(request):
-    """Vue pour ajouter un produit avec Cloudinary"""
+    """Vue pour ajouter un produit avec Supabase"""
 
     if request.method == 'POST':
         # Récupérer les données du formulaire
@@ -1256,7 +1256,6 @@ def admin_add_product(request):
             product = Product(
                 name=name,
                 description=description,
-                # ✅ CORRECTION : CONVERSION EN DECIMAL
                 price=Decimal(price) if not needs_custom_quote else Decimal('0'),
                 product_type=product_type,
                 stock=stock,
@@ -1266,8 +1265,7 @@ def admin_add_product(request):
                 decoration_type=decoration_type if product_type == 'DECORATION' else None,
                 price_per_sqm=Decimal(price_per_sqm) if product_type == 'DECORATION' and price_per_sqm else None,
                 phone_brand=request.POST.get('phone_brand') if product_type == 'ELECTRONICS' else None,
-                electronics_category=request.POST.get(
-                    'electronics_category') if product_type == 'ELECTRONICS' else None,
+                electronics_category=request.POST.get('electronics_category') if product_type == 'ELECTRONICS' else None,
                 phone_category=request.POST.get('phone_category') if product_type == 'ELECTRONICS' else None,
                 storage=request.POST.get('storage') if product_type == 'ELECTRONICS' else None,
                 screen_size=request.POST.get('screen_size') if product_type == 'ELECTRONICS' else None,
@@ -1283,11 +1281,19 @@ def admin_add_product(request):
             )
             product.save()  # Génère l'ID
 
-            # Sauvegarde de l'image via Cloudinary
-            product.image.save(image.name, image)
-
-            messages.success(request, f"Le produit '{name}' a été créé avec succès !")
-            return redirect('/gestion-securisee/products/')
+            # ✅ NOUVEAU : Upload de l'image vers Supabase
+            from .supabase_storage import upload_to_supabase
+            supabase_url = upload_to_supabase(image, 'products')
+            if supabase_url:
+                product.image_url = supabase_url
+                product.save()
+                messages.success(request, f"Le produit '{name}' a été créé avec succès !")
+                return redirect('/gestion-securisee/products/')
+            else:
+                # Si l'upload échoue, supprimer le produit créé et afficher une erreur
+                product.delete()
+                messages.error(request, "Erreur lors de l'upload de l'image vers Supabase. Veuillez réessayer.")
+                return redirect('/gestion-securisee/products/add/')
 
         except Exception as e:
             messages.error(request, f"Erreur lors de la création du produit : {e}")
@@ -1713,13 +1719,13 @@ def export_html_fallback(request, order):
 @login_required
 @user_passes_test(is_admin_user)
 def admin_edit_product(request, product_id):
-    """Vue pour modifier un produit existant - VERSION SIMPLIFIÉE"""
+    """Vue pour modifier un produit existant avec Supabase"""
     product = get_object_or_404(Product, id=product_id)
 
     if request.method == 'POST':
         try:
             # Récupérer seulement les champs essentiels
-            name = request.POST.get('name', product.name)  # Valeur par défaut = valeur actuelle
+            name = request.POST.get('name', product.name)
             description = request.POST.get('description', product.description)
             price = request.POST.get('price', product.price)
             stock = request.POST.get('stock', product.stock)
@@ -1732,12 +1738,18 @@ def admin_edit_product(request, product_id):
             product.stock = stock or product.stock
             product.product_type = product_type or product.product_type
 
-            # Gestion de l'image - champ principal
+            # ✅ CORRECTION : Gestion de l'image avec Supabase
             image = request.FILES.get('image')
             if image:
-                product.image = image
+                from .supabase_storage import upload_to_supabase
+                supabase_url = upload_to_supabase(image, 'products')
+                if supabase_url:
+                    product.image_url = supabase_url
+                else:
+                    messages.error(request, "Erreur lors de l'upload de l'image vers Supabase. L'image n'a pas été modifiée.")
+                    return redirect(f'/gestion-securisee/products/edit/{product_id}/')
 
-            # SAUVEGARDER sans validation stricte
+            # SAUVEGARDER
             product.save()
 
             messages.success(request, f"Le produit '{product.name}' a été modifié avec succès !")

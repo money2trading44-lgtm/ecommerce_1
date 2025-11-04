@@ -27,8 +27,8 @@
                             <div class="flex items-start gap-4">
                                 <!-- Image du produit -->
                                 <div class="flex-shrink-0">
-                                    {% if item.product.image %}
-                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}"
+                                    {% if item.product.image_url %}
+                                        <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}"
                                              class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg">
                                     {% else %}
                                         <div class="w-16 h-16 sm:w-20 sm:h-20 bg-slate-100 rounded-lg flex items-center justify-center">

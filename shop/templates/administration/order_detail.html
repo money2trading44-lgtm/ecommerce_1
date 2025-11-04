@@ -98,8 +98,8 @@
                     <div class="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                         <!-- Image du produit avec fallback -->
                         <div class="flex-shrink-0">
-                            {% if item.product.image %}
-                                <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" class="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg">
+                            {% if item.product.image_url %}
+                                <img src="{{ item.product.image_url }}" alt="{{ item.product_name }}" class="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg">
                             {% else %}
                                 <!-- Image par défaut stylisée -->
                                 <div class="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center border border-gray-200">

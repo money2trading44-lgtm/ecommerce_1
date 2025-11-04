@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'storages',  # NOUVEAU : pour Supabase Storage
     'shop',
     'users',
 ]
@@ -113,26 +112,16 @@ SUPABASE_URL = os.environ.get('SUPABASE_URL')
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
 SUPABASE_BUCKET_NAME = 'dsd-trading-images'
 
-# Configuration du stockage pour Supabase
-if SUPABASE_URL and SUPABASE_KEY:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# Configuration simple - on gérera l'upload via le code
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-    AWS_ACCESS_KEY_ID = SUPABASE_KEY
-    AWS_SECRET_ACCESS_KEY = SUPABASE_KEY
-    AWS_STORAGE_BUCKET_NAME = SUPABASE_BUCKET_NAME
-    AWS_S3_ENDPOINT_URL = f"{SUPABASE_URL}/storage/v1"
-    AWS_S3_CUSTOM_DOMAIN = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET_NAME}"
-    AWS_S3_FILE_OVERWRITE = False
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_QUERYSTRING_AUTH = False
-
-    # URL pour les médias - CORRIGÉ
-    MEDIA_URL = AWS_S3_CUSTOM_DOMAIN + '/'
+# Mais on définit l'URL publique pour l'affichage
+if SUPABASE_URL:
+    SUPABASE_PUBLIC_URL = f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_BUCKET_NAME}"
 else:
-    # Fallback local si Supabase n'est pas configuré
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    SUPABASE_PUBLIC_URL = None
 
 # --- STATIC FILES ---
 STATIC_URL = '/static/'

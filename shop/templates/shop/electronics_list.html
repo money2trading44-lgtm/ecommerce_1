@@ -99,8 +99,8 @@
                 <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-shadow">
                     <a href="{% url 'shop:product_detail' product_id=phone.id %}" class="block">
                         <div class="relative">
-                            {% if phone.image %}
-                                <img src="{{ request.scheme }}://{{ request.get_host }}{{ phone.image.url }}" alt="{{ phone.name }}" class="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-500">
+                            {% if phone.image_url %}
+                                <img src="{{ phone.image_url }}" alt="{{ phone.name }}" class="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-500">
                             {% else %}
                                 <div class="w-full h-48 sm:h-56 bg-gray-200 flex items-center justify-center">
                                     <span class="text-3xl sm:text-4xl">📱</span>
