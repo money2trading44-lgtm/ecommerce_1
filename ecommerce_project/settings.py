@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prct4r0m&#@h#i0vnm=z(8sx)!)@*a&2rc+cr6kq1us7tzr5%6')
 
 # 🔥 DEBUG True pour voir les images
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 # Hosts pour Railway
 ALLOWED_HOSTS = [
