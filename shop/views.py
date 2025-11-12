@@ -2,6 +2,7 @@ import os
 from decimal import Decimal
 
 from django.db.models.functions import ExtractMonth
+from django.urls import reverse
 from django.utils import timezone as django_timezone, timezone
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -16,6 +17,7 @@ from django.db.models import Sum, Q
 from datetime import timedelta, datetime
 import requests
 import json
+from .winipayer_service import WinipayerService
 from .utils.emails import send_new_order_notification, send_quote_request_notification, send_repair_request_notification
 
 
@@ -455,206 +457,141 @@ def remove_from_cart(request, item_id):
 
 def process_payment(request, order_id):
     """
-    Vue pour traiter le paiement en ligne via CinetPay
+    Vue pour traiter le paiement via Winipayer
     """
-    print("🎯 PROCESS_PAYMENT CinetPay appelée")
     order = get_object_or_404(Order, id=order_id)
-    print(f"🎯 Commande #{order.order_number} - Méthode: {order.payment_method}")
 
-    # VÉRIFICATION : SI LA COMMANDE EST DÉJÀ PAYÉE, REDIRIGER
+    # Si la commande est déjà payée
     if order.payment_status == 'PAID':
         messages.info(request, "Cette commande a déjà été payée.")
         return redirect('shop:order_confirmation', order_id=order.id)
 
-    # Si paiement à la livraison, rediriger directement vers confirmation
+    # Si paiement à la livraison (ne devrait pas arriver ici)
     if order.payment_method == 'CASH':
-        print("🎯 Paiement cash - redirection confirmation")
         return redirect('shop:order_confirmation', order_id=order.id)
 
-    # Configuration CinetPay
-    CINETPAY_API_KEY = settings.CINETPAY_API_KEY
-    CINETPAY_SITE_ID = settings.CINETPAY_SITE_ID
-
-    if not all([CINETPAY_API_KEY, CINETPAY_SITE_ID]):
-        print("❌ Clés CinetPay manquantes")
-        messages.error(request, "Configuration de paiement incomplète. Veuillez réessayer plus tard.")
-        return redirect('shop:checkout')
-
-    try:
-        print("🎯 Tentative de création de paiement CinetPay...")
-
-        # Préparer les données pour CinetPay
-        import uuid
-        transaction_id = str(uuid.uuid4())
-
-        # Déterminer le canal de paiement
-        payment_channels = {
-            'WAVE': 'CM_WAVE',
-            'ORANGE': 'CM_OM',
-            'MTN': 'CM_MTN'
-        }
-
-        channel = payment_channels.get(order.payment_method, 'CM_MOBILE_MONEY')
-
-        # Données de la requête CinetPay
-        payload = {
-            "apikey": CINETPAY_API_KEY,
-            "site_id": CINETPAY_SITE_ID,
-            "transaction_id": transaction_id,
-            "amount": str(int(float(order.total_price))),  # Montant en entier
-            "currency": "XOF",
-            "description": f"Commande #{order.order_number}",
-            "customer_name": order.full_name,
-            "customer_surname": order.full_name.split(' ')[0] if ' ' in order.full_name else order.full_name,
-            "customer_phone_number": order.phone_number,
-            "customer_email": order.email,
-            "customer_address": order.address,
-            "customer_city": order.city,
-            "customer_country": "CI",
-            "channels": channel,
-            "notify_url": f"http://127.0.0.1:8000/payment/webhook/",
-            "return_url": f"http://127.0.0.1:8000/commande/confirmation/{order.id}/",
-            "metadata": f"order_{order.id}"
-        }
-
-        # Envoyer la requête à CinetPay
-        print("🎯 Envoi requête à CinetPay...")
-        api_url = f"{settings.CINETPAY_BASE_URL}/payment/init"
-
-        response = requests.post(
-            api_url,
-            json=payload,
-            headers={'Content-Type': 'application/json'},
-            timeout=30
-        )
-
-        print(f"🎯 Statut HTTP CinetPay: {response.status_code}")
-        print(f"🎯 Réponse CinetPay: {response.text}")
-
-        if response.status_code == 200:
-            data = response.json()
-            print(f"🎯 Données reçues CinetPay: {data}")
-
-            if data.get('code') == '0':  # Succès CinetPay
-                print("✅ Succès CinetPay - Redirection...")
-                order.payment_reference = transaction_id
-                order.save()
-
-                # Rediriger vers la page de paiement CinetPay
-                payment_url = data['data']['payment_url']
-                return redirect(payment_url)
-            else:
-                print(f"❌ Erreur CinetPay: {data}")
-                error_message = data.get('description', 'Erreur inconnue de CinetPay')
-                messages.error(request, f"Erreur de paiement: {error_message}")
-                return redirect('shop:checkout')
-
-        else:
-            print(f"❌ Erreur HTTP CinetPay: {response.status_code}")
-            messages.error(request, "Erreur de connexion avec le service de paiement")
+    # Paiement en ligne Winipayer
+    if order.payment_method == 'ONLINE':
+        # Vérifier la configuration Winipayer
+        if not all([settings.WINIPAYER_API_KEY, settings.WINIPAYER_MERCHANT_UUID]):
+            messages.error(request, "Configuration de paiement incomplète. Veuillez réessayer plus tard.")
             return redirect('shop:checkout')
 
-    except Exception as e:
-        print(f"❌ Exception CinetPay: {str(e)}")
-        messages.error(request, f"Erreur lors du traitement du paiement: {str(e)}")
-        return redirect('shop:checkout')
+        try:
+            winipayer = WinipayerService()
+
+            # URLs de retour
+            if settings.DEBUG:
+                base_url = f"http://{request.get_host()}"  # HTTP pour développement
+            else:
+                base_url = f"https://{request.get_host()}"  # Utilisez votre domaine réel
+            return_url = f"{base_url}{reverse('shop:payment_success', args=[order.id])}"
+            cancel_url = f"{base_url}{reverse('shop:payment_cancel', args=[order.id])}"
+            callback_url = f"{base_url}{reverse('shop:winipayer_webhook')}"
+
+            # Créer le paiement
+            result = winipayer.create_payment(order, return_url, cancel_url, callback_url)
+
+            if result['success']:
+                # Sauvegarder les infos de transaction
+                order.winipayer_transaction_id = result['transaction_id']
+                order.winipayer_payment_url = result['payment_url']
+                order.payment_status = 'INITIATED'
+                order.save()
+
+                # Rediriger vers la page de paiement Winipayer
+                return redirect(result['payment_url'])
+            else:
+                messages.error(request, f"Erreur de paiement: {result['error']}")
+                return redirect('shop:checkout')
+
+        except Exception as e:
+            messages.error(request, f"Erreur lors du traitement du paiement: {str(e)}")
+            return redirect('shop:checkout')
+
+    messages.error(request, "Méthode de paiement non reconnue.")
+    return redirect('shop:checkout')
 
 
-def payment_webhook(request):
-    """Webhook pour recevoir les confirmations de paiement de CinetPay"""
+def winipayer_webhook(request):
+    """
+    Webhook Winipayer - Finaliser la commande après paiement réussi
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print(f"🔔 Webhook CinetPay reçu: {data}")
-
-            # Structure de réponse CinetPay
-            transaction_id = data.get('cpm_trans_id')
-            payment_status = data.get('cpm_result')
-            metadata = data.get('cpm_custom', '')
-
-            # Extraire l'ID de commande du metadata
-            order_id = None
-            if metadata and metadata.startswith('order_'):
-                try:
-                    order_id = int(metadata.replace('order_', ''))
-                except ValueError:
-                    pass
+            transaction_id = data.get('transaction_id')
+            status = data.get('status')
+            order_id = data.get('metadata', {}).get('order_id')
 
             if not order_id:
-                print("❌ Impossible d'extraire l'ID de commande du metadata")
                 return HttpResponse(status=400)
 
             try:
                 order = Order.objects.get(id=order_id)
-                print(f"🔔 Commande trouvée: #{order.order_number}")
 
-                if payment_status == '00':  # Paiement réussi CinetPay
-                    # PAIEMENT RÉUSSI
+                if status == 'success':
+                    # 🔥 PAIEMENT RÉUSSI - Finaliser la commande
                     order.payment_status = 'PAID'
                     order.status = 'CONFIRMED'
-                    order.payment_reference = transaction_id
+                    order.winipayer_transaction_id = transaction_id
                     order.save()
 
-                    # Mettre à jour le stock
+                    # 🔥 MAINTENANT mettre à jour le stock
                     for item in order.items.all():
                         if item.product:
                             item.product.stock -= item.quantity
                             item.product.save()
 
-                    # Vider le panier
+                    # 🔥 Vider le panier de l'utilisateur
                     cart = get_or_create_cart(request)
                     cart.items.all().delete()
 
-                    print(f"✅ Paiement CinetPay confirmé pour la commande #{order.order_number}")
+                    print(f"✅ Paiement confirmé pour la commande #{order.order_number}")
 
-                else:
-                    # PAIEMENT ÉCHOUÉ
+                elif status == 'failed':
                     order.payment_status = 'FAILED'
+                    order.status = 'CANCELLED'
                     order.save()
-                    print(f"❌ Paiement CinetPay échoué pour la commande #{order.order_number}")
 
             except Order.DoesNotExist:
-                print(f"❌ Commande {order_id} non trouvée")
                 return HttpResponse(status=404)
 
             return HttpResponse(status=200)
 
         except Exception as e:
-            print(f"❌ Erreur webhook CinetPay: {str(e)}")
+            print(f"Erreur webhook: {str(e)}")
             return HttpResponse(status=400)
 
     return HttpResponse(status=405)
 
 
-def payment_failed(request, order_id):
-    """Vue appelée quand le paiement échoue"""
-    try:
-        order = get_object_or_404(Order, id=order_id)
-        # 🔥 SUPPRIMER LA COMMANDE SI LE PAIEMENT ÉCHOUE
-        order.delete()
-    except:
-        pass
+def payment_success(request, order_id):
+    """
+    Vue appelée quand le paiement réussit
+    """
+    order = get_object_or_404(Order, id=order_id)
 
-    messages.error(request,
-                   "Le paiement a échoué. Votre commande n'a pas été créée. "
-                   "Veuillez réessayer ou choisir une autre méthode de paiement.")
+    if order.payment_status == 'PAID':
+        messages.success(request,
+                         f"Paiement confirmé ! Votre commande #{order.order_number} est en cours de traitement.")
+    else:
+        messages.info(request, "Votre paiement est en cours de validation...")
 
-    return redirect('shop:checkout')
+    return redirect('shop:order_confirmation', order_id=order.id)
 
 
 def payment_cancel(request, order_id):
     """
     Vue appelée quand l'utilisateur annule le paiement
     """
-    try:
-        order = get_object_or_404(Order, id=order_id)
-        # 🔥 SUPPRIMER LA COMMANDE SI L'UTILISATEUR ANNULE
-        order.delete()
-    except:
-        pass
+    order = get_object_or_404(Order, id=order_id)
+    order.payment_status = 'FAILED'
+    order.status = 'CANCELLED'
+    order.save()
 
-    messages.warning(request, "Paiement annulé. Votre commande n'a pas été créée.")
-    return redirect('shop:checkout')
+    messages.warning(request, "Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.")
+    return redirect('shop:cart_detail')
 
 
 def checkout(request):
@@ -672,7 +609,7 @@ def checkout(request):
     for item in cart_items:
         if item.quantity > item.product.stock:
             messages.error(request,
-                           f"Stock insuffisant pour {item.item.product.name}. Il ne reste que {item.product.stock} unité(s) disponible(s).")
+                           f"Stock insuffisant pour {item.product.name}. Il ne reste que {item.product.stock} unité(s) disponible(s).")
             return redirect('shop:cart_detail')
 
     if request.method == 'POST':
@@ -692,12 +629,9 @@ def checkout(request):
             messages.error(request, "Veuillez remplir tous les champs obligatoires.")
             return redirect('shop:checkout')
 
-        # 🔥 CRÉER LA COMMANDE UNIQUEMENT APRÈS VALIDATION
+        # 🔥 CRÉER LA COMMANDE (statut PENDING_PAYMENT pour paiement en ligne)
         order = Order(
-            # ⭐⭐ AJOUTEZ CETTE LIGNE : Lier la commande à l'utilisateur connecté
             user=request.user if request.user.is_authenticated else None,
-
-            # Vos champs existants :
             full_name=full_name,
             email=email,
             phone_number=phone_number,
@@ -707,15 +641,10 @@ def checkout(request):
             total_price=cart.get_total_price(),
             session_key=request.session.session_key if not request.user.is_authenticated else None,
             payment_method=payment_method,
-            payment_status='CASH_ON_DELIVERY' if payment_method == 'CASH' else 'PENDING'
+            payment_status='PENDING_PAYMENT' if payment_method == 'ONLINE' else 'CASH_ON_DELIVERY',
+            status='PENDING_PAYMENT' if payment_method == 'ONLINE' else 'PENDING'
         )
         order.save()
-        # 🔥 NOTIFICATION EMAIL - NOUVELLE COMMANDE
-        try:
-            send_new_order_notification(order)
-            print("✅ Notification commande envoyée !")
-        except Exception as e:
-            print(f"❌ Erreur notification commande: {e}")
 
         # Créer les OrderItems
         for cart_item in cart_items:
@@ -728,20 +657,29 @@ def checkout(request):
             )
             order_item.save()
 
-        # 🔥 CORRECTION CRITIQUE : GESTION DIFFÉRENCIÉE DES PAIEMENTS
+        # 🔥 LOGIQUE DIFFÉRENTE SELON LE PAIEMENT
         if payment_method == 'CASH':
-            # Pour paiement à la livraison : vider le panier et mettre à jour le stock
+            # Paiement à la livraison : mettre à jour le stock immédiatement
             for cart_item in cart_items:
                 cart_item.product.stock -= cart_item.quantity
                 cart_item.product.save()
 
+            # Vider le panier
             cart.items.all().delete()
+
+            # Notification email
+            try:
+                send_new_order_notification(order)
+            except Exception as e:
+                print(f"Erreur notification: {e}")
+
             messages.success(request,
                              f"Votre commande #{order.order_number} a été passée avec succès ! Paiement à la livraison.")
             return redirect('shop:order_confirmation', order_id=order.id)
-        else:
-            # Pour paiements en ligne : NE PAS vider le panier ni mettre à jour le stock
-            # Le stock sera mis à jour seulement après confirmation du paiement
+
+        else:  # Paiement en ligne
+            # 🔥 NE PAS mettre à jour le stock ni vider le panier maintenant
+            # Rediriger vers le processus de paiement Winipayer
             return redirect('shop:process_payment', order_id=order.id)
 
     context = {
@@ -749,7 +687,6 @@ def checkout(request):
         'cart_items': cart_items,
     }
     return render(request, 'shop/checkout.html', context)
-
 
 def order_confirmation(request, order_id):
     """

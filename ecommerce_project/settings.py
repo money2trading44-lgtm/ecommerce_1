@@ -24,7 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prct4r0m&#@h#i0vnm=z(8sx)!)@*a&2rc+cr6kq1us7tzr5%6')
 
 # 🔥 DEBUG True pour voir les images
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+#DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = False
 
 # Hosts pour Railway
 ALLOWED_HOSTS = [
@@ -148,17 +149,20 @@ USE_TZ = True
 # --- DEFAULT PK ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- CINETPAY CONFIG ---
-CINETPAY_API_KEY = os.environ.get('CINETPAY_API_KEY', '')
-CINETPAY_SITE_ID = os.environ.get('CINETPAY_SITE_ID', '')
-CINETPAY_MODE = os.environ.get('CINETPAY_MODE', 'test')
+# --- WINIPAYER CONFIG ---
+WINIPAYER_MERCHANT_UUID ='ae3792f7-67ba-4cca-b878-37694a7d3136'
+WINIPAYER_API_KEY = os.environ.get('WINIPAYER_API_KEY','')
+WINIPAYER_MERCHANT_APPLY = os.environ.get('WINIPAYER_MERCHANT_APPLY', '')
+WINIPAYER_MERCHANT_TOKEN = os.environ.get('WINIPAYER_MERCHANT_TOKEN', '')
+WINIPAYER_MODE = os.environ.get('WINIPAYER_MODE', 'test')  # test ou prod
 
-if CINETPAY_MODE == 'prod':
-    CINETPAY_BASE_URL = "https://api.cinetpay.com/v1"
-    CINETPAY_CHECKOUT_URL = "https://secure.cinetpay.com"
+if WINIPAYER_MODE == 'prod':
+    WINIPAYER_BASE_URL = "https://api-v2.winipayer.com"
+    WINIPAYER_CHECKOUT_URL = "https://checkout-v2.winipayer.com"
 else:
-    CINETPAY_BASE_URL = "https://api-checkout.cinetpay.com/v1"
-    CINETPAY_CHECKOUT_URL = "https://secure-checkout.cinetpay.com"
+    WINIPAYER_BASE_URL = "https://api-v2.winipayer.com"  # Même URL pour test et prod
+    WINIPAYER_CHECKOUT_URL = "https://checkout-v2.winipayer.com"
+
 
 # 🔥 Configuration pour servir les médias en debug
 if DEBUG:

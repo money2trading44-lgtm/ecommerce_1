@@ -307,6 +307,7 @@ class CartItem(models.Model):
 class Order(models.Model):
 
     STATUS_CHOICES = [
+        ('PENDING_PAYMENT', 'En attente de paiement'),
         ('PENDING', 'En attente'),
         ('CONFIRMED', 'Confirmée'),
         ('SHIPPED', 'Expédiée'),
@@ -316,14 +317,13 @@ class Order(models.Model):
 
     PAYMENT_METHODS =[
         ('CASH','Paiement à la livraison'),
-        ('WAVE','Wave'),
-        ('ORANGE','Orange Money'),
-        ('MTN','MTN Money'),
-        ('PAYDUNYA','PayDunya Checkout')
+        ('ONLINE', 'Paiement en ligne'),
     ]
 
     PAYMENT_STATUS = [
+        ('PENDING_PAYMENT', 'En attente de paiement'),
         ('PENDING', 'En attente'),
+        ('INITIATED','Paiement initié'),
         ('PAID', 'Payé'),
         ('FAILED', 'Échoué'),
         ('CASH_ON_DELIVERY', 'À payer à la livraison'),
@@ -353,6 +353,8 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=20,choices=PAYMENT_METHODS,default='CASH',verbose_name='Méthode de paiement')
     payment_status = models.CharField(max_length=20,choices=PAYMENT_STATUS,default='PENDING',verbose_name='Statut paiement')
     payment_reference = models.CharField(max_length=100,blank=True,verbose_name='Référence paiement')
+    winipayer_transaction_id = models.CharField(max_length=100,blank=True,verbose_name='ID Transaction Winipayer')
+    winipayer_payment_url = models.URLField(blank=True,verbose_name='URL de paiement Winipayer')
 
 
     class Meta:

@@ -21,7 +21,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             <!-- Formulaire de commande -->
             <div class="lg:col-span-1">
-                <form method="post" class="space-y-6">
+                <form method="post" class="space-y-6" id="checkout-form">
                     {% csrf_token %}
 
                     <!-- Informations personnelles -->
@@ -94,6 +94,36 @@
                         </div>
                     </div>
 
+                    <!-- Méthodes de paiement -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900 mb-4">Méthode de paiement</h2>
+
+                        <div class="space-y-3">
+                            <!-- Paiement à la livraison -->
+                            <label class="flex items-center gap-3 p-3 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="payment_method" value="CASH" checked class="text-primary focus:ring-primary">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-green-600">local_shipping</span>
+                                    <div>
+                                        <p class="font-medium text-slate-900">Paiement à la livraison</p>
+                                        <p class="text-xs text-slate-500">Payez lorsque vous recevez votre commande</p>
+                                    </div>
+                                </div>
+                            </label>
+                            <!-- Paiement en ligne (Winipayer) -->
+                            <label class="flex items-center gap-3 p-3 border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="payment_method" value="ONLINE" class="text-primary focus:ring-primary">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-blue-600">payments</span>
+                                    <div>
+                                        <p class="font-medium text-slate-900">Paiement en ligne sécurisé</p>
+                                        <p class="text-xs text-slate-500">Wave, Orange Money, MTN, Carte bancaire</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Informations de contact -->
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div class="flex items-start gap-3">
@@ -102,7 +132,7 @@
                                 <p class="font-medium mb-1">Comment procéderons-nous ?</p>
                                 <ul class="list-disc list-inside space-y-1 text-xs sm:text-sm">
                                     <li>Nous vous contacterons par téléphone pour confirmer votre commande</li>
-                                    <li>Paiement à la livraison uniquement</li>
+                                    <li>Paiement sécurisé via Winipayer</li>
                                     <li>Livraison sous 2-3 jours ouvrés</li>
                                 </ul>
                             </div>
@@ -111,9 +141,10 @@
 
                     <!-- Bouton de confirmation -->
                     <button type="submit"
-                            class="w-full bg-primary text-white font-bold py-3 sm:py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 text-base sm:text-lg">
+                            class="w-full bg-primary text-white font-bold py-3 sm:py-4 px-6 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 text-base sm:text-lg"
+                            id="submit-button">
                         <span class="material-symbols-outlined text-lg sm:text-xl">check_circle</span>
-                        Confirmer la commande
+                        <span id="button-text">Confirmer la commande</span>
                     </button>
                 </form>
             </div>
@@ -183,7 +214,48 @@
         </div>
     </div>
 </div>
-{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('checkout-form');
+    const submitButton = document.getElementById('submit-button');
+    const buttonText = document.getElementById('button-text');
+
+    form.addEventListener('submit', function(e) {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+        if (selectedMethod === 'ONLINE') {
+            // Pour paiement en ligne, on laisse le formulaire s'envoyer normalement
+            buttonText.textContent = 'Redirection vers le paiement...';
+            submitButton.disabled = true;
+        }
+        // Pour le paiement cash, le formulaire s'envoie normalement
+    });
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+    const buttonText = document.getElementById('button-text');
+    const submitButton = document.getElementById('submit-button');
+
+    function updateButtonText() {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+        if (selectedMethod === 'CASH') {
+            buttonText.textContent = 'Confirmer la commande';
+        } else {
+            buttonText.textContent = 'Procéder au paiement';
+        }
+    }
+
+    // Écouter les changements de méthode de paiement
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', updateButtonText);
+    });
+
+    // Initialiser le texte du bouton
+    updateButtonText();
+});
+</script>
 
 <style>
 /* Pour les très petits écrans */
@@ -196,3 +268,4 @@
     }
 }
 </style>
+{% endblock %}
