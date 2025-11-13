@@ -30,6 +30,7 @@ DEBUG = False
 # Hosts pour Railway
 ALLOWED_HOSTS = [
     'dsd-ecommerce.onrender.com',
+    '.onrender.com',
     '.up.railway.app',
     'dsd-general-trading.com',
     'www.dsd-general-trading.com',
@@ -93,16 +94,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ecommerce_project.wsgi.application'
 
 # --- DATABASE ---
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'YohanTuite98',  # ← Remplacez par le mot de passe que vous avez récupéré
-        'HOST': 'db.cnxuiqntjgbjwnyqatun.supabase.co',
-        'PORT': '5432',
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # --- SUPA BASE CONFIGURATION ---
 SUPABASE_URL = 'https://cnxuiqntjgbjwnyqatun.supabase.co'
