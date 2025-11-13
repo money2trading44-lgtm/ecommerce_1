@@ -99,13 +99,13 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'YohanTuite98',  # ← Remplacez par le mot de passe que vous avez récupéré
-        'HOST': 'db.xvhcmeshxeevpeuwzhzj.supabase.co',
+        'HOST': 'db.cnxuiqntjgbjwnyqatun.supabase.co',
         'PORT': '5432',
     }
 }
 
 # --- SUPA BASE CONFIGURATION ---
-SUPABASE_URL = 'https://xvhcmeshxeevpeuwzhzj.supabase.co'
+SUPABASE_URL = 'https://cnxuiqntjgbjwnyqatun.supabase.co'
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
 SUPABASE_BUCKET_NAME = 'dsd-trading-images'
 
