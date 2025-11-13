@@ -37,6 +37,18 @@ def check_db(request):
     except Exception as e:
         return HttpResponse(f"ERREUR: {e}", content_type='text/plain')
 
+def create_admin_auto(request):
+    # Vérifier si admin existe déjà
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser(
+            username='admin',
+            email='admin@dsd-trading.com',
+            password='admin'
+        )
+        return HttpResponse("✅ Admin créé ! Username: admin, Password: DsdTrading2024!")
+    else:
+        return HttpResponse("❌ Admin existe déjà")
+
 def home(request):
     categories = Category.objects.all()
     promotions = Product.objects.filter(on_sale=True, is_active=True)[:3]
