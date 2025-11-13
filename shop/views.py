@@ -19,9 +19,23 @@ import requests
 import json
 from .winipayer_service import WinipayerService
 from .utils.emails import send_new_order_notification, send_quote_request_notification, send_repair_request_notification
-
+from django.contrib.auth.models import User
 
 # ========================= VUES CLIENT ======================
+
+
+
+
+def check_db(request):
+    try:
+        user_count = User.objects.count()
+        users = list(User.objects.values('username', 'email', 'is_superuser'))
+        result = f"Utilisateurs: {user_count}\n"
+        for user in users:
+            result += f"- {user['username']} (superuser: {user['is_superuser']})\n"
+        return HttpResponse(result, content_type='text/plain')
+    except Exception as e:
+        return HttpResponse(f"ERREUR: {e}", content_type='text/plain')
 
 def home(request):
     categories = Category.objects.all()
