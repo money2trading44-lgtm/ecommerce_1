@@ -98,8 +98,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'YohanTuite98',  # ← Remplacez par le mot de passe que vous avez récupéré
-        'HOST': 'db.xvhcmeshxeevpeuwzhzj.supabase.co',
+        'PASSWORD': os.environ.get('SUPABASE_DB_PASSWORD'),  # ← Remplacez par le mot de passe que vous avez récupéré
+        'HOST': os.environ.get('SUPABASE_DB_HOST'),
         'PORT': '5432',
     }
 }
