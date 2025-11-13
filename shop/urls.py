@@ -22,6 +22,8 @@ urlpatterns = [
     path('paiement/success/<int:order_id>/', views.payment_success, name='payment_success'),
     path('paiement/cancel/<int:order_id>/', views.payment_cancel, name='payment_cancel'),
     path('payment/winipayer-webhook/', views.winipayer_webhook, name='winipayer_webhook'),
+    path('paiement/statut/', views.payment_status, name='payment_status'),
+    path('api/payment-status/<int:order_id>/', views.api_payment_status, name='api_payment_status'),
 
     path('devis/confirmation/<int:quote_id>/', views.quote_confirmation, name='quote_confirmation'),
     path('mes-commandes/', views.order_history, name='order_history'),

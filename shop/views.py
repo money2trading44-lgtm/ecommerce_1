@@ -489,6 +489,11 @@ def process_payment(request, order_id):
             cancel_url = f"{base_url}{reverse('shop:payment_cancel', args=[order.id])}"
             callback_url = f"{base_url}{reverse('shop:winipayer_webhook')}"
 
+            print(f"🌐 URLs de retour:")
+            print(f"  - Success: {return_url}")
+            print(f"  - Cancel: {cancel_url}")
+            print(f"  - Webhook: {callback_url}")
+
             # Créer le paiement
             result = winipayer.create_payment(order, return_url, cancel_url, callback_url)
 
@@ -512,6 +517,53 @@ def process_payment(request, order_id):
     messages.error(request, "Méthode de paiement non reconnue.")
     return redirect('shop:checkout')
 
+def payment_status(request):
+    """
+    Page de statut après fermeture de la fenêtre Winipayer
+    """
+    order = None
+
+    # Trouver la dernière commande en attente de paiement
+    if request.user.is_authenticated:
+        orders = Order.objects.filter(
+            user=request.user,
+            payment_status__in=['INITIATED', 'PENDING_PAYMENT']
+        ).order_by('-created_at')
+    else:
+        session_key = request.session.session_key
+        if session_key:
+            orders = Order.objects.filter(
+                session_key=session_key,
+                payment_status__in=['INITIATED', 'PENDING_PAYMENT']
+            ).order_by('-created_at')
+        else:
+            orders = Order.objects.none()
+
+    if orders.exists():
+        order = orders.first()
+
+    context = {
+        'order': order,
+    }
+    return render(request, 'shop/payment_status.html', context)
+
+
+def api_payment_status(request, order_id):
+    """
+    API pour vérifier le statut du paiement en temps réel
+    """
+    try:
+        order = Order.objects.get(id=order_id)
+        return JsonResponse({
+            'status': order.payment_status,
+            'order_number': order.order_number,
+            'is_paid': order.payment_status == 'PAID',
+            'is_failed': order.payment_status in ['FAILED', 'CANCELLED'],
+            'is_pending': order.payment_status in ['INITIATED', 'PENDING_PAYMENT']
+        })
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'Commande non trouvée'}, status=404)
+
 
 def winipayer_webhook(request):
     """
@@ -519,16 +571,24 @@ def winipayer_webhook(request):
     """
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            transaction_id = data.get('transaction_id')
+            # Winipayer envoie les données en form-data, pas en JSON
+            data = request.POST
+            print(f"🔔 Webhook Winipayer reçu: {dict(data)}")
+
+            # Récupérer les données du webhook Winipayer
+            transaction_id = data.get('uuid')  # Winipayer utilise 'uuid'
             status = data.get('status')
-            order_id = data.get('metadata', {}).get('order_id')
+            order_id = data.get('order_id')  # L'ID de commande qu'on a passé en metadata
+
+            print(f"🔔 Données webhook - UUID: {transaction_id}, Status: {status}, Order ID: {order_id}")
 
             if not order_id:
+                print("❌ Order ID manquant dans le webhook")
                 return HttpResponse(status=400)
 
             try:
                 order = Order.objects.get(id=order_id)
+                print(f"🔔 Commande trouvée: #{order.order_number} - Statut actuel: {order.payment_status}")
 
                 if status == 'success':
                     # 🔥 PAIEMENT RÉUSSI - Finaliser la commande
@@ -548,19 +608,23 @@ def winipayer_webhook(request):
                     cart.items.all().delete()
 
                     print(f"✅ Paiement confirmé pour la commande #{order.order_number}")
+                    print(f"✅ Stock mis à jour et panier vidé")
 
                 elif status == 'failed':
+                    # 🔥 PAIEMENT ÉCHOUÉ - Marquer comme échoué
                     order.payment_status = 'FAILED'
                     order.status = 'CANCELLED'
                     order.save()
+                    print(f"❌ Paiement échoué pour la commande #{order.order_number}")
 
             except Order.DoesNotExist:
+                print(f"❌ Commande {order_id} non trouvée")
                 return HttpResponse(status=404)
 
             return HttpResponse(status=200)
 
         except Exception as e:
-            print(f"Erreur webhook: {str(e)}")
+            print(f"❌ Erreur webhook Winipayer: {str(e)}")
             return HttpResponse(status=400)
 
     return HttpResponse(status=405)
@@ -568,30 +632,43 @@ def winipayer_webhook(request):
 
 def payment_success(request, order_id):
     """
-    Vue appelée quand le paiement réussit
+    Vue appelée quand le paiement réussit (retour de Winipayer)
     """
-    order = get_object_or_404(Order, id=order_id)
+    try:
+        order = get_object_or_404(Order, id=order_id)
 
-    if order.payment_status == 'PAID':
-        messages.success(request,
-                         f"Paiement confirmé ! Votre commande #{order.order_number} est en cours de traitement.")
-    else:
-        messages.info(request, "Votre paiement est en cours de validation...")
+        # Vérifier si le paiement a été confirmé par le webhook
+        if order.payment_status != 'PAID':
+            messages.info(request, "Votre paiement est en cours de validation...")
+        else:
+            messages.success(request,
+                             f"Paiement confirmé ! Votre commande #{order.order_number} est en cours de traitement.")
 
-    return redirect('shop:order_confirmation', order_id=order.id)
+        return redirect('shop:order_confirmation', order_id=order.id)
+
+    except Exception as e:
+        print(f"❌ Erreur payment_success: {str(e)}")
+        messages.error(request, "Erreur lors de la confirmation du paiement.")
+        return redirect('shop:home')
 
 
 def payment_cancel(request, order_id):
     """
     Vue appelée quand l'utilisateur annule le paiement
     """
-    order = get_object_or_404(Order, id=order_id)
-    order.payment_status = 'FAILED'
-    order.status = 'CANCELLED'
-    order.save()
+    try:
+        order = get_object_or_404(Order, id=order_id)
+        order.payment_status = 'FAILED'
+        order.status = 'CANCELLED'
+        order.save()
 
-    messages.warning(request, "Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.")
-    return redirect('shop:cart_detail')
+        messages.warning(request, "Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.")
+        return redirect('shop:cart_detail')  # ⭐ Rediriger vers le panier
+
+    except Exception as e:
+        print(f"❌ Erreur payment_cancel: {str(e)}")
+        messages.error(request, "Erreur lors de l'annulation.")
+        return redirect('shop:home')
 
 
 def checkout(request):
