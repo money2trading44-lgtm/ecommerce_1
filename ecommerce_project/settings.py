@@ -98,14 +98,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': os.environ.get('SUPABASE_DB_PASSWORD'),  # ← Remplacez par le mot de passe que vous avez récupéré
-        'HOST': os.environ.get('SUPABASE_DB_HOST'),
+        'PASSWORD': 'YohanTuite98',  # ← Remplacez par le mot de passe que vous avez récupéré
+        'HOST': 'db.xvhcmeshxeevpeuwzhzj.supabase.co',
         'PORT': '5432',
     }
 }
 
 # --- SUPA BASE CONFIGURATION ---
-SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_URL = 'https://xvhcmeshxeevpeuwzhzj.supabase.co'
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
 SUPABASE_BUCKET_NAME = 'dsd-trading-images'
 
