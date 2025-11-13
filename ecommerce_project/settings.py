@@ -113,7 +113,7 @@ else:
     }
 
 # --- SUPA BASE CONFIGURATION ---
-SUPABASE_URL = 'https://cnxuiqntjgbjwnyqatun.supabase.co'
+SUPABASE_URL = 'https://xvhcmeshxeevpeuwzhzj.supabase.co'
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
 SUPABASE_BUCKET_NAME = 'dsd-trading-images'
 
