@@ -1,6 +1,5 @@
-import os
-from decimal import Decimal
 
+from decimal import Decimal
 from django.db.models.functions import ExtractMonth
 from django.urls import reverse
 from django.utils import timezone as django_timezone, timezone
@@ -15,11 +14,11 @@ from ecommerce_project import settings
 from shop.models import Category, Product, RepairRequest, Cart, CartItem, Order, OrderItem,CustomQuoteRequest
 from django.db.models import Sum, Q
 from datetime import timedelta, datetime
-import requests
-import json
 from .winipayer_service import WinipayerService
 from .utils.emails import send_new_order_notification, send_quote_request_notification, send_repair_request_notification
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 # ========================= VUES CLIENT ======================
 
@@ -590,111 +589,148 @@ def api_payment_status(request, order_id):
     except Order.DoesNotExist:
         return JsonResponse({'error': 'Commande non trouvée'}, status=404)
 
-
+@csrf_exempt
 def winipayer_webhook(request):
     """
-    Webhook Winipayer - Finaliser la commande après paiement réussi
-    """
+        Webhook Winipayer - CSRF désactivé
+        """
     if request.method == 'POST':
         try:
-            # Winipayer envoie les données en form-data, pas en JSON
+            # Winipayer envoie en form-data
             data = request.POST
-            print(f"🔔 Webhook Winipayer reçu: {dict(data)}")
+            print(f"🔔 Webhook reçu: {dict(data)}")
 
-            # Récupérer les données du webhook Winipayer
-            transaction_id = data.get('uuid')  # Winipayer utilise 'uuid'
-            status = data.get('status')
-            order_id = data.get('order_id')  # L'ID de commande qu'on a passé en metadata
-
-            print(f"🔔 Données webhook - UUID: {transaction_id}, Status: {status}, Order ID: {order_id}")
-
-            if not order_id:
-                print("❌ Order ID manquant dans le webhook")
-                return HttpResponse(status=400)
-
+            # Récupérer l'order_id depuis metadata
+            metadata_str = data.get('metadata', '{}')
             try:
-                order = Order.objects.get(id=order_id)
-                print(f"🔔 Commande trouvée: #{order.order_number} - Statut actuel: {order.payment_status}")
+                import json
+                metadata = json.loads(metadata_str)
+                order_id = metadata.get('order_id')
+            except:
+                order_id = None
 
-                if status == 'success':
-                    # 🔥 PAIEMENT RÉUSSI - Finaliser la commande
-                    order.payment_status = 'PAID'
-                    order.status = 'CONFIRMED'
-                    order.winipayer_transaction_id = transaction_id
-                    order.save()
+            transaction_id = data.get('uuid')
+            status = data.get('status')
 
-                    # 🔥 MAINTENANT mettre à jour le stock
-                    for item in order.items.all():
-                        if item.product:
-                            item.product.stock -= item.quantity
-                            item.product.save()
+            print(f"🔔 Webhook - Order ID: {order_id}, Status: {status}")
 
-                    # 🔥 Vider le panier de l'utilisateur
-                    cart = get_or_create_cart(request)
-                    cart.items.all().delete()
+            if order_id:
+                try:
+                    order = Order.objects.get(id=order_id)
 
-                    print(f"✅ Paiement confirmé pour la commande #{order.order_number}")
-                    print(f"✅ Stock mis à jour et panier vidé")
+                    if status == 'success':
+                        order.payment_status = 'PAID'
+                        order.status = 'CONFIRMED'
+                        order.winipayer_transaction_id = transaction_id
+                        order.save()
 
-                elif status == 'failed':
-                    # 🔥 PAIEMENT ÉCHOUÉ - Marquer comme échoué
-                    order.payment_status = 'FAILED'
-                    order.status = 'CANCELLED'
-                    order.save()
-                    print(f"❌ Paiement échoué pour la commande #{order.order_number}")
+                        # Mettre à jour le stock
+                        for item in order.items.all():
+                            if item.product:
+                                item.product.stock -= item.quantity
+                                item.product.save()
 
-            except Order.DoesNotExist:
-                print(f"❌ Commande {order_id} non trouvée")
-                return HttpResponse(status=404)
+                        # Vider le panier
+                        cart = get_or_create_cart(request)
+                        cart.items.all().delete()
 
-            return HttpResponse(status=200)
+                        print(f"✅ Webhook: Commande #{order.order_number} confirmée")
+
+                    elif status == 'failed':
+                        order.payment_status = 'FAILED'
+                        order.status = 'CANCELLED'
+                        order.save()
+                        print(f"❌ Webhook: Commande #{order.order_number} annulée")
+
+                except Order.DoesNotExist:
+                    print(f"❌ Webhook: Commande {order_id} non trouvée")
+
+            return HttpResponse("OK", status=200)
 
         except Exception as e:
-            print(f"❌ Erreur webhook Winipayer: {str(e)}")
-            return HttpResponse(status=400)
+            print(f"❌ Erreur webhook: {str(e)}")
+            return HttpResponse("ERROR", status=400)
 
-    return HttpResponse(status=405)
+    return HttpResponse("Method Not Allowed", status=405)
 
 
+@csrf_exempt
 def payment_success(request, order_id):
     """
-    Vue appelée quand le paiement réussit (retour de Winipayer)
+    Retour après paiement réussi - CSRF désactivé
     """
+    crypto = request.GET.get('crypto', '')
+    uuid = request.GET.get('uuid', '')
+
+    print(f"✅ SUCCÈS Paiement - Crypto: {crypto}, UUID: {uuid}")
+
     try:
         order = get_object_or_404(Order, id=order_id)
 
-        # Vérifier si le paiement a été confirmé par le webhook
-        if order.payment_status != 'PAID':
-            messages.info(request, "Votre paiement est en cours de validation...")
-        else:
-            messages.success(request,
-                             f"Paiement confirmé ! Votre commande #{order.order_number} est en cours de traitement.")
+        # Si UUID fourni, trouver la commande par UUID
+        if uuid:
+            try:
+                order = Order.objects.get(winipayer_transaction_id=uuid)
+            except Order.DoesNotExist:
+                print(f"❌ Commande non trouvée pour UUID: {uuid}")
 
-        return redirect('shop:order_confirmation', order_id=order.id)
+        # Marquer comme payé
+        order.payment_status = 'PAID'
+        order.status = 'CONFIRMED'
+        order.save()
+
+        # Mettre à jour le stock
+        for item in order.items.all():
+            if item.product:
+                item.product.stock -= item.quantity
+                item.product.save()
+
+        # Vider le panier
+        cart = get_or_create_cart(request)
+        cart.items.all().delete()
+
+        print(f"✅ Commande #{order.order_number} confirmée")
+        messages.success(request, f"Paiement confirmé ! Commande #{order.order_number}")
 
     except Exception as e:
-        print(f"❌ Erreur payment_success: {str(e)}")
-        messages.error(request, "Erreur lors de la confirmation du paiement.")
-        return redirect('shop:home')
+        print(f"❌ Erreur success: {str(e)}")
+        messages.success(request, "Paiement confirmé avec succès !")
+
+    return redirect('shop:order_confirmation', order_id=order.id)
 
 
+@csrf_exempt
 def payment_cancel(request, order_id):
     """
-    Vue appelée quand l'utilisateur annule le paiement
+    Retour après annulation - CSRF désactivé
     """
+    crypto = request.GET.get('crypto', '')
+    uuid = request.GET.get('uuid', '')
+
+    print(f"❌ ANNULATION Paiement - Crypto: {crypto}, UUID: {uuid}")
+
     try:
         order = get_object_or_404(Order, id=order_id)
+
+        # Si UUID fourni, trouver la commande par UUID
+        if uuid:
+            try:
+                order = Order.objects.get(winipayer_transaction_id=uuid)
+            except Order.DoesNotExist:
+                print(f"❌ Commande non trouvée pour UUID: {uuid}")
+
         order.payment_status = 'FAILED'
         order.status = 'CANCELLED'
         order.save()
 
-        messages.warning(request, "Paiement annulé. Vous pouvez réessayer quand vous le souhaitez.")
-        return redirect('shop:cart_detail')  # ⭐ Rediriger vers le panier
+        print(f"❌ Commande #{order.order_number} annulée")
+        messages.warning(request, f"Paiement annulé. Commande #{order.order_number}")
 
     except Exception as e:
-        print(f"❌ Erreur payment_cancel: {str(e)}")
-        messages.error(request, "Erreur lors de l'annulation.")
-        return redirect('shop:home')
+        print(f"❌ Erreur cancel: {str(e)}")
+        messages.warning(request, "Paiement annulé.")
+
+    return redirect('shop:cart_detail')
 
 
 def checkout(request):

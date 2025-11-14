@@ -42,7 +42,18 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.up.railway.app',
     'https://dsd-general-trading.com',
     'https://www.dsd-general-trading.com',
+    'https://checkout.winipayer.com',
+    'https://checkout.cinetpay.com',
 ]
+
+
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'  # ⭐ CHANGÉ de 'Lax' à 'None'
+CSRF_USE_SESSIONS = False
+
+# ⭐ POUR LES SESSIONS :
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
 
 # --- APPLICATIONS ---
 INSTALLED_APPS = [
