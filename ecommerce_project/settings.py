@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prct4r0m&#@h#i0vnm=z(
 
 # 🔥 DEBUG True pour voir les images
 #DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
-DEBUG = False
+DEBUG = True
 
 # Hosts pour Railway
 ALLOWED_HOSTS = [
@@ -93,7 +93,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ecommerce_project.wsgi.application'
 
 # --- DATABASE ---
-if os.environ.get('DATABASE_URL'):
+if not DEBUG:
     DATABASES = {
         'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -154,11 +154,11 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --- WINIPAYER CONFIG ---
-WINIPAYER_MERCHANT_UUID ='ae3792f7-67ba-4cca-b878-37694a7d3136'
+WINIPAYER_MERCHANT_APPLY_KEY ='qO1T8YInhYsMSkkGyrKe'
 WINIPAYER_API_KEY = os.environ.get('WINIPAYER_API_KEY','')
 WINIPAYER_MERCHANT_APPLY = os.environ.get('WINIPAYER_MERCHANT_APPLY', '')
 WINIPAYER_MERCHANT_TOKEN = os.environ.get('WINIPAYER_MERCHANT_TOKEN', '')
-WINIPAYER_MODE = os.environ.get('WINIPAYER_MODE', 'test')  # test ou prod
+WINIPAYER_MODE = os.environ.get("WINIPAYER_MODE", 'test')  # test ou prod
 
 if WINIPAYER_MODE == 'prod':
     WINIPAYER_BASE_URL = "https://api-v2.winipayer.com"

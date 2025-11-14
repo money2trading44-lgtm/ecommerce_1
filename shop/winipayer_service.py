@@ -8,60 +8,70 @@ logger = logging.getLogger(__name__)
 
 class WinipayerService:
     def __init__(self):
-        self.merchant_uuid = "ae3792f7-67ba-4cca-b878-37694a7d3136"  # ⭐ REMPLACE PAR TON UUID
-        self.private_key = settings.WINIPAYER_API_KEY
+        self.merchant_apply = settings.WINIPAYER_MERCHANT_APPLY_KEY
+        self.api_key = settings.WINIPAYER_API_KEY
         self.base_url = "https://api-v2.winipayer.com"
-        self.env = 'prod'
-
-    # shop/winipayer_service.py - MODIFIEZ create_payment
+        self.env = "prod"
 
     def create_payment(self, order, return_url, cancel_url, callback_url):
         """
-        Créer un paiement Winipayer EXPRESS avec les URLs de retour
+        Créer un paiement Winipayer STANDARD - Format exact cURL
         """
         try:
             print("=" * 60)
-            print("🔄 DÉBUT CRÉATION PAIEMENT WINIPAYER")
+            print("🔄 API STANDARD - FORMAT CURL")
             print("=" * 60)
 
-            print(f"🔧 Configuration Winipayer:")
-            print(f"  - UUID: {self.merchant_uuid}")
-            print(f"  - Environnement: {self.env}")
-            print(f"  - Montant: {order.total_price}")
-            print(f"  - Order ID: {order.id}")
-            print(f"  - Return URL: {return_url}")
-            print(f"  - Cancel URL: {cancel_url}")
-            print(f"  - Callback URL: {callback_url}")
+            print(f"🔧 Configuration:")
+            print(f"  - Apply: {self.merchant_apply}")
+            print(f"  - Token: {self.api_key}")
+            print(f"  - Env: {self.env}")
 
-            # Préparer les headers
+            # Headers exacts comme cURL
             headers = {
-                'X-Merchant-uuid': self.merchant_uuid,
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Merchant-Apply': self.merchant_apply,
+                'X-Merchant-Token': self.api_key,
             }
 
-            # ⭐ PAYLOAD COMPLET avec toutes les URLs
+            # ⭐ FORMAT EXACT COMME LA DOC CURL - tous les champs en strings
             payload = {
                 "env": self.env,
-                "amount": int(float(order.total_price)),
-                "client_pay_fee": "false",
-                "metadata": json.dumps({"order_id": str(order.id)}),  # Format JSON correct
-                "return_url": return_url,  # Où rediriger après succès
-                "cancel_url": cancel_url,  # Où rediriger après annulation
-                "callback_url": callback_url,  # Où envoyer le webhook
-                "currency": "XOF",  # Devise
-                "description": f"Commande #{order.order_number}",
+                'amount': int(float(order.total_price)),
+                'description': f'Commande #{order.order_number}',
+                'client_pay_fee': 'false',
+                'cancel_url': f'{cancel_url}',
+                'return_url': f'{return_url}',
+                'callback_url': f'{callback_url}',
             }
 
-            print(f"🔍 Payload COMPLET envoyé à Winipayer:")
+            # ⭐ AJOUTER items SI DISPONIBLE
+            items_data = []
+            for item in order.items.all():
+                items_data.append({
+                    "name": item.product_name,
+                    "quantity": item.quantity,
+                    "price_unit": float(item.product_price),
+                    "description": f"Commande #{order.order_number}",
+                    "price_total": float(item.get_total_price())
+                })
+
+            if items_data:
+                payload['items'] = json.dumps(items_data)
+
+            # ⭐ AJOUTER custom_data
+            payload['custom_data'] = json.dumps({
+                "order_id": str(order.id),
+                "order_number": order.order_number
+            })
+
+            print(f"🔍 Payload FINAL:")
             for key, value in payload.items():
                 print(f"  {key}: {value}")
 
-            # URL de l'API Winipayer
-            api_url = f"{self.base_url}/checkout/express/create"
-            print(f"🌐 URL API: {api_url}")
+            api_url = f"{self.base_url}/checkout/standard/create"
+            print(f"🌐 URL: {api_url}")
 
-            # Faire la requête
-            print("🔄 Envoi de la requête à Winipayer...")
+            # ⭐ REQUÊTE AVEC VERIFICATION
             response = requests.post(
                 api_url,
                 data=payload,
@@ -70,124 +80,61 @@ class WinipayerService:
             )
 
             print("=" * 60)
-            print("📡 RÉPONSE DE WINIPAYER")
-            print("=" * 60)
-            print(f"  Status Code: {response.status_code}")
+            print("📡 RÉPONSE COMPLÈTE:")
+            print(f"  Status: {response.status_code}")
             print(f"  Headers: {dict(response.headers)}")
             print(f"  Contenu: {response.text}")
+            print("=" * 60)
 
-            # Traiter la réponse
             if response.status_code == 200:
-                try:
-                    data = response.json()
-                    print(f"📊 Données JSON parsées: {data}")
+                data = response.json()
+                print(f"📊 JSON: {data}")
 
-                    if data.get('success'):
-                        results = data['results']
-                        print("🎉 PAIEMENT CRÉÉ AVEC SUCCÈS!")
-                        print(f"   - UUID: {results.get('uuid')}")
-                        print(f"   - URL Paiement: {results.get('checkout_process')}")
-                        print(f"   - Crypto: {results.get('crypto')}")
-                        print(f"   - Expire le: {results.get('expired_at')}")
-
-                        return {
-                            'success': True,
-                            'payment_url': results.get('checkout_process'),
-                            'transaction_id': results.get('uuid'),
-                            'crypto': results.get('crypto'),
-                            'expired_at': results.get('expired_at'),
-                            'raw_response': data
-                        }
-                    else:
-                        error_data = data.get('errors', {})
-                        error_msg = error_data.get('msg', 'Erreur inconnue de Winipayer')
-                        error_code = error_data.get('code', 'N/A')
-
-                        print(f"❌ ERREUR WINIPAYER:")
-                        print(f"   - Code: {error_code}")
-                        print(f"   - Message: {error_msg}")
-                        print(f"   - Données complètes: {error_data}")
-
-                        return {
-                            'success': False,
-                            'error': f"Winipayer [{error_code}]: {error_msg}",
-                            'error_details': error_data
-                        }
-
-                except json.JSONDecodeError as e:
-                    print(f"❌ ERREUR: Impossible de parser la réponse JSON")
-                    print(f"   - Réponse brute: {response.text}")
+                if data.get('success'):
+                    results = data['results']
+                    print("🎉 SUCCÈS API STANDARD !")
+                    return {
+                        'success': True,
+                        'payment_url': results.get('checkout_process'),
+                        'transaction_id': results.get('uuid'),
+                    }
+                else:
+                    error_data = data.get('errors', {})
+                    error_msg = error_data.get('msg', 'Erreur inconnue')
+                    error_code = error_data.get('code', 'N/A')
+                    print(f"❌ Erreur détaillée: {error_data}")
                     return {
                         'success': False,
-                        'error': f"Erreur de format JSON: {str(e)}"
+                        'error': f"[{error_code}] {error_msg}",
+                        'details': error_data
                     }
-
-            elif response.status_code == 400:
-                print("❌ ERREUR 400: Requête mal formée")
-                return {
-                    'success': False,
-                    'error': "Requête mal formée (400). Vérifiez les paramètres."
-                }
-            elif response.status_code == 401:
-                print("❌ ERREUR 401: Non autorisé")
-                return {
-                    'success': False,
-                    'error': "Clé API ou UUID incorrect (401)"
-                }
-            elif response.status_code == 500:
-                print("❌ ERREUR 500: Problème serveur Winipayer")
-                return {
-                    'success': False,
-                    'error': "Problème serveur Winipayer (500)"
-                }
             else:
-                print(f"❌ ERREUR HTTP: {response.status_code}")
+                print(f"❌ Erreur HTTP: {response.status_code}")
                 return {
                     'success': False,
-                    'error': f"Erreur HTTP {response.status_code}: {response.text}"
+                    'error': f"Erreur HTTP {response.status_code}",
+                    'response_text': response.text
                 }
 
-        except requests.exceptions.Timeout:
-            print("❌ TIMEOUT: La requête a expiré")
-            return {
-                'success': False,
-                'error': "Timeout: La requête a pris trop de temps"
-            }
-        except requests.exceptions.ConnectionError:
-            print("❌ CONNECTION ERROR: Impossible de se connecter à Winipayer")
-            return {
-                'success': False,
-                'error': "Erreur de connexion: Impossible d'atteindre Winipayer"
-            }
-        except requests.exceptions.RequestException as e:
-            print(f"❌ REQUEST EXCEPTION: {str(e)}")
-            return {
-                'success': False,
-                'error': f"Erreur de requête: {str(e)}"
-            }
         except Exception as e:
-            print(f"❌ ERREUR INATTENDUE: {str(e)}")
+            print(f"❌ Exception: {str(e)}")
             import traceback
-            print(f"Stack trace: {traceback.format_exc()}")
+            print(f"Stack: {traceback.format_exc()}")
             return {
                 'success': False,
-                'error': f"Erreur inattendue: {str(e)}"
+                'error': f"Exception: {str(e)}"
             }
-        finally:
-            print("=" * 60)
-            print("🏁 FIN CRÉATION PAIEMENT")
-            print("=" * 60)
 
-    def check_payment_status(self, transaction_crypto):
+    def check_payment_status(self, transaction_uuid):
         """
-        Vérifier le statut d'un paiement Express
+        Vérifier le statut d'un paiement Standard
         """
         try:
-            print(f"🔍 Vérification statut paiement: {transaction_crypto}")
+            print(f"🔍 Vérification statut: {transaction_uuid}")
 
             headers = {
-                'X-Merchant-uuid': self.merchant_uuid,
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Merchant-Apply': self.merchant_apply,
+                'X-Merchant-Token': self.api_key,
             }
 
             payload = {
@@ -195,7 +142,7 @@ class WinipayerService:
             }
 
             response = requests.post(
-                f"{self.base_url}/checkout/express/detail/{transaction_crypto}",
+                f"{self.base_url}/checkout/standard/detail/{transaction_uuid}",
                 data=payload,
                 headers=headers,
                 timeout=30
@@ -203,12 +150,12 @@ class WinipayerService:
 
             if response.status_code == 200:
                 data = response.json()
-                print(f"📊 Statut paiement: {data}")
+                print(f"📊 Statut: {data}")
                 return data
             else:
-                print(f"❌ Erreur vérification statut: {response.status_code}")
+                print(f"❌ Erreur vérification: {response.status_code}")
                 return None
 
         except Exception as e:
-            print(f"❌ Erreur vérification paiement: {str(e)}")
+            print(f"❌ Erreur vérification: {str(e)}")
             return None

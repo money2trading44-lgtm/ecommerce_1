@@ -499,7 +499,7 @@ def process_payment(request, order_id):
     # Paiement en ligne Winipayer
     if order.payment_method == 'ONLINE':
         # Vérifier la configuration Winipayer
-        if not all([settings.WINIPAYER_API_KEY, settings.WINIPAYER_MERCHANT_UUID]):
+        if not all([settings.WINIPAYER_MERCHANT_APPLY_KEY, settings.WINIPAYER_API_KEY]):
             messages.error(request, "Configuration de paiement incomplète. Veuillez réessayer plus tard.")
             return redirect('shop:checkout')
 
@@ -783,7 +783,13 @@ def checkout(request):
         else:  # Paiement en ligne
             # 🔥 NE PAS mettre à jour le stock ni vider le panier maintenant
             # Rediriger vers le processus de paiement Winipayer
-            return redirect('shop:process_payment', order_id=order.id)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'redirect_url': reverse('shop:process_payment', args=[order.id])
+                })
+                # ⭐ SINON, rediriger normalement
+            else:
+                return redirect('shop:process_payment', order_id=order.id)
 
     context = {
         'cart': cart,
