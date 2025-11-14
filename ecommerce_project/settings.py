@@ -104,19 +104,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ecommerce_project.wsgi.application'
 
 # --- DATABASE ---
-if not DEBUG:
-    DATABASES = {
-        'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'YohanTuite98',  # ← Mot de passe de votre NOUVEAU projet
-        'HOST': 'db.cnxuiqntjgbjwnyqatun.supabase.co',  # ← Host du nouveau projet
-        'PORT': '5432',
-        }
-    }
-else:
-    DATABASES = {
+DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
