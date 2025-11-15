@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prct4r0m&#@h#i0vnm=z(
 
 # 🔥 DEBUG True pour voir les images
 #DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
-DEBUG = True
+DEBUG = os.environ.get('DEBUG','False')
 
 # Hosts pour Railway
 ALLOWED_HOSTS = [

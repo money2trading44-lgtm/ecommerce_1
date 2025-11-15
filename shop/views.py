@@ -489,7 +489,7 @@ def process_payment(request, order_id):
     # Paiement en ligne Winipayer
     if order.payment_method == 'ONLINE':
         # Vérifier la configuration Winipayer
-        if not all([settings.WINIPAYER_MERCHANT_APPLY_KEY, settings.WINIPAYER_API_KEY]):
+        if not all([settings.WINIPAYER_MERCHANT_APPLY, settings.WINIPAYER_MERCHANT_TOKEN]):
             messages.error(request, "Configuration de paiement incomplète. Veuillez réessayer plus tard.")
             return redirect('shop:checkout')
 
