@@ -226,7 +226,7 @@
 
                         <div class="flex gap-2">
                             <a class="flex-1 bg-slate-100 text-slate-700 font-medium py-2 px-3 sm:px-4 rounded-lg hover:bg-slate-200 transition-colors text-xs sm:text-sm text-center"
-                               href="{% url 'shop:product_detail' product_id=product.id %}">
+                               href="{% url 'shop:product_detail' product.slug %}">
                                 Voir détails
                             </a>
                             {% if product.stock > 0 %}

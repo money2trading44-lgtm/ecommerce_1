@@ -1,40 +1,23 @@
-
 from decimal import Decimal
 from django.db.models.functions import ExtractMonth
 from django.urls import reverse
-from django.utils import timezone as django_timezone, timezone
+from django.utils import timezone as django_timezone
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Avg, Count
-from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-
 from ecommerce_project import settings
-from shop.models import Category, Product, RepairRequest, Cart, CartItem, Order, OrderItem,CustomQuoteRequest
+from shop.models import Category, Product, RepairRequest, Cart, CartItem, Order, OrderItem, CustomQuoteRequest, ProductImage
 from django.db.models import Sum, Q
 from datetime import timedelta, datetime
 from .winipayer_service import WinipayerService
-from .utils.emails import send_new_order_notification, send_quote_request_notification, send_repair_request_notification
+from .utils.emails import send_quote_request_notification, send_repair_request_notification
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 
 # ========================= VUES CLIENT ======================
-
-
-
-
-def check_db(request):
-    try:
-        user_count = User.objects.count()
-        users = list(User.objects.values('username', 'email', 'is_superuser'))
-        result = f"Utilisateurs: {user_count}\n"
-        for user in users:
-            result += f"- {user['username']} (superuser: {user['is_superuser']})\n"
-        return HttpResponse(result, content_type='text/plain')
-    except Exception as e:
-        return HttpResponse(f"ERREUR: {e}", content_type='text/plain')
 
 def create_admin_auto(request):
     # Vérifier si admin existe déjà
@@ -196,17 +179,25 @@ def electronics_list(request):
 
     return render(request, 'shop/electronics_list.html', context)  # ⭐ CHANGÉ
 
-def product_detail(request, product_id):
-    product = get_object_or_404(Product, id=product_id, is_active=True)
+
+def product_detail(request, slug):
+    # AJOUT: prefetch_related pour charger les images supplémentaires
+    product = get_object_or_404(
+        Product.objects.prefetch_related('images'),
+        slug=slug,
+        is_active=True
+    )
+
     if product.needs_custom_quote:
         messages.info(request,
                       "Ce produit nécessite un devis personnalisé. Veuillez utiliser le formulaire de demande de rendez-vous.")
         return redirect('shop:custom_quote_request', product_id=product.id)
+
     similar_products = Product.objects.filter(
         category=product.category,
         is_active=True,
-        needs_custom_quote=False  # ✅ EXCLURE LES PRODUITS SUR DEVIS
-    ).exclude(id=product_id)[:4]
+        needs_custom_quote=False
+    ).exclude(slug=slug)[:4]
 
     context = {
         'product': product,
@@ -380,7 +371,7 @@ def add_to_cart(request, product_id):
                     'error': f'Stock insuffisant. Il ne reste que {product.stock} unité(s) disponible(s).'
                 })
             messages.error(request, f'Stock insuffisant. Il ne reste que {product.stock} unité(s) disponible(s).')
-            return redirect('shop:product_detail', product_id=product_id)
+            return redirect('shop:product_detail', slug=product.slug)
 
         # Ajouter ou mettre à jour l'article
         cart_item, created = CartItem.objects.get_or_create(
@@ -598,7 +589,6 @@ def winipayer_webhook(request):
         try:
             # Winipayer envoie en form-data
             data = request.POST
-            print(f"🔔 Webhook reçu: {dict(data)}")
 
             # Récupérer l'order_id depuis metadata
             metadata_str = data.get('metadata', '{}')
@@ -611,8 +601,6 @@ def winipayer_webhook(request):
 
             transaction_id = data.get('uuid')
             status = data.get('status')
-
-            print(f"🔔 Webhook - Order ID: {order_id}, Status: {status}")
 
             if order_id:
                 try:
@@ -634,13 +622,10 @@ def winipayer_webhook(request):
                         cart = get_or_create_cart(request)
                         cart.items.all().delete()
 
-                        print(f"✅ Webhook: Commande #{order.order_number} confirmée")
-
                     elif status == 'failed':
                         order.payment_status = 'FAILED'
                         order.status = 'CANCELLED'
                         order.save()
-                        print(f"❌ Webhook: Commande #{order.order_number} annulée")
 
                 except Order.DoesNotExist:
                     print(f"❌ Webhook: Commande {order_id} non trouvée")
@@ -648,7 +633,6 @@ def winipayer_webhook(request):
             return HttpResponse("OK", status=200)
 
         except Exception as e:
-            print(f"❌ Erreur webhook: {str(e)}")
             return HttpResponse("ERROR", status=400)
 
     return HttpResponse("Method Not Allowed", status=405)
@@ -661,8 +645,6 @@ def payment_success(request, order_id):
     """
     crypto = request.GET.get('crypto', '')
     uuid = request.GET.get('uuid', '')
-
-    print(f"✅ SUCCÈS Paiement - Crypto: {crypto}, UUID: {uuid}")
 
     try:
         order = get_object_or_404(Order, id=order_id)
@@ -688,12 +670,9 @@ def payment_success(request, order_id):
         # Vider le panier
         cart = get_or_create_cart(request)
         cart.items.all().delete()
-
-        print(f"✅ Commande #{order.order_number} confirmée")
         messages.success(request, f"Paiement confirmé ! Commande #{order.order_number}")
 
     except Exception as e:
-        print(f"❌ Erreur success: {str(e)}")
         messages.success(request, "Paiement confirmé avec succès !")
 
     return redirect('shop:order_confirmation', order_id=order.id)
@@ -706,8 +685,6 @@ def payment_cancel(request, order_id):
     """
     crypto = request.GET.get('crypto', '')
     uuid = request.GET.get('uuid', '')
-
-    print(f"❌ ANNULATION Paiement - Crypto: {crypto}, UUID: {uuid}")
 
     try:
         order = get_object_or_404(Order, id=order_id)
@@ -723,11 +700,9 @@ def payment_cancel(request, order_id):
         order.status = 'CANCELLED'
         order.save()
 
-        print(f"❌ Commande #{order.order_number} annulée")
         messages.warning(request, f"Paiement annulé. Commande #{order.order_number}")
 
     except Exception as e:
-        print(f"❌ Erreur cancel: {str(e)}")
         messages.warning(request, "Paiement annulé.")
 
     return redirect('shop:cart_detail')
@@ -806,12 +781,6 @@ def checkout(request):
             # Vider le panier
             cart.items.all().delete()
 
-            # Notification email
-            try:
-                send_new_order_notification(order)
-            except Exception as e:
-                print(f"Erreur notification: {e}")
-
             messages.success(request,
                              f"Votre commande #{order.order_number} a été passée avec succès ! Paiement à la livraison.")
             return redirect('shop:order_confirmation', order_id=order.id)
@@ -853,28 +822,19 @@ def order_history(request):
     orders = Order.objects.none()
 
     if request.user.is_authenticated:
-        print(f"DEBUG: Utilisateur connecté - {request.user.email}")
         # Chercher les commandes par email
         orders = Order.objects.filter(
             user=request.user
         ).prefetch_related('items').order_by('-created_at')
-        print(f"DEBUG: Commandes trouvées par email: {orders.count()}")
 
     elif request.session.session_key:
-        print(f"DEBUG: Session non connectée - {request.session.session_key}")
         # Chercher les commandes par session
         orders = Order.objects.filter(
             session_key=request.session.session_key
         ).prefetch_related('items').order_by('-created_at')
-        print(f"DEBUG: Commandes trouvées par session: {orders.count()}")
 
     else:
-        print("DEBUG: Pas d'utilisateur ni de session")
         messages.info(request, "Votre historique de commandes n'est pas disponible.")
-
-    # Afficher le détail des commandes trouvées
-    for order in orders:
-        print(f"DEBUG: Commande #{order.order_number} - Email: {order.email}")
 
     context = {
         'orders': orders,
@@ -1283,7 +1243,7 @@ def admin_repair_delete(request, repair_id):
 @login_required
 @user_passes_test(is_admin_user)
 def admin_add_product(request):
-    """Vue pour ajouter un produit avec Supabase"""
+    """Vue pour ajouter un produit avec Supabase et images multiples"""
 
     if request.method == 'POST':
         # Récupérer les données du formulaire
@@ -1293,7 +1253,10 @@ def admin_add_product(request):
         product_type = request.POST.get('product_type')
         stock = request.POST.get('stock')
         discount_percentage = request.POST.get('discount_percentage', 0)
-        image = request.FILES.get('image')
+
+        # Récupérer correctement les fichiers multiples
+        main_image = request.FILES.get('main_image')
+        additional_images = request.FILES.getlist('additional_images')
 
         # Champs spécifiques à DECORATION
         needs_custom_quote = request.POST.get('needs_custom_quote') == 'on'
@@ -1307,6 +1270,8 @@ def admin_add_product(request):
             ('product_type', 'Type de produit'),
             ('stock', 'Stock')
         ]
+
+        # CORRECTION : Ne pas exiger le prix pour les produits sur devis
         if not needs_custom_quote:
             required_fields.append(('price', 'Prix'))
 
@@ -1315,13 +1280,13 @@ def admin_add_product(request):
             messages.error(request, f"Champs obligatoires manquants: {', '.join(missing_fields)}")
             return redirect('/gestion-securisee/products/add/')
 
-        if not image:
-            messages.error(request, "Veuillez sélectionner une image.")
+        if not main_image:
+            messages.error(request, "Veuillez ajouter une image principale.")
             return redirect('/gestion-securisee/products/add/')
 
         # Validation spécifique
         if product_type == 'ELECTRONICS' and not request.POST.get('phone_brand'):
-            messages.error(request, "Pour les téléphones, la marque est obligatoire.")
+            messages.error(request, "Pour les produits électroniques, la marque est obligatoire.")
             return redirect('/gestion-securisee/products/add/')
 
         if product_type == 'DECORATION':
@@ -1334,11 +1299,14 @@ def admin_add_product(request):
                     return redirect('/gestion-securisee/products/add/')
 
         try:
+            # CORRECTION : Gérer le prix pour les produits sur devis
+            product_price = Decimal('0') if needs_custom_quote else Decimal(price)
+
             # Création du produit SANS image
             product = Product(
                 name=name,
                 description=description,
-                price=Decimal(price) if not needs_custom_quote else Decimal('0'),
+                price=product_price,
                 product_type=product_type,
                 stock=stock,
                 discount_percentage=discount_percentage,
@@ -1347,7 +1315,8 @@ def admin_add_product(request):
                 decoration_type=decoration_type if product_type == 'DECORATION' else None,
                 price_per_sqm=Decimal(price_per_sqm) if product_type == 'DECORATION' and price_per_sqm else None,
                 phone_brand=request.POST.get('phone_brand') if product_type == 'ELECTRONICS' else None,
-                electronics_category=request.POST.get('electronics_category') if product_type == 'ELECTRONICS' else None,
+                electronics_category=request.POST.get(
+                    'electronics_category') if product_type == 'ELECTRONICS' else None,
                 phone_category=request.POST.get('phone_category') if product_type == 'ELECTRONICS' else None,
                 storage=request.POST.get('storage') if product_type == 'ELECTRONICS' else None,
                 screen_size=request.POST.get('screen_size') if product_type == 'ELECTRONICS' else None,
@@ -1363,19 +1332,30 @@ def admin_add_product(request):
             )
             product.save()  # Génère l'ID
 
-            # ✅ NOUVEAU : Upload de l'image vers Supabase
+            # GESTION DES IMAGES
             from .supabase_storage import upload_to_supabase
-            supabase_url = upload_to_supabase(image, 'products')
-            if supabase_url:
-                product.image_url = supabase_url
-                product.save()
-                messages.success(request, f"Le produit '{name}' a été créé avec succès !")
-                return redirect('/gestion-securisee/products/')
-            else:
-                # Si l'upload échoue, supprimer le produit créé et afficher une erreur
-                product.delete()
-                messages.error(request, "Erreur lors de l'upload de l'image vers Supabase. Veuillez réessayer.")
-                return redirect('/gestion-securisee/products/add/')
+
+            # 1. Image principale
+            if main_image:
+                main_image_url = upload_to_supabase(main_image, 'products')
+                if main_image_url:
+                    product.image_url = main_image_url
+                    product.save()
+
+            # 2. Images supplémentaires
+            for additional_image in additional_images:
+                if additional_image:
+                    additional_image_url = upload_to_supabase(additional_image, 'products')
+                    if additional_image_url:
+                        ProductImage.objects.create(
+                            product=product,
+                            image_url=additional_image_url,
+                            is_primary=False
+                        )
+
+            messages.success(request,
+                             f"Le produit '{name}' a été créé avec succès avec {len(additional_images)} images supplémentaires !")
+            return redirect('/gestion-securisee/products/')
 
         except Exception as e:
             messages.error(request, f"Erreur lors de la création du produit : {e}")
@@ -1383,7 +1363,6 @@ def admin_add_product(request):
 
     # GET request
     return render(request, 'administration/add_product.html')
-
 
 @admin_required
 @login_required
@@ -1800,39 +1779,74 @@ def export_html_fallback(request, order):
 @admin_required
 @login_required
 @user_passes_test(is_admin_user)
-def admin_edit_product(request, product_id):
-    """Vue pour modifier un produit existant avec Supabase"""
-    product = get_object_or_404(Product, id=product_id)
+def admin_edit_product(request, slug):
+    """Vue pour modifier un produit existant avec Supabase et images multiples"""
+    product = get_object_or_404(Product, slug=slug)
 
     if request.method == 'POST':
         try:
-            # Récupérer seulement les champs essentiels
+            # Récupérer les données de base
             name = request.POST.get('name', product.name)
             description = request.POST.get('description', product.description)
             price = request.POST.get('price', product.price)
             stock = request.POST.get('stock', product.stock)
             product_type = request.POST.get('product_type', product.product_type)
 
-            # Mettre à jour les champs de base avec les valeurs existantes si vides
-            product.name = name or product.name
-            product.description = description or product.description
-            product.price = price or product.price
-            product.stock = stock or product.stock
-            product.product_type = product_type or product.product_type
+            # Récupérer les fichiers
+            main_image = request.FILES.get('main_image')
+            additional_images = request.FILES.getlist('additional_images')
 
-            # ✅ CORRECTION : Gestion de l'image avec Supabase
-            image = request.FILES.get('image')
-            if image:
+            # Récupérer les IDs des images à supprimer
+            remove_image_ids = request.POST.getlist('remove_image_ids')
+
+            # SUPPRESSION DES IMAGES
+            if remove_image_ids:
+                clean_remove_ids = []
+                for img_id in remove_image_ids:
+                    if img_id and str(img_id).strip() and str(img_id).isdigit():
+                        clean_remove_ids.append(int(img_id))
+
+                if clean_remove_ids:
+                    # Supprimer les images de la base de données et de Supabase
+                    existing_images = ProductImage.objects.filter(id__in=clean_remove_ids, product=product)
+
+                    for img in existing_images:
+                        # Supprimer de Supabase
+                        from .supabase_storage import delete_from_supabase
+                        delete_from_supabase(img.image_url)
+
+                    # Supprimer de la base de données
+                    existing_images.delete()
+
+            # GESTION DE LA NOUVELLE IMAGE PRINCIPALE
+            if main_image:
                 from .supabase_storage import upload_to_supabase
-                supabase_url = upload_to_supabase(image, 'products')
-                if supabase_url:
-                    product.image_url = supabase_url
-                else:
-                    messages.error(request, "Erreur lors de l'upload de l'image vers Supabase. L'image n'a pas été modifiée.")
-                    return redirect(f'/gestion-securisee/products/edit/{product_id}/')
+                main_image_url = upload_to_supabase(main_image, 'products')
+                if main_image_url:
+                    product.image_url = main_image_url
 
-            # SAUVEGARDER
+            # Mettre à jour les champs de base
+            product.name = name
+            product.description = description
+            product.price = Decimal(price) if price else Decimal('0')
+            product.stock = int(stock) if stock else 0
+            product.product_type = product_type
+
+            # SAUVEGARDER le produit
             product.save()
+
+            # GESTION DES NOUVELLES IMAGES SUPPLÉMENTAIRES
+            if additional_images:
+                for additional_image in additional_images:
+                    if additional_image:
+                        from .supabase_storage import upload_to_supabase
+                        additional_image_url = upload_to_supabase(additional_image, 'products')
+                        if additional_image_url:
+                            ProductImage.objects.create(
+                                product=product,
+                                image_url=additional_image_url,
+                                is_primary=False
+                            )
 
             messages.success(request, f"Le produit '{product.name}' a été modifié avec succès !")
             return redirect('/gestion-securisee/products/')
@@ -1840,7 +1854,12 @@ def admin_edit_product(request, product_id):
         except Exception as e:
             messages.error(request, f"Erreur lors de la modification : {str(e)}")
 
-    context = {'product': product}
+    # GET request
+    product_images = product.images.all()
+    context = {
+        'product': product,
+        'product_images': product_images
+    }
     return render(request, 'administration/edit_product.html', context)
 
 

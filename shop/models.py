@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.conf import settings
+from django.utils.text import slugify
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name="Nom")
@@ -79,6 +80,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Prix")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Catégorie")
     product_type = models.CharField(max_length=15, choices=PRODUCT_TYPES, verbose_name="Type de produit")
+    slug = models.SlugField(max_length=200,unique=True,blank=True,verbose_name="Identifiant URL")
 
     # Attributs spécifiques aux draps
     sheet_size = models.CharField(max_length=10, choices=SHEET_SIZES, blank=True, null=True, verbose_name="Taille")
@@ -140,7 +142,7 @@ class Product(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('product_detail', kwargs={'pk': self.pk})
+        return reverse('shop:product_detail', kwargs={'slug': self.slug})
 
 
     # Méthode pour calculer le prix promotionnel
@@ -153,7 +155,48 @@ class Product(models.Model):
             return self.price - discount
         return self.price
 
+    def get_main_image_url(self):
+        """Retourne l'URL de l'image principale"""
+        if self.image_url:  # Garde la compatibilité avec l'image actuelle
+            return self.image_url
+
+        # Vérifie si la relation images existe (ProductImage peut ne pas être encore défini)
+        if hasattr(self, 'images'):
+            # Cherche une image marquée comme principale
+            primary_image = self.images.filter(is_primary=True).first()
+            if primary_image:
+                return primary_image.image_url
+            # Sinon retourne la première image
+            first_image = self.images.first()
+            if first_image:
+                return first_image.image_url
+
+        return None
+
+    def get_all_images(self):
+        """Retourne toutes les images du produit"""
+        images = []
+
+        # Ajouter l'image principale (si elle existe)
+        if self.image_url:
+            images.append({
+                'image_url': self.image_url,
+                'is_primary': True
+            })
+
+        # Ajouter les images supplémentaires de ProductImage
+        if hasattr(self, 'images'):
+            for img in self.images.all():
+                images.append({
+                    'image_url': img.image_url,
+                    'is_primary': img.is_primary
+                })
+
+        return images
+
     def save(self, *args, **kwargs):
+        # DÉPLACER LA GÉNÉRATION DE CATÉGORIE AVANT LE SUPER().SAVE()
+
         # Déterminer la catégorie automatiquement
         if self.product_type == 'ELECTRONICS':
             category_name = "Électronique & Accessoires"
@@ -168,7 +211,32 @@ class Product(models.Model):
         )
         self.category = category
 
+        # GÉNÉRER LE SLUG SI VIDE - AJOUTER CETTE PARTIE
+        if not self.slug:
+            base_slug = slugify(self.name)
+            slug = base_slug
+            counter = 1
+            # S'assurer que le slug est unique
+            while Product.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+
         super().save(*args, **kwargs)
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', verbose_name="Produit")
+    image_url = models.URLField(verbose_name="URL de l'image")  # Pour Supabase
+    is_primary = models.BooleanField(default=False, verbose_name="Image principale")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
+
+    class Meta:
+        verbose_name = "Image du produit"
+        verbose_name_plural = "Images du produit"
+        ordering = ['-is_primary', 'created_at']
+
+    def __str__(self):
+        return f"Image pour {self.product.name}"
 
 
 class CustomQuoteRequest(models.Model):

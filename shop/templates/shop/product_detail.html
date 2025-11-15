@@ -27,24 +27,111 @@
     <div class="max-w-6xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 xl:gap-12">
 
-            <!-- IMAGE PRINCIPALE -->
+            <!-- GALERIE D'IMAGES AMÉLIORÉE -->
             <div class="space-y-3 sm:space-y-4">
-                <div class="bg-white rounded-lg overflow-hidden border border-slate-200">
-                    {% if product.image_url %}
-                        <img src="{{ product.image_url }}"
-                         alt="{{ product.name }} - {{ product.get_product_type_display }} DSD General Trading"
-                         class="w-full h-64 sm:h-72 lg:h-80 xl:h-96 object-cover hover:scale-105 transition-transform duration-300"
-                         loading="eager" width="600" height="400">
-                    {% else %}
-                        <div class="w-full h-64 sm:h-72 lg:h-80 xl:h-96 bg-slate-100 flex items-center justify-center">
-                            <span class="text-4xl sm:text-5xl text-slate-400">
-                                {% if product.product_type == 'SHEET' %}🛏️
-                                {% elif product.product_type == 'PHONE' %}📱
-                                {% else %}🔧{% endif %}
-                            </span>
+                <!-- Image principale avec navigation -->
+                <div class="bg-white rounded-lg overflow-hidden border border-slate-200 relative image-gallery-container">
+                    <div class="image-slider-wrapper">
+                        <div class="image-slider-track" id="image-slider-track">
+                            {% with all_images=product.get_all_images %}
+                            {% for image in all_images %}
+                            <div class="image-slide {% if forloop.first %}active{% endif %}" data-image-index="{{ forloop.counter0 }}">
+                                <img src="{{ image.image_url }}"
+                                     alt="{{ product.name }} - Vue {{ forloop.counter }}"
+                                     class="w-full h-64 sm:h-72 lg:h-80 xl:h-96 object-cover cursor-zoom-in transition-opacity duration-300"
+                                     loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                                     width="600" height="400"
+                                     onclick="openLightbox(this.src)">
+                            </div>
+                            {% endfor %}
+                            {% endwith %}
                         </div>
+                    </div>
+
+                    <!-- Flèche gauche -->
+                    {% with all_images=product.get_all_images %}
+                    {% if all_images|length > 1 %}
+                    <button id="prev-image"
+                            class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-slate-700 hover:text-primary rounded-full p-2 sm:p-3 shadow-lg transition-all duration-300 opacity-0 image-gallery-container:hover:opacity-100 hover:scale-110 z-10"
+                            onclick="navigateImage(-1)"
+                            aria-label="Image précédente">
+                        <span class="material-symbols-outlined text-xl sm:text-2xl">chevron_left</span>
+                    </button>
+
+                    <!-- Flèche droite -->
+                    <button id="next-image"
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-slate-700 hover:text-primary rounded-full p-2 sm:p-3 shadow-lg transition-all duration-300 opacity-0 image-gallery-container:hover:opacity-100 hover:scale-110 z-10"
+                            onclick="navigateImage(1)"
+                            aria-label="Image suivante">
+                        <span class="material-symbols-outlined text-xl sm:text-2xl">chevron_right</span>
+                    </button>
+
+                    <!-- Indicateurs de position -->
+                    <div class="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1 sm:gap-2 z-10">
+                        {% for image in all_images %}
+                        <button class="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-white/50 hover:bg-white transition-all duration-300 indicator-dot {% if forloop.first %}active bg-white{% endif %}"
+                                onclick="goToImage({{ forloop.counter0 }})"
+                                data-indicator-index="{{ forloop.counter0 }}"
+                                aria-label="Aller à l'image {{ forloop.counter }}">
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Compteur d'images -->
+                    <div class="absolute top-3 right-3 bg-black/60 text-white text-xs font-medium px-2 py-1 rounded-md z-10">
+                        <span id="current-image-counter">1</span> / <span id="total-images">{{ all_images|length }}</span>
+                    </div>
                     {% endif %}
+                    {% endwith %}
                 </div>
+
+                <!-- Miniatures des images avec navigation améliorée -->
+                {% with all_images=product.get_all_images %}
+                {% if all_images|length > 1 %}
+                <div class="relative">
+                    <!-- Bouton précédent pour miniatures -->
+                    <button id="prev-thumbnail"
+                            class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-slate-600 hover:text-primary rounded-full p-1 sm:p-2 shadow-lg transition-all duration-300 opacity-0 hover:opacity-100 hover:scale-110 z-10"
+                            onclick="scrollThumbnails(-1)"
+                            aria-label="Défiler les miniatures vers la gauche">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">chevron_left</span>
+                    </button>
+
+                    <!-- Bouton suivant pour miniatures -->
+                    <button id="next-thumbnail"
+                            class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-slate-600 hover:text-primary rounded-full p-1 sm:p-2 shadow-lg transition-all duration-300 opacity-0 hover:opacity-100 hover:scale-110 z-10"
+                            onclick="scrollThumbnails(1)"
+                            aria-label="Défiler les miniatures vers la droite">
+                        <span class="material-symbols-outlined text-lg sm:text-xl">chevron_right</span>
+                    </button>
+
+                    <!-- Container des miniatures avec effet de dégradé -->
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-white to-transparent z-5 pointer-events-none"></div>
+                        <div class="absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white to-transparent z-5 pointer-events-none"></div>
+
+                        <!-- Container des miniatures -->
+                        <div class="flex gap-2 sm:gap-3 overflow-x-auto pb-2 thumbnails-container scroll-smooth" id="thumbnails-container">
+                            {% for image in all_images %}
+                            <button class="flex-shrink-0 focus:outline-none group thumbnail-item transform transition-all duration-300 hover:scale-105"
+                                    onclick="goToImage({{ forloop.counter0 }})"
+                                    data-image-index="{{ forloop.counter0 }}"
+                                    data-image-url="{{ image.image_url }}"
+                                    aria-label="Afficher l'image {{ forloop.counter }}"
+                                    aria-current="{% if forloop.first %}true{% else %}false{% endif %}">
+                                <div class="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 border-2 border-transparent rounded-lg overflow-hidden group-focus:border-primary transition-all duration-300 thumbnail-container {% if forloop.first %}border-primary border-2{% endif %}">
+                                    <img src="{{ image.image_url }}"
+                                         alt="{{ product.name }} - Vue {{ forloop.counter }}"
+                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                         loading="lazy">
+                                </div>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endwith %}
             </div>
 
             <!-- INFORMATIONS PRODUIT -->
@@ -115,7 +202,7 @@
                         <button type="button"
                                 data-add-to-cart
                                 data-product-id="{{ product.id }}"
-                                class="w-full bg-primary text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
+                                class="w-full bg-primary text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 text-sm sm:text-base">
                             <span class="material-symbols-outlined text-lg">shopping_cart</span>
                             Ajouter au panier
                         </button>
@@ -140,219 +227,411 @@
             </div>
         </div>
 
-        <!-- SECTION DÉTAILS AVEC ONGLETS -->
-        <div class="mt-6 sm:mt-8 lg:mt-12">
-            <div class="border-b border-slate-200 overflow-x-auto">
-                <nav class="flex gap-4 sm:gap-6 lg:gap-8 -mb-px min-w-max">
-                    <button class="pb-3 border-b-2 border-primary text-primary font-medium text-xs sm:text-sm transition-colors whitespace-nowrap" data-tab="specs">
-                        Spécifications
+        <!-- SECTION CARACTÉRISTIQUES DÉTAILLÉES -->
+        <div class="mt-12 sm:mt-16">
+            <div class="border-b border-slate-200">
+                <nav class="flex space-x-8">
+                    <button data-tab="specs"
+                            class="border-b-2 border-primary text-primary font-medium py-4 text-sm sm:text-base transition-all duration-300">
+                        Caractéristiques
                     </button>
-                    <button class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap" data-tab="description">
-                        Description
+                    <button data-tab="description"
+                            class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium py-4 text-sm sm:text-base transition-all duration-300">
+                        Description détaillée
+                    </button>
+                    <button data-tab="shipping"
+                            class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium py-4 text-sm sm:text-base transition-all duration-300">
+                        Livraison & Retours
                     </button>
                 </nav>
             </div>
 
-            <div class="py-4 sm:py-6">
-                <!-- Onglet Spécifications -->
+            <div class="py-6 sm:py-8">
+                <!-- Onglet Caractéristiques -->
                 <div id="specs-tab" class="tab-content">
-                    {% if product.product_type == 'PHONE' %}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                        {% if product.screen_size %}
-                        <div class="bg-white rounded-lg p-3 sm:p-4 border border-slate-200">
-                            <div class="text-slate-500 text-xs sm:text-sm mb-1">Écran</div>
-                            <div class="font-medium text-slate-900 text-sm sm:text-base">{{ product.screen_size }}</div>
-                        </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        {% if product.product_type == 'SHEET' %}
+                            {% if product.material %}
+                            <div class="flex justify-between py-3 border-b border-slate-100">
+                                <span class="text-slate-600">Matériau</span>
+                                <span class="font-medium text-slate-900">{{ product.get_material_display }}</span>
+                            </div>
+                            {% endif %}
+                            {% if product.thread_count %}
+                            <div class="flex justify-between py-3 border-b border-slate-100">
+                                <span class="text-slate-600">Nombre de fils</span>
+                                <span class="font-medium text-slate-900">{{ product.thread_count }}</span>
+                            </div>
+                            {% endif %}
+                            {% if product.sheet_size %}
+                            <div class="flex justify-between py-3 border-b border-slate-100">
+                                <span class="text-slate-600">Taille</span>
+                                <span class="font-medium text-slate-900">{{ product.get_sheet_size_display }}</span>
+                            </div>
+                            {% endif %}
+                        {% elif product.product_type == 'PHONE' %}
+                            {% if product.phone_brand %}
+                            <div class="flex justify-between py-3 border-b border-slate-100">
+                                <span class="text-slate-600">Marque</span>
+                                <span class="font-medium text-slate-900">{{ product.get_phone_brand_display }}</span>
+                            </div>
+                            {% endif %}
+                            {% if product.storage_capacity %}
+                            <div class="flex justify-between py-3 border-b border-slate-100">
+                                <span class="text-slate-600">Stockage</span>
+                                <span class="font-medium text-slate-900">{{ product.storage_capacity }} Go</span>
+                            </div>
+                            {% endif %}
+                            {% if product.screen_size %}
+                            <div class="flex justify-between py-3 border-b border-slate-100">
+                                <span class="text-slate-600">Écran</span>
+                                <span class="font-medium text-slate-900">{{ product.screen_size }}"</span>
+                            </div>
+                            {% endif %}
                         {% endif %}
 
-                        {% if product.processor %}
-                        <div class="bg-white rounded-lg p-3 sm:p-4 border border-slate-200">
-                            <div class="text-slate-500 text-xs sm:text-sm mb-1">Processeur</div>
-                            <div class="font-medium text-slate-900 text-sm sm:text-base">{{ product.processor }}</div>
-                        </div>
-                        {% endif %}
-
-                        {% if product.camera %}
-                        <div class="bg-white rounded-lg p-3 sm:p-4 border border-slate-200">
-                            <div class="text-slate-500 text-xs sm:text-sm mb-1">Appareil photo</div>
-                            <div class="font-medium text-slate-900 text-sm sm:text-base">{{ product.camera }}</div>
-                        </div>
-                        {% endif %}
-
-                        {% if product.storage %}
-                        <div class="bg-white rounded-lg p-3 sm:p-4 border border-slate-200">
-                            <div class="text-slate-500 text-xs sm:text-sm mb-1">Stockage</div>
-                            <div class="font-medium text-slate-900 text-sm sm:text-base">{{ product.storage }}</div>
-                        </div>
-                        {% endif %}
-
-                        {% if product.ram %}
-                        <div class="bg-white rounded-lg p-3 sm:p-4 border border-slate-200">
-                            <div class="text-slate-500 text-xs sm:text-sm mb-1">Mémoire RAM</div>
-                            <div class="font-medium text-slate-900 text-sm sm:text-base">{{ product.ram }}</div>
-                        </div>
-                        {% endif %}
-
-                        {% if product.battery %}
-                        <div class="bg-white rounded-lg p-3 sm:p-4 border border-slate-200">
-                            <div class="text-slate-500 text-xs sm:text-sm mb-1">Batterie</div>
-                            <div class="font-medium text-slate-900 text-sm sm:text-base">{{ product.battery }}</div>
-                        </div>
-                        {% endif %}
-
-                        {% if product.operating_system %}
-                        <div class="bg-white rounded-lg p-3 sm:p-4 border border-slate-200">
-                            <div class="text-slate-500 text-xs sm:text-sm mb-1">Système</div>
-                            <div class="font-medium text-slate-900 text-sm sm:text-base">{{ product.operating_system }}</div>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    {% elif product.product_type == 'SHEET' %}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-2xl">
-                        {% if product.material %}
-                        <div class="flex justify-between py-2 border-b border-slate-100">
-                            <span class="text-slate-600 text-sm">Matière</span>
-                            <span class="font-medium text-slate-900 text-sm">{{ product.material }}</span>
-                        </div>
-                        {% endif %}
-                        {% if product.sheet_size %}
-                        <div class="flex justify-between py-2 border-b border-slate-100">
-                            <span class="text-slate-600 text-sm">Taille</span>
-                            <span class="font-medium text-slate-900 text-sm">{{ product.get_sheet_size_display }}</span>
-                        </div>
-                        {% endif %}
                         {% if product.color %}
-                        <div class="flex justify-between py-2 border-b border-slate-100">
-                            <span class="text-slate-600 text-sm">Couleur</span>
-                            <span class="font-medium text-slate-900 text-sm">{{ product.get_color_display }}</span>
+                        <div class="flex justify-between py-3 border-b border-slate-100">
+                            <span class="text-slate-600">Couleur</span>
+                            <span class="font-medium text-slate-900">{{ product.get_color_display }}</span>
                         </div>
                         {% endif %}
+
+                        <div class="flex justify-between py-3 border-b border-slate-100">
+                            <span class="text-slate-600">Garantie</span>
+                            <span class="font-medium text-slate-900">2 ans</span>
+                        </div>
                     </div>
-                    {% endif %}
                 </div>
 
-                <!-- Onglet Description -->
+                <!-- Onglet Description détaillée -->
                 <div id="description-tab" class="tab-content hidden">
-                    <div class="prose prose-sm sm:prose-base max-w-none">
-                        <p class="text-slate-600 leading-relaxed">{{ product.description }}</p>
+                    <div class="prose max-w-none">
+                        <p class="text-slate-700 leading-relaxed">{{ product.description }}</p>
+
+                        {% if product.product_type == 'SHEET' %}
+                        <div class="mt-6">
+                            <h3 class="text-lg font-semibold text-slate-900 mb-3">Avantages</h3>
+                            <ul class="list-disc pl-5 text-slate-700 space-y-2">
+                                <li>Confort optimal grâce à la qualité du tissu</li>
+                                <li>Respiration naturelle pour un sommeil agréable</li>
+                                <li>Facile d'entretien et résistant au lavage</li>
+                                <li>Conserve sa forme et ses couleurs après plusieurs lavages</li>
+                            </ul>
+                        </div>
+                        {% elif product.product_type == 'PHONE' %}
+                        <div class="mt-6">
+                            <h3 class="text-lg font-semibold text-slate-900 mb-3">Fonctionnalités</h3>
+                            <ul class="list-disc pl-5 text-slate-700 space-y-2">
+                                <li>Performance optimale pour un usage quotidien</li>
+                                <li>Autonomie prolongée pour une utilisation toute la journée</li>
+                                <li>Écran haute définition pour une expérience visuelle exceptionnelle</li>
+                                <li>Design ergonomique pour une prise en main confortable</li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Onglet Livraison & Retours -->
+                <div id="shipping-tab" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-900 mb-3">Livraison</h3>
+                            <ul class="list-disc pl-5 text-slate-700 space-y-2">
+                                <li>Livraison gratuite dans toute la ville d'Abidjan</li>
+                                <li>Délai de livraison: 24 à 48 heures</li>
+                                <li>Suivi de commande disponible</li>
+                                <li>Livraison express disponible (frais supplémentaires)</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-900 mb-3">Retours & Échanges</h3>
+                            <ul class="list-disc pl-5 text-slate-700 space-y-2">
+                                <li>Délai de retour: 14 jours après réception</li>
+                                <li>Produit doit être dans son état d'origine</li>
+                                <li>Remboursement sous 7 jours ouvrables</li>
+                                <li>Échange possible pour un autre produit</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- PRODUITS SIMILAIRES COMPACTS -->
-        {% if similar_products %}
-        <section class="mt-8 sm:mt-12">
-            <div class="flex items-center justify-between mb-4 sm:mb-6">
-                <h2 class="text-lg sm:text-xl font-bold text-slate-900">Produits similaires</h2>
-                <a href="{% if product.product_type == 'SHEET' %}{% url 'shop:electronics_list' %}{% else %}{% url 'shop:electronics_list' %}{% endif %}"
-                   class="text-primary hover:underline text-xs sm:text-sm">
-                    Voir tout
-                </a>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {% for similar in similar_products %}
-                <a href="{% url 'shop:product_detail' product_id=similar.id %}" class="bg-white rounded-lg overflow-hidden border border-slate-200 hover:border-primary transition-colors group">
-                    <div class="relative">
-                        {% if similar.image_url %}
-                            <img src="{{ similar.image_url }}" alt="{{ similar.name }}" class="w-full h-32 sm:h-36 lg:h-40 object-cover group-hover:scale-105 transition-transform duration-300">
-                        {% else %}
-                            <div class="w-full h-32 sm:h-36 lg:h-40 bg-slate-100 flex items-center justify-center">
-                                <span class="text-2xl sm:text-3xl text-slate-400">
-                                    {% if similar.product_type == 'SHEET' %}🛏️
-                                    {% elif similar.product_type == 'PHONE' %}📱
-                                    {% else %}🔧{% endif %}
-                                </span>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="p-2 sm:p-3">
-                        <h3 class="font-medium text-slate-800 text-xs sm:text-sm mb-1 line-clamp-2 group-hover:text-primary transition-colors">{{ similar.name }}</h3>
-                        <div class="flex items-center gap-1 sm:gap-2">
-                            {% if similar.on_sale %}
-                                <span class="text-sm sm:text-base font-bold text-primary">{{ similar.get_discounted_price|floatformat:2 }} FCFA</span>
-                                <span class="text-xs text-red-500 line-through">{{ similar.price|floatformat:2 }} FCFA</span>
-                            {% else %}
-                                <span class="text-sm sm:text-base font-bold text-slate-900">{{ similar.price|floatformat:2 }} FCFA</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-        </section>
-        {% endif %}
     </div>
 </div>
 
-{% block structured_data %}
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org/",
-    "@type": "Product",
-    "name": "{{ product.name|escapejs }}",
-    "description": "{{ product.description|striptags|escapejs|truncatewords:50 }}",
-    "image": "{% if product.image_url %}{{ request.scheme }}://{{ request.get_host }}{{ product.image_url }}{% else %}https://dsd-general-trading.com/static/shop/images/logo.jpg{% endif %}",
-    "sku": "PROD{{ product.id }}",
-    "mpn": "DSD{{ product.id }}",
-    "brand": {
-        "@type": "Brand",
-        "name": "{% if product.phone_brand %}{{ product.get_phone_brand_display }}{% else %}DSD General Trading{% endif %}"
-    },
-    "offers": {
-        "@type": "Offer",
-        "url": "{{ request.build_absolute_uri }}",
-        "priceCurrency": "XOF",
-        "price": "{{ product.get_discounted_price|floatformat:2 }}",
-        "priceValidUntil": "{% now 'Y-m-d' %}",
-        "availability": "{% if product.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
-        "itemCondition": "https://schema.org/NewCondition",
-        "shippingDetails": {
-            "@type": "OfferShippingDetails",
-            "shippingRate": {
-                "@type": "MonetaryAmount",
-                "value": "0",
-                "currency": "XOF"
-            },
-            "shippingDestination": {
-                "@type": "DefinedRegion",
-                "addressCountry": "CI"
-            },
-            "deliveryTime": {
-                "@type": "ShippingDeliveryTime",
-                "handlingTime": {
-                    "@type": "QuantitativeValue",
-                    "minValue": "1",
-                    "maxValue": "2"
-                },
-                "transitTime": {
-                    "@type": "QuantitativeValue",
-                    "minValue": "1",
-                    "maxValue": "3"
-                }
-            }
-        },
-        "hasMerchantReturnPolicy": {
-            "@type": "MerchantReturnPolicy",
-            "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-            "merchantReturnDays": 14,
-            "returnMethod": "https://schema.org/ReturnByMail",
-            "returnFees": "https://schema.org/FreeReturn"
-        }
-    },
-    "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "25"
-    }
-}
-</script>
-{% endblock %}
+<!-- Lightbox améliorée -->
+<div id="lightbox" class="fixed inset-0 bg-black bg-opacity-0 z-50 flex items-center justify-center p-4 hidden transition-opacity duration-500">
+    <div class="relative max-w-4xl max-h-full transform scale-95 opacity-0 transition-all duration-500">
+        <button id="lightbox-close"
+                class="absolute -top-12 right-0 text-white text-2xl hover:text-gray-300 transition-colors duration-300 hover:scale-110 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"
+                onclick="closeLightbox()"
+                aria-label="Fermer la lightbox">
+            ✕
+        </button>
+
+        <button id="lightbox-prev"
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-2xl hover:text-gray-300 transition-colors duration-300 hover:scale-110 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"
+                onclick="navigateLightbox(-1)"
+                aria-label="Image précédente">
+            ‹
+        </button>
+
+        <button id="lightbox-next"
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-2xl hover:text-gray-300 transition-colors duration-300 hover:scale-110 bg-black/50 rounded-full w-10 h-10 flex items-center justify-center"
+                onclick="navigateLightbox(1)"
+                aria-label="Image suivante">
+            ›
+        </button>
+
+        <img id="lightbox-image"
+             alt="Zoom de {{ product.name }}"
+             class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white bg-black/50 px-3 py-1 rounded-md text-sm">
+            <span id="lightbox-counter">1</span> / <span>{{ product.get_all_images|length }}</span>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+// Variables globales pour la navigation des images
+let currentImageIndex = 0;
+let productImages = [];
+let isAnimating = false;
+let lightboxOpen = false;
+
+// Initialisation des images au chargement de la page
+document.addEventListener('DOMContentLoaded', function() {
+    // Récupérer toutes les images du produit
+    const imageElements = document.querySelectorAll('[data-image-url]');
+    productImages = Array.from(imageElements).map(element => ({
+        url: element.getAttribute('data-image-url'),
+        index: parseInt(element.getAttribute('data-image-index'))
+    }));
+
+    // Initialiser le slider
+    initializeSlider();
+
+    // Mettre à jour le compteur d'images
+    updateImageCounter();
+
+    // Afficher les flèches de navigation si plus d'une image
+    if (productImages.length > 1) {
+        const imageContainer = document.querySelector('.image-gallery-container');
+
+        // Afficher les flèches au survol
+        imageContainer.addEventListener('mouseenter', function() {
+            document.getElementById('prev-image').style.opacity = '1';
+            document.getElementById('next-image').style.opacity = '1';
+        });
+
+        imageContainer.addEventListener('mouseleave', function() {
+            document.getElementById('prev-image').style.opacity = '0';
+            document.getElementById('next-image').style.opacity = '0';
+        });
+
+        // Gestion du survol des miniatures
+        const thumbnailsContainer = document.getElementById('thumbnails-container');
+        if (thumbnailsContainer) {
+            thumbnailsContainer.addEventListener('mouseenter', function() {
+                document.getElementById('prev-thumbnail').style.opacity = '1';
+                document.getElementById('next-thumbnail').style.opacity = '1';
+            });
+
+            thumbnailsContainer.addEventListener('mouseleave', function() {
+                document.getElementById('prev-thumbnail').style.opacity = '0';
+                document.getElementById('next-thumbnail').style.opacity = '0';
+            });
+        }
+    }
+
+    // Initialiser les onglets
+    showTab('specs');
+
+    // Écouteurs d'événements pour les onglets
+    document.querySelectorAll('[data-tab]').forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            showTab(tabName);
+        });
+    });
+});
+
+// Initialisation du slider
+function initializeSlider() {
+    const slides = document.querySelectorAll('.image-slide');
+
+    // S'assurer que toutes les images sont préchargées
+    slides.forEach((slide, index) => {
+        const img = slide.querySelector('img');
+        if (img) {
+            // Précharger l'image
+            const preloadImg = new Image();
+            preloadImg.src = img.src;
+
+            // Afficher immédiatement l'image active
+            if (index === currentImageIndex) {
+                slide.style.opacity = '1';
+                slide.style.display = 'block';
+            } else {
+                slide.style.opacity = '0';
+                slide.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Navigation entre les images avec animations
+function navigateImage(direction) {
+    if (productImages.length <= 1 || isAnimating) return;
+
+    isAnimating = true;
+    const newIndex = currentImageIndex + direction;
+
+    // Gérer le débordement
+    if (newIndex < 0) {
+        currentImageIndex = productImages.length - 1;
+    } else if (newIndex >= productImages.length) {
+        currentImageIndex = 0;
+    } else {
+        currentImageIndex = newIndex;
+    }
+
+    // Animation de transition
+    animateImageTransition();
+}
+
+// Aller directement à une image spécifique
+function goToImage(targetIndex) {
+    if (targetIndex === currentImageIndex || isAnimating) return;
+
+    isAnimating = true;
+    currentImageIndex = targetIndex;
+    animateImageTransition();
+}
+
+// Animation de transition entre les images
+function animateImageTransition() {
+    const slides = document.querySelectorAll('.image-slide');
+    const currentSlide = document.querySelector('.image-slide.active');
+    const nextSlide = slides[currentImageIndex];
+
+    // Masquer toutes les slides sauf la suivante
+    slides.forEach(slide => {
+        slide.style.display = 'none';
+        slide.classList.remove('active');
+    });
+
+    // Afficher la nouvelle slide
+    nextSlide.style.display = 'block';
+    nextSlide.classList.add('active');
+
+    // Animation de fondu
+    nextSlide.style.opacity = '0';
+
+    // Déclencher l'animation après un court délai pour permettre le reflow
+    setTimeout(() => {
+        nextSlide.style.transition = 'opacity 0.4s ease-in-out';
+        nextSlide.style.opacity = '1';
+
+        // Mettre à jour les indicateurs
+        updateActiveIndicators();
+
+        // Mettre à jour le compteur
+        updateImageCounter();
+
+        // Faire défiler les miniatures pour que l'image active soit visible
+        scrollToActiveThumbnail();
+
+        // Réinitialiser l'animation
+        setTimeout(() => {
+            isAnimating = false;
+            nextSlide.style.transition = '';
+        }, 400);
+    }, 50);
+}
+
+// Mettre à jour le compteur d'images
+function updateImageCounter() {
+    const currentCounter = document.getElementById('current-image-counter');
+    const lightboxCounter = document.getElementById('lightbox-counter');
+
+    if (currentCounter) {
+        currentCounter.textContent = currentImageIndex + 1;
+    }
+
+    if (lightboxCounter) {
+        lightboxCounter.textContent = currentImageIndex + 1;
+    }
+}
+
+// Faire défiler les miniatures pour que l'image active soit visible
+function scrollToActiveThumbnail() {
+    const activeThumb = document.querySelector(`[data-image-index="${currentImageIndex}"]`);
+    const thumbnailsContainer = document.getElementById('thumbnails-container');
+
+    if (activeThumb && thumbnailsContainer) {
+        const thumbRect = activeThumb.getBoundingClientRect();
+        const containerRect = thumbnailsContainer.getBoundingClientRect();
+
+        // Vérifier si la miniature est partiellement ou totalement hors de la vue
+        if (thumbRect.left < containerRect.left || thumbRect.right > containerRect.right) {
+            // Calculer la position de défilement
+            const scrollPosition = activeThumb.offsetLeft - (thumbnailsContainer.offsetWidth / 2) + (activeThumb.offsetWidth / 2);
+
+            // Défiler vers la position
+            thumbnailsContainer.scrollTo({
+                left: scrollPosition,
+                behavior: 'smooth'
+            });
+        }
+    }
+}
+
+// Navigation manuelle des miniatures
+function scrollThumbnails(direction) {
+    const thumbnailsContainer = document.getElementById('thumbnails-container');
+    const scrollAmount = 120; // pixels à défiler
+
+    thumbnailsContainer.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+    });
+}
+
+// Mettre à jour les indicateurs actifs
+function updateActiveIndicators() {
+    // Mettre à jour les points indicateurs
+    document.querySelectorAll('.indicator-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentImageIndex);
+        dot.classList.toggle('bg-white', index === currentImageIndex);
+        dot.classList.toggle('bg-white/50', index !== currentImageIndex);
+    });
+
+    // Mettre à jour les miniatures
+    document.querySelectorAll('.thumbnail-item').forEach((item, index) => {
+        const container = item.querySelector('.thumbnail-container');
+        container.classList.toggle('border-primary', index === currentImageIndex);
+        container.classList.toggle('border-2', index === currentImageIndex);
+        container.classList.toggle('border-transparent', index !== currentImageIndex);
+
+        // Mettre à jour l'attribut aria-current
+        item.setAttribute('aria-current', index === currentImageIndex ? 'true' : 'false');
+
+        // Animation de la miniature active
+        if (index === currentImageIndex) {
+            item.classList.add('scale-105');
+        } else {
+            item.classList.remove('scale-105');
+        }
+    });
+}
+
 // Gestion des onglets
 function showTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => {
@@ -369,47 +648,468 @@ function showTab(tabName) {
     document.querySelector(`[data-tab="${tabName}"]`).classList.remove('border-transparent', 'text-slate-500');
 }
 
-// Initialisation au chargement de la page
-document.addEventListener('DOMContentLoaded', function() {
-    showTab('specs');
+// Lightbox améliorée
+function openLightbox(imageUrl) {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightbox-image');
 
-    // Écouteurs d'événements pour les onglets
-    document.querySelectorAll('[data-tab]').forEach(button => {
-        button.addEventListener('click', function() {
-            const tabName = this.getAttribute('data-tab');
-            showTab(tabName);
+    lightboxImage.src = imageUrl;
+    lightbox.classList.remove('hidden');
+    lightboxOpen = true;
+
+    // Animation d'entrée
+    setTimeout(() => {
+        lightbox.classList.remove('bg-opacity-0');
+        lightbox.classList.add('bg-opacity-90');
+        const content = lightbox.querySelector('div');
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }, 50);
+
+    // Mettre à jour le compteur dans la lightbox
+    updateImageCounter();
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    const content = lightbox.querySelector('div');
+
+    content.classList.remove('scale-100', 'opacity-100');
+    content.classList.add('scale-95', 'opacity-0');
+    lightbox.classList.remove('bg-opacity-90');
+    lightbox.classList.add('bg-opacity-0');
+
+    setTimeout(() => {
+        lightbox.classList.add('hidden');
+        lightboxOpen = false;
+    }, 500);
+}
+
+// Navigation dans la lightbox
+function navigateLightbox(direction) {
+    if (productImages.length <= 1 || isAnimating) return;
+
+    isAnimating = true;
+    const newIndex = currentImageIndex + direction;
+
+    // Gérer le débordement
+    if (newIndex < 0) {
+        currentImageIndex = productImages.length - 1;
+    } else if (newIndex >= productImages.length) {
+        currentImageIndex = 0;
+    } else {
+        currentImageIndex = newIndex;
+    }
+
+    // Mettre à jour l'image dans la lightbox
+    const lightboxImage = document.getElementById('lightbox-image');
+    lightboxImage.style.opacity = '0';
+
+    setTimeout(() => {
+        lightboxImage.src = productImages[currentImageIndex].url;
+        lightboxImage.style.opacity = '1';
+
+        // Mettre à jour les indicateurs
+        updateActiveIndicators();
+        updateImageCounter();
+
+        isAnimating = false;
+    }, 300);
+}
+
+// Navigation au clavier
+document.addEventListener('keydown', function(e) {
+    if (lightboxOpen) {
+        if (e.key === 'ArrowLeft') {
+            navigateLightbox(-1);
+        } else if (e.key === 'ArrowRight') {
+            navigateLightbox(1);
+        } else if (e.key === 'Escape') {
+            closeLightbox();
+        }
+    } else {
+        if (productImages.length <= 1 || isAnimating) return;
+
+        if (e.key === 'ArrowLeft') {
+            navigateImage(-1);
+        } else if (e.key === 'ArrowRight') {
+            navigateImage(1);
+        }
+    }
+});
+
+// Swipe sur mobile
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+document.addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+});
+
+function handleSwipe() {
+    const swipeThreshold = 50;
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+            // Swipe gauche -> image suivante
+            if (lightboxOpen) {
+                navigateLightbox(1);
+            } else {
+                navigateImage(1);
+            }
+        } else {
+            // Swipe droite -> image précédente
+            if (lightboxOpen) {
+                navigateLightbox(-1);
+            } else {
+                navigateImage(-1);
+            }
+        }
+    }
+}
+
+// Préchargement des images suivantes pour une navigation plus fluide
+function preloadNextImages() {
+    const nextIndex = (currentImageIndex + 1) % productImages.length;
+    const prevIndex = (currentImageIndex - 1 + productImages.length) % productImages.length;
+
+    [nextIndex, prevIndex].forEach(index => {
+        const img = new Image();
+        img.src = productImages[index].url;
+    });
+}
+
+// Observer pour le chargement paresseux des miniatures
+if ('IntersectionObserver' in window) {
+    const thumbnailObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target.querySelector('img');
+                if (img && img.dataset.src) {
+                    img.src = img.dataset.src;
+                    img.removeAttribute('data-src');
+                }
+                thumbnailObserver.unobserve(entry.target);
+            }
         });
+    }, {
+        rootMargin: '50px 0px',
+        threshold: 0.1
     });
 
-    // Les boutons "Ajouter au panier" sont gérés automatiquement par base.html
-});
+    document.querySelectorAll('.thumbnail-item').forEach(item => {
+        thumbnailObserver.observe(item);
+    });
+}
 </script>
 
 <style>
-/* Pour les très petits écrans */
-@media (max-width: 480px) {
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
+/* ===== STYLES PRINCIPAUX POUR LE SLIDER ===== */
 
-    .truncate {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+/* Container principal de la galerie */
+.image-gallery-container {
+    overflow: hidden;
+}
+
+/* Wrapper pour le slider */
+.image-slider-wrapper {
+    overflow: hidden;
+    border-radius: 0.5rem;
+    position: relative;
+}
+
+/* Piste du slider */
+.image-slider-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+/* Slides individuelles */
+.image-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
+    opacity: 1;
+    transition: opacity 0.4s ease-in-out;
+}
+
+/* Images dans les slides */
+.image-slide img {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    width: 100%;
+    height: 16rem; /* h-64 */
+}
+
+/* Responsive pour les images */
+@media (min-width: 640px) {
+    .image-slide img {
+        height: 18rem; /* sm:h-72 */
     }
 }
 
-/* Scroll horizontal pour les onglets sur mobile */
-.overflow-x-auto {
+@media (min-width: 1024px) {
+    .image-slide img {
+        height: 20rem; /* lg:h-80 */
+        max-height: 500px;
+    }
+}
+
+@media (min-width: 1280px) {
+    .image-slide img {
+        height: 24rem; /* xl:h-96 */
+    }
+}
+
+/* ===== STYLES POUR LA NAVIGATION PRINCIPALE ===== */
+
+/* Flèches de navigation principales */
+#prev-image, #next-image {
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#prev-image:hover, #next-image:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== STYLES POUR LES INDICATEURS ===== */
+
+/* Points indicateurs */
+.indicator-dot {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    width: 0.5rem; /* w-2 */
+    height: 0.5rem; /* h-2 */
+}
+
+.indicator-dot.active {
+    transform: scale(1.2);
+}
+
+.indicator-dot:hover {
+    transform: scale(1.3);
+    background-color: white !important;
+}
+
+/* Animation de pulse pour les indicateurs actifs */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.indicator-dot.active {
+    animation: pulse 2s infinite;
+}
+
+/* ===== STYLES POUR LES MINIATURES ===== */
+
+/* Container des miniatures */
+.thumbnails-container {
+    position: relative;
+    padding: 0 2.5rem; /* 40px - Espace pour les boutons de navigation */
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    scroll-behavior: smooth;
 }
 
-.overflow-x-auto::-webkit-scrollbar {
+.thumbnails-container::-webkit-scrollbar {
     display: none;
+}
+
+/* Éléments de miniature individuels */
+.thumbnail-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.thumbnail-item:hover {
+    transform: scale(1.05);
+}
+
+/* Container de chaque miniature */
+.thumbnail-container {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 4rem;  /* w-16 */
+    height: 4rem; /* h-16 */
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+/* Images dans les miniatures */
+.thumbnail-container img {
+    transition: transform 0.3s ease-in-out;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-item:hover .thumbnail-container img {
+    transform: scale(1.1);
+}
+
+/* Style pour les miniatures actives */
+.border-primary {
+    border-color: #3b82f6 !important;
+}
+
+/* ===== STYLES POUR LA NAVIGATION DES MINIATURES ===== */
+
+/* Flèches de navigation des miniatures */
+#prev-thumbnail, #next-thumbnail {
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#prev-thumbnail:hover, #next-thumbnail:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Dégradés pour indiquer qu'il y a plus de miniatures */
+.bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+.bg-gradient-to-l {
+    background-image: linear-gradient(to left, var(--tw-gradient-stops));
+}
+
+.from-white {
+    --tw-gradient-from: #fff;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(255, 255, 255, 0));
+}
+
+.to-transparent {
+    --tw-gradient-to: transparent;
+}
+
+/* ===== STYLES POUR LA LIGHTBOX ===== */
+
+#lightbox {
+    backdrop-filter: blur(5px);
+}
+
+#lightbox-close, #lightbox-prev, #lightbox-next {
+    backdrop-filter: blur(10px);
+}
+
+#lightbox-image {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* ===== STYLES RESPONSIVE ===== */
+
+/* Pour les très petits écrans (mobile) */
+@media (max-width: 480px) {
+    .thumbnails-container {
+        padding: 0 1.875rem; /* 30px */
+    }
+
+    #prev-thumbnail, #next-thumbnail {
+        padding: 0.375rem !important; /* 6px */
+    }
+
+    #prev-image, #next-image {
+        padding: 0.5rem !important; /* 8px */
+    }
+
+    #prev-image .material-symbols-outlined,
+    #next-image .material-symbols-outlined {
+        font-size: 1.125rem !important; /* 18px */
+    }
+
+    .indicator-dot {
+        width: 0.375rem; /* 6px */
+        height: 0.375rem; /* 6px */
+    }
+
+    .thumbnail-container {
+        width: 3.5rem;  /* ~w-14 */
+        height: 3.5rem; /* ~h-14 */
+    }
+}
+
+/* Pour les écrans moyens (tablettes) */
+@media (min-width: 640px) {
+    .thumbnail-container {
+        width: 5rem;  /* sm:w-20 */
+        height: 5rem; /* sm:h-20 */
+    }
+}
+
+/* Pour les grands écrans (desktop) */
+@media (min-width: 1024px) {
+    .thumbnail-container {
+        width: 6rem;  /* lg:w-24 */
+        height: 6rem; /* lg:h-24 */
+    }
+}
+
+/* ===== STYLES POUR LE TEXTE ===== */
+
+/* Texte avec limite de lignes */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Texte tronqué */
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===== ACCESSIBILITÉ ===== */
+
+/* Support pour le mode réduit de mouvement */
+@media (prefers-reduced-motion: reduce) {
+    .image-slider-track,
+    #prev-image, #next-image,
+    #prev-thumbnail, #next-thumbnail,
+    .thumbnail-item,
+    .thumbnail-container,
+    .indicator-dot,
+    .thumbnail-container img {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+    }
+
+    .thumbnails-container {
+        scroll-behavior: auto;
+    }
+}
+
+/* ===== OPTIMISATIONS DE PERFORMANCE ===== */
+
+/* Évite les repaints inutiles */
+.image-slider-track,
+.thumbnail-container img {
+    will-change: transform;
+}
+
+/* Améliore le rendu des images */
+.image-slide img,
+.thumbnail-container img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
 }
 </style>
 {% endblock %}

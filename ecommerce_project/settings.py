@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-prct4r0m&#@h#i0vnm=z(
 
 # 🔥 DEBUG True pour voir les images
 #DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
-DEBUG = False
+DEBUG = True
 
 # Hosts pour Railway
 ALLOWED_HOSTS = [
@@ -104,12 +104,22 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ecommerce_project.wsgi.application'
 
 # --- DATABASE ---
+# settings.py - REMPLACE ta configuration DATABASES par :
+
 DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'neondb',  # ← IMPORTANT: change à 'neondb'
+        'USER': 'neondb_owner',
+        'PASSWORD': 'npg_mhSvUpyxTM25',
+        'HOST': 'ep-summer-cloud-a83c4hsq-pooler.eastus2.azure.neon.tech',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+            'channel_binding': 'require',
+        },
     }
+}
 
 # --- SUPA BASE CONFIGURATION ---
 SUPABASE_URL = 'https://xvhcmeshxeevpeuwzhzj.supabase.co'

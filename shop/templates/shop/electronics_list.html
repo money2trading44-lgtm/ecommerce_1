@@ -97,7 +97,7 @@
             <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {% for phone in electronics %}
                 <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-shadow">
-                    <a href="{% url 'shop:product_detail' product_id=phone.id %}" class="block">
+                    <a href="{% url 'shop:product_detail' phone.slug %}" class="block">
                         <div class="relative">
                             {% if phone.image_url %}
                                 <img src="{{ phone.image_url }}" alt="{{ phone.name }}" class="w-full h-48 sm:h-56 object-cover group-hover:scale-105 transition-transform duration-500">

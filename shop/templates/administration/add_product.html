@@ -141,6 +141,22 @@
                             </select>
                         </div>
 
+                        <!-- Couleur -->
+                        <div>
+                            <label for="color" class="block text-sm font-medium text-gray-700 mb-2">Couleur *</label>
+                            <select id="color" name="color"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
+                                <option value="">Sélectionnez une couleur</option>
+                                <option value="WHITE" {% if request.POST.color == 'WHITE' %}selected{% endif %}>Blanc</option>
+                                <option value="GRAY" {% if request.POST.color == 'GRAY' %}selected{% endif %}>Gris</option>
+                                <option value="BLUE" {% if request.POST.color == 'BLUE' %}selected{% endif %}>Bleu</option>
+                                <option value="PINK" {% if request.POST.color == 'PINK' %}selected{% endif %}>Rose</option>
+                                <option value="GREEN" {% if request.POST.color == 'GREEN' %}selected{% endif %}>Vert</option>
+                                <option value="BEIGE" {% if request.POST.color == 'BEIGE' %}selected{% endif %}>Beige</option>
+                                <option value="BLACK" {% if request.POST.color == 'BLACK' %}selected{% endif %}>Noir</option>
+                            </select>
+                        </div>
+
                         <!-- Matière -->
                         <div class="md:col-span-2">
                             <label for="material" class="block text-sm font-medium text-gray-700 mb-2">Matière</label>
@@ -188,7 +204,7 @@
                 <!-- Catégorie électronique -->
                 <div>
                     <label for="electronics_category" class="block text-sm font-medium text-gray-700 mb-2">Catégorie *</label>
-                    <select id="electronics_category" name="electronics_category" required
+                    <select id="electronics_category" name="electronics_category"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
                         <option value="">Sélectionnez une catégorie</option>
                         <option value="SMARTPHONE" {% if request.POST.electronics_category == 'SMARTPHONE' %}selected{% endif %}>Smartphones</option>
@@ -208,7 +224,7 @@
                     <!-- Marque -->
                     <div class="electronics-field" data-categories="all">
                         <label for="phone_brand" class="block text-sm font-medium text-gray-700 mb-2">Marque *</label>
-                        <input type="text" id="phone_brand" name="phone_brand" required
+                        <input type="text" id="phone_brand" name="phone_brand"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm sm:text-base focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                                placeholder="Ex: Apple, Samsung, Huawei, Sony, JBL..."
                                value="{{ request.POST.phone_brand }}">
@@ -310,14 +326,13 @@
                 </div>
             </div>
 
-            <!-- Image du produit -->
+            <!-- Image principale -->
             <div>
-                <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
-                    Image du produit <span class="text-red-500">*</span>
+                <label for="main_image" class="block text-sm font-medium text-gray-700 mb-2">
+                    Image principale <span class="text-red-500">*</span>
                 </label>
 
-                <!-- Input file responsive -->
-                <input type="file" id="image" name="image"
+                <input type="file" id="main_image" name="main_image"
                        class="block w-full text-xs sm:text-sm text-gray-500
                               file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
                               file:rounded-lg file:border-0
@@ -327,28 +342,52 @@
                               border border-gray-300 rounded-lg"
                        accept="image/*"
                        required
-                       onchange="previewImage(this)">
+                       onchange="previewMainImage(this)">
 
                 <p class="mt-1 text-xs text-gray-500">Formats supportés: JPG, PNG, GIF (max 10MB)</p>
 
-                <!-- Aperçu de l'image -->
-                <div id="image-preview" class="mt-3 hidden p-3 sm:p-4 bg-gray-50 rounded-lg">
-                    <p class="text-sm font-medium text-gray-700 mb-2">Aperçu :</p>
-                    <div class="flex flex-col xs:flex-row xs:items-center space-y-3 xs:space-y-0 xs:space-x-4">
-                        <img id="preview" class="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded-lg border border-gray-300 mx-auto xs:mx-0">
-                        <div class="text-center xs:text-left">
-                            <p id="file-name" class="text-sm font-medium text-gray-900 break-words"></p>
-                            <p id="file-size" class="text-xs text-gray-500"></p>
-                            <button type="button" onclick="removeImage()" class="mt-1 text-xs text-red-600 hover:text-red-800 flex items-center gap-1 justify-center xs:justify-start">
-                                <span class="material-symbols-outlined text-sm">delete</span>
-                                Changer l'image
-                            </button>
+                <!-- Aperçu image principale -->
+                <div id="main-image-preview" class="mt-3 hidden p-3 sm:p-4 bg-gray-50 rounded-lg">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Aperçu image principale :</p>
+                    <div class="flex items-center space-x-4">
+                        <img id="main-preview" class="h-20 w-20 object-cover rounded-lg border border-gray-300">
+                        <div>
+                            <p id="main-file-name" class="text-sm font-medium text-gray-900"></p>
+                            <p id="main-file-size" class="text-xs text-gray-500"></p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Message d'erreur -->
-                <p class="mt-1 text-xs sm:text-sm text-red-600 hidden" id="image-error"></p>
+                <p class="mt-1 text-xs sm:text-sm text-red-600 hidden" id="main-image-error"></p>
+            </div>
+
+            <!-- Images supplémentaires -->
+            <div class="border-t pt-6 mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Images supplémentaires
+                </label>
+
+                <input type="file"
+                       name="additional_images"
+                       multiple
+                       accept="image/*"
+                       class="block w-full text-xs sm:text-sm text-gray-500
+                              file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
+                              file:rounded-lg file:border-0
+                              file:text-xs sm:file:text-sm file:font-semibold
+                              file:bg-green-600 file:text-white
+                              hover:file:bg-green-700 transition-colors
+                              border border-gray-300 rounded-lg"
+                       onchange="previewMultipleImages(this)">
+
+                <p class="mt-2 text-xs text-gray-500">
+                    Sélectionnez plusieurs images supplémentaires.
+                </p>
+
+                <!-- Aperçu des images multiples -->
+                <div id="multiple-images-preview" class="mt-4 hidden grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <!-- Les aperçus seront ajoutés ici par JavaScript -->
+                </div>
             </div>
 
             <!-- Boutons -->
@@ -370,6 +409,7 @@
 <script>
     // Gestion de l'affichage des spécifications par type de produit
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM chargé - initialisation des spécifications');
         const productTypeRadios = document.querySelectorAll('input[name="product_type"]');
         const electronicsSpecs = document.getElementById('electronics-specs');
         const decorationSpecs = document.getElementById('decoration-specs');
@@ -377,6 +417,7 @@
 
         function updateSpecifications() {
             const selectedType = document.querySelector('input[name="product_type"]:checked');
+            console.log('Type de produit sélectionné:', selectedType ? selectedType.value : 'aucun');
 
             // Masquer toutes les spécifications
             electronicsSpecs.classList.add('hidden');
@@ -408,10 +449,12 @@
                     electronicsSpecs.classList.remove('hidden');
                     icon.classList.add('text-green-600');
                     updateElectronicsFields(); // Mettre à jour les champs électroniques
+                    console.log('Spécifications électroniques affichées');
                 } else if (selectedType.value === 'DECORATION') {
                     decorationSpecs.classList.remove('hidden');
                     icon.classList.add('text-purple-600');
                     updateDecorationSpecs(); // Gérer les sous-options de décoration
+                    console.log('Spécifications décoration affichées');
                 }
             }
         }
@@ -419,6 +462,7 @@
         // Gestion des champs électroniques selon la catégorie
         function updateElectronicsFields() {
             const category = document.getElementById('electronics_category').value;
+            console.log('Catégorie électronique:', category);
             const allFields = document.querySelectorAll('.electronics-field');
 
             allFields.forEach(field => {
@@ -439,9 +483,12 @@
             const customQuoteInfo = document.getElementById('custom-quote-info');
             const priceInput = document.getElementById('price');
 
+            console.log('Type décoration:', decorationType, 'Sur devis:', needsCustomQuote);
+
             // Afficher/masquer les spécifications des draps
             if (decorationType === 'SHEET') {
                 sheetSpecs.classList.remove('hidden');
+                console.log('Spécifications draps affichées');
             } else {
                 sheetSpecs.classList.add('hidden');
             }
@@ -452,6 +499,7 @@
                 priceInput.value = '0';
                 priceInput.disabled = true;
                 priceInput.placeholder = 'Prix fixé à 0 (sur devis)';
+                console.log('Produit sur devis - prix fixé à 0');
             } else {
                 customQuoteInfo.classList.add('hidden');
                 priceInput.disabled = false;
@@ -475,13 +523,13 @@
         updateSpecifications();
     });
 
-    // Fonction pour prévisualiser l'image
-    function previewImage(input) {
-        const preview = document.getElementById('preview');
-        const previewContainer = document.getElementById('image-preview');
-        const fileName = document.getElementById('file-name');
-        const fileSize = document.getElementById('file-size');
-        const imageError = document.getElementById('image-error');
+    // Fonction pour prévisualiser l'image principale
+    function previewMainImage(input) {
+        const preview = document.getElementById('main-preview');
+        const previewContainer = document.getElementById('main-image-preview');
+        const fileName = document.getElementById('main-file-name');
+        const fileSize = document.getElementById('main-file-size');
+        const imageError = document.getElementById('main-image-error');
 
         // Cacher les erreurs précédentes
         imageError.classList.add('hidden');
@@ -529,19 +577,53 @@
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    // Fonction pour supprimer l'image
-    function removeImage() {
-        const input = document.getElementById('image');
-        const previewContainer = document.getElementById('image-preview');
-        const imageError = document.getElementById('image-error');
-
-        input.value = '';
+    // Gestion des images multiples avec sélection multiple
+    function previewMultipleImages(input) {
+        const previewContainer = document.getElementById('multiple-images-preview');
+        previewContainer.innerHTML = '';
         previewContainer.classList.add('hidden');
-        imageError.classList.add('hidden');
+
+        if (input.files && input.files.length > 0) {
+            previewContainer.classList.remove('hidden');
+
+            for (let i = 0; i < input.files.length; i++) {
+                const file = input.files[i];
+
+                // Validation du type de fichier
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Un ou plusieurs fichiers ont un format non supporté. Utilisez JPG, PNG, GIF ou WebP.');
+                    continue;
+                }
+
+                // Validation de la taille (10MB max)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Un ou plusieurs fichiers sont trop volumineux (max 10MB).');
+                    continue;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'relative group';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}"
+                             class="w-full h-24 object-cover rounded-lg border border-gray-300">
+                        <div class="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
+                            ${i + 1}
+                        </div>
+                    `;
+                    previewContainer.appendChild(previewItem);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
     }
 
-    // Validation avant soumission
+    // Validation avant soumission - AVEC DÉBOGAGE DÉTAILLÉ
     document.querySelector('form').addEventListener('submit', function(e) {
+        console.log('=== DÉBUT VALIDATION FORMULAIRE ===');
+
         // Empêcher la soumission temporairement pour validation
         e.preventDefault();
 
@@ -551,7 +633,16 @@
         const price = document.getElementById('price').value;
         const stock = document.getElementById('stock').value;
         const productType = document.querySelector('input[name="product_type"]:checked');
-        const image = document.getElementById('image').files[0];
+        const mainImage = document.getElementById('main_image').files[0];
+
+        console.log('Valeurs récupérées:', {
+            name: name,
+            description: description ? '✓' : '✗',
+            price: price,
+            stock: stock,
+            productType: productType ? productType.value : 'aucun',
+            mainImage: mainImage ? '✓' : '✗'
+        });
 
         // Validation des champs de base
         let errorMessages = [];
@@ -560,43 +651,79 @@
         if (!description) errorMessages.push('La description est requise');
         if (!stock || isNaN(stock) || parseInt(stock) < 0) errorMessages.push('Le stock doit être un nombre positif ou zéro');
         if (!productType) errorMessages.push('Le type de produit est requis');
-        if (!image) errorMessages.push('Une image est requise');
+        if (!mainImage) errorMessages.push('Une image principale est requise');
+
+        console.log('Erreurs de base:', errorMessages);
 
         // Validation du prix selon le type
         if (productType) {
             const needsCustomQuote = document.getElementById('needs_custom_quote') ? document.getElementById('needs_custom_quote').checked : false;
+            console.log('Validation prix - Sur devis:', needsCustomQuote);
 
             if (productType.value === 'DECORATION' && needsCustomQuote) {
-                // Pas de validation de prix pour les produits sur devis
+                // Produit sur devis : prix à 0 est acceptable
+                document.getElementById('price').value = '0';
+                console.log('Prix forcé à 0 pour produit sur devis');
             } else {
+                // Produit normal : prix doit être positif
                 if (!price || isNaN(price) || parseFloat(price) <= 0) {
                     errorMessages.push('Le prix doit être un nombre positif');
+                    console.log('Erreur prix - doit être positif');
                 }
             }
         }
 
         // Validation des champs spécifiques
         if (productType) {
+            console.log('Validation champs spécifiques pour:', productType.value);
+
             if (productType.value === 'ELECTRONICS') {
                 const electronicsCategory = document.getElementById('electronics_category').value;
                 const phoneBrand = document.getElementById('phone_brand').value;
 
+                console.log('Champs électroniques:', {
+                    category: electronicsCategory,
+                    brand: phoneBrand
+                });
+
                 if (!electronicsCategory) errorMessages.push('La catégorie électronique est requise');
                 if (!phoneBrand) errorMessages.push('La marque est requise pour les produits électroniques');
+
             } else if (productType.value === 'DECORATION') {
                 const decorationType = document.getElementById('decoration_type').value;
-                if (!decorationType) errorMessages.push('Le type de décoration est requis');
+                const sheetSize = document.getElementById('sheet_size').value;
+                const color = document.getElementById('color').value;
+
+                console.log('Champs décoration:', {
+                    type: decorationType,
+                    sheetSize: sheetSize,
+                    color: color
+                });
+
+                if (!decorationType) {
+                    errorMessages.push('Le type de décoration est requis');
+                    console.log('Erreur: type de décoration manquant');
+                }
 
                 // Validation spécifique pour les draps
                 if (decorationType === 'SHEET') {
-                    const sheetSize = document.getElementById('sheet_size').value;
-                    if (!sheetSize) errorMessages.push('La taille est requise pour les draps');
+                    if (!sheetSize) {
+                        errorMessages.push('La taille est requise pour les draps');
+                        console.log('Erreur: taille manquante pour draps');
+                    }
+                    if (!color) {
+                        errorMessages.push('La couleur est requise pour les draps');
+                        console.log('Erreur: couleur manquante pour draps');
+                    }
                 }
             }
         }
 
+        console.log('Toutes les erreurs:', errorMessages);
+
         // Si erreurs, afficher et bloquer
         if (errorMessages.length > 0) {
+            console.log('❌ FORMULAIRE BLOQUÉ - Erreurs détectées');
             if (window.innerWidth <= 768) {
                 alert('Veuillez corriger les erreurs dans le formulaire');
             } else {
@@ -604,6 +731,8 @@
             }
             return false;
         }
+
+        console.log('✅ FORMULAIRE VALIDE - Soumission...');
 
         // Si tout est valide, soumettre
         const submitButton = document.querySelector('button[type="submit"]');
@@ -613,6 +742,7 @@
 
         // Timeout pour permettre l'affichage du loading
         setTimeout(() => {
+            console.log('Soumission du formulaire...');
             this.submit();
         }, 100);
     });
@@ -626,6 +756,35 @@
             });
         });
     }
+
+    // Fonction de débogage pour vérifier l'état des champs
+    function debugFormState() {
+        console.log('=== ÉTAT ACTUEL DU FORMULAIRE ===');
+        console.log('Nom:', document.getElementById('name').value);
+        console.log('Description:', document.getElementById('description').value);
+        console.log('Prix:', document.getElementById('price').value);
+        console.log('Stock:', document.getElementById('stock').value);
+        console.log('Type produit:', document.querySelector('input[name="product_type"]:checked')?.value);
+        console.log('Type décoration:', document.getElementById('decoration_type').value);
+        console.log('Taille draps:', document.getElementById('sheet_size').value);
+        console.log('Couleur:', document.getElementById('color').value);
+        console.log('Sur devis:', document.getElementById('needs_custom_quote').checked);
+        console.log('Image principale:', document.getElementById('main_image').files[0]?.name);
+        console.log('================================');
+    }
+
+    // Exposer la fonction de débogage globalement
+    window.debugForm = debugFormState;
+
+    // Déboguer quand on change des champs importants
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('#decoration_type, #sheet_size, #color, #needs_custom_quote')) {
+            console.log('Changement détecté:', e.target.id, '=', e.target.value);
+            debugFormState();
+        }
+    });
+
+    console.log('Script de validation chargé - utilisez debugForm() dans la console pour voir l\'état du formulaire');
 </script>
 
 <style>
@@ -707,6 +866,15 @@
     .text-xs {
         font-size: 0.7rem;
     }
+}
+
+    /* Style pour les champs d'images supplémentaires */
+.additional-image-field {
+    transition: all 0.2s ease-in-out;
+}
+
+.additional-image-field:hover {
+    background-color: #f9fafb;
 }
 </style>
 {% endblock %}

@@ -6,6 +6,7 @@
 {% block page_subtitle %}{{ product.name }}{% endblock %}
 
 {% block content %}
+
 <div class="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <!-- En-tête -->
@@ -335,28 +336,28 @@
                 </div>
             </div>
 
-            <!-- Image du produit -->
+            <!-- Image principale -->
             <div>
-                <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
-                    Image du produit
+                <label for="main_image" class="block text-sm font-medium text-gray-700 mb-2">
+                    Image principale
                 </label>
 
-                <!-- Image actuelle -->
+                <!-- Image principale actuelle -->
                 {% if product.image_url %}
-                <div class="mb-3 p-3 bg-gray-50 rounded-lg">
-                    <p class="text-sm font-medium text-gray-700 mb-2">Image actuelle :</p>
+                <div class="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Image principale actuelle :</p>
                     <div class="flex items-center space-x-4">
-                        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="h-16 w-16 object-cover rounded-lg border border-gray-300">
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="h-20 w-20 object-cover rounded-lg border-2 border-green-500">
                         <div>
-                            <p class="text-sm text-gray-900">{{ product.image.name }}</p>
+                            <p class="text-sm text-gray-900">Image principale</p>
                             <p class="text-xs text-gray-500">Conserver cette image si aucun nouveau fichier n'est sélectionné</p>
                         </div>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- Nouvelle image -->
-                <input type="file" id="image" name="image"
+                <!-- Nouvelle image principale -->
+                <input type="file" id="main_image" name="main_image"
                        class="block w-full text-xs sm:text-sm text-gray-500
                               file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
                               file:rounded-lg file:border-0
@@ -365,28 +366,117 @@
                               hover:file:bg-primary-dark transition-colors
                               border border-gray-300 rounded-lg"
                        accept="image/*"
-                       onchange="previewImage(this)">
+                       onchange="previewMainImage(this)">
 
                 <p class="mt-1 text-xs text-gray-500">Formats supportés: JPG, PNG, GIF (max 10MB). Laisser vide pour conserver l'image actuelle.</p>
 
-                <!-- Aperçu de la nouvelle image -->
-                <div id="image-preview" class="mt-3 hidden p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <!-- Aperçu nouvelle image principale -->
+                <div id="main-image-preview" class="mt-3 hidden p-3 sm:p-4 bg-gray-50 rounded-lg">
                     <p class="text-sm font-medium text-gray-700 mb-2">Nouvel aperçu :</p>
-                    <div class="flex flex-col xs:flex-row xs:items-center space-y-3 xs:space-y-0 xs:space-x-4">
-                        <img id="preview" class="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded-lg border border-gray-300 mx-auto xs:mx-0">
-                        <div class="text-center xs:text-left">
-                            <p id="file-name" class="text-sm font-medium text-gray-900 break-words"></p>
-                            <p id="file-size" class="text-xs text-gray-500"></p>
-                            <button type="button" onclick="removeImage()" class="mt-1 text-xs text-red-600 hover:text-red-800 flex items-center gap-1 justify-center xs:justify-start">
-                                <span class="material-symbols-outlined text-sm">delete</span>
-                                Changer l'image
+                    <div class="flex items-center space-x-4">
+                        <img id="main-preview" class="h-20 w-20 object-cover rounded-lg border border-gray-300">
+                        <div>
+                            <p id="main-file-name" class="text-sm font-medium text-gray-900"></p>
+                            <p id="main-file-size" class="text-xs text-gray-500"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images supplémentaires existantes -->
+            {% if product_images %}
+            <div class="border-t pt-6 mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Images supplémentaires existantes
+                    <span class="text-xs text-gray-500">(Total: {{ product_images.count }})</span>
+                </label>
+
+                <div id="existing-images-container" class="space-y-4">
+                    {% for product_image in product_images %}
+                    <div class="existing-image-field border border-gray-300 rounded-lg p-4 bg-blue-50" data-image-id="{{ product_image.id }}">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-sm font-medium text-gray-700">
+                                Image supplémentaire {{ forloop.counter }}
+                                <span class="text-xs font-normal text-gray-500">(ID: {{ product_image.id }})</span>
+                            </label>
+                            <button type="button" onclick="removeExistingImage({{ product_image.id }})"
+                                    class="text-red-600 hover:text-red-800 text-sm flex items-center gap-1">
+                                <span class="material-symbols-outlined text-base">delete</span>
+                                Supprimer
                             </button>
+                        </div>
+
+                        <div class="flex items-center space-x-4">
+                            <img src="{{ product_image.image_url }}" alt="Image produit"
+                                 class="h-20 w-20 object-cover rounded-lg border border-gray-300">
+                            <div>
+                                <p class="text-sm text-gray-900">Image existante</p>
+                                <p class="text-xs text-gray-500">ID: {{ product_image.id }}</p>
+                                {% if product_image.is_primary %}
+                                <span class="inline-block mt-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                    Image principale
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Nouvelles images supplémentaires -->
+            <div class="border-t pt-6 mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Ajouter de nouvelles images supplémentaires
+                </label>
+
+                <div id="additional-images-container" class="space-y-4">
+                    <!-- Premier champ pour nouvelle image -->
+                    <div class="additional-image-field border border-gray-300 rounded-lg p-4 bg-green-50">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="block text-sm font-medium text-gray-700">Nouvelle image supplémentaire 1</label>
+                            <button type="button" onclick="removeAdditionalImageField(this)" class="text-red-600 hover:text-red-800 text-sm flex items-center gap-1">
+                                <span class="material-symbols-outlined text-base">delete</span>
+                                Supprimer
+                            </button>
+                        </div>
+
+                        <input type="file"
+                               name="additional_images"
+                               class="block w-full text-xs sm:text-sm text-gray-500
+                                      file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4
+                                      file:rounded-lg file:border-0
+                                      file:text-xs sm:file:text-sm file:font-semibold
+                                      file:bg-green-600 file:text-white
+                                      hover:file:bg-green-700 transition-colors
+                                      border border-gray-300 rounded-lg"
+                               accept="image/*"
+                               onchange="previewAdditionalImage(this, 0)">
+
+                        <!-- Aperçu nouvelle image -->
+                        <div id="additional-preview-0" class="mt-3 hidden p-3 bg-white rounded-lg border">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Aperçu :</p>
+                            <div class="flex items-center space-x-4">
+                                <img id="additional-img-0" class="h-16 w-16 object-cover rounded-lg border border-gray-300">
+                                <div>
+                                    <p id="additional-file-name-0" class="text-sm font-medium text-gray-900"></p>
+                                    <p id="additional-file-size-0" class="text-xs text-gray-500"></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Message d'erreur -->
-                <p class="mt-1 text-xs sm:text-sm text-red-600 hidden" id="image-error"></p>
+                <!-- Bouton pour ajouter plus d'images -->
+                <button type="button" onclick="addAdditionalImageField()" class="mt-4 flex items-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium">
+                    <span class="material-symbols-outlined text-base">add</span>
+                    Ajouter une autre image
+                </button>
+            </div>
+
+            <div id="remove-images-container">
+                <!-- Les champs seront ajoutés ici dynamiquement -->
             </div>
 
             <!-- Boutons -->
@@ -394,6 +484,7 @@
                 <a href="/gestion-securisee/products/" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-center text-sm sm:text-base">
                     Annuler
                 </a>
+
                 <button type="submit"
                         class="bg-primary text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
                     <span class="material-symbols-outlined text-base">save</span>
@@ -406,182 +497,375 @@
 
 <!-- Script pour la gestion des spécifications par type -->
 <script>
-    // Gestion de l'affichage des spécifications par type de produit
-    document.addEventListener('DOMContentLoaded', function() {
-        const productTypeRadios = document.querySelectorAll('input[name="product_type"]');
-        const electronicsSpecs = document.getElementById('electronics-specs');
-        const decorationSpecs = document.getElementById('decoration-specs');
-        const sheetSpecs = document.getElementById('sheet-specs');
+// Variable globale pour stocker les IDs à supprimer
+let imagesToRemove = [];
 
-        function updateSpecifications() {
-            const selectedType = document.querySelector('input[name="product_type"]:checked');
+// Fonction pour supprimer une image existante - NOUVELLE APPROCHE
+function removeExistingImage(imageId) {
+    console.log("=== TENTATIVE DE SUPPRESSION ===");
+    console.log("ID de l'image à supprimer:", imageId);
 
-            // Masquer toutes les spécifications
-            electronicsSpecs.classList.add('hidden');
-            decorationSpecs.classList.add('hidden');
-            sheetSpecs.classList.add('hidden');
+    if (confirm('Voulez-vous vraiment supprimer cette image ?')) {
+        // Ajouter l'ID à la liste des images à supprimer
+        if (!imagesToRemove.includes(imageId)) {
+            imagesToRemove.push(imageId);
+            console.log("✅ ID ajouté à la liste de suppression:", imagesToRemove);
+        }
 
-            // Réinitialiser tous les styles des options
-            document.querySelectorAll('.product-type-option').forEach(option => {
-                option.classList.remove('border-primary', 'bg-blue-50', 'ring-2', 'ring-primary');
-                option.classList.add('border-gray-300');
+        // Mettre à jour les champs cachés
+        updateRemoveImageFields();
 
-                // Réinitialiser les icônes
-                const icon = option.querySelector('.material-symbols-outlined');
-                icon.classList.remove('text-green-600', 'text-purple-600');
-                icon.classList.add('text-gray-400');
-            });
+        // Marquer visuellement l'élément
+        const imageElement = document.querySelector(`button[onclick="removeExistingImage(${imageId})"]`).closest('.existing-image-field');
+        if (imageElement) {
+            imageElement.style.opacity = '0.4';
+            imageElement.style.backgroundColor = '#fef2f2';
+            imageElement.style.borderColor = '#ef4444';
+            imageElement.classList.add('to-be-deleted');
 
-            // Afficher les spécifications correspondantes et styliser l'option sélectionnée
-            if (selectedType) {
-                const selectedOption = selectedType.closest('.product-type-option');
-                selectedOption.classList.remove('border-gray-300');
-                selectedOption.classList.add('border-primary', 'bg-blue-50', 'ring-2', 'ring-primary');
-
-                // Changer la couleur de l'icône
-                const icon = selectedOption.querySelector('.material-symbols-outlined');
-                icon.classList.remove('text-gray-400');
-
-                if (selectedType.value === 'ELECTRONICS') {
-                    electronicsSpecs.classList.remove('hidden');
-                    icon.classList.add('text-green-600');
-                    updateElectronicsFields(); // Mettre à jour les champs électroniques
-                } else if (selectedType.value === 'DECORATION') {
-                    decorationSpecs.classList.remove('hidden');
-                    icon.classList.add('text-purple-600');
-                    updateDecorationSpecs(); // Gérer les sous-options de décoration
-                }
+            const deleteButton = imageElement.querySelector('button');
+            if (deleteButton) {
+                deleteButton.disabled = true;
+                deleteButton.innerHTML = '<span class="material-symbols-outlined text-base">delete</span> Supprimée';
+                deleteButton.classList.remove('text-red-600', 'hover:text-red-800');
+                deleteButton.classList.add('text-gray-400', 'cursor-not-allowed');
             }
         }
 
-        // Gestion des champs électroniques selon la catégorie
-        function updateElectronicsFields() {
-            const category = document.getElementById('electronics_category').value;
-            const allFields = document.querySelectorAll('.electronics-field');
+        console.log("=== SUPPRESSION CONFIRMÉE ===");
+    }
+}
 
-            allFields.forEach(field => {
-                const fieldCategories = field.getAttribute('data-categories').split(',');
-                // "all" signifie que le champ est toujours visible
-                if (fieldCategories.includes('all') || fieldCategories.includes(category)) {
-                    field.style.display = 'block';
-                } else {
-                    field.style.display = 'none';
-                }
-            });
-        }
+// Fonction pour mettre à jour les champs cachés
+function updateRemoveImageFields() {
+    const container = document.getElementById('remove-images-container');
 
-        // Gestion des spécifications de décoration
-        function updateDecorationSpecs() {
-            const decorationType = document.getElementById('decoration_type').value;
-            const needsCustomQuote = document.getElementById('needs_custom_quote').checked;
-            const pricePerSqmContainer = document.getElementById('price-per-sqm-container');
-            const customQuoteInfo = document.getElementById('custom-quote-info');
-            const priceInput = document.getElementById('price');
+    // Vider le conteneur
+    container.innerHTML = '';
 
-            // Afficher/masquer les spécifications des draps
-            if (decorationType === 'SHEET') {
-                sheetSpecs.classList.remove('hidden');
-            } else {
-                sheetSpecs.classList.add('hidden');
-            }
-
-            // Afficher/masquer le prix au m² pour les tapis
-            if (decorationType === 'CARPET') {
-                pricePerSqmContainer.classList.remove('hidden');
-            } else {
-                pricePerSqmContainer.classList.add('hidden');
-            }
-
-            // Gérer l'affichage pour les produits sur devis
-            if (needsCustomQuote) {
-                customQuoteInfo.classList.remove('hidden');
-                priceInput.value = '0';
-                priceInput.disabled = true;
-                priceInput.placeholder = 'Prix fixé à 0 (sur devis)';
-            } else {
-                customQuoteInfo.classList.add('hidden');
-                priceInput.disabled = false;
-                priceInput.placeholder = '0.00';
-            }
-        }
-
-        // Écouter les changements de type de produit
-        productTypeRadios.forEach(radio => {
-            radio.addEventListener('change', updateSpecifications);
-        });
-
-        // Écouter les changements dans les options électroniques
-        document.getElementById('electronics_category').addEventListener('change', updateElectronicsFields);
-
-        // Écouter les changements dans les options de décoration
-        document.getElementById('decoration_type').addEventListener('change', updateDecorationSpecs);
-        document.getElementById('needs_custom_quote').addEventListener('change', updateDecorationSpecs);
-
-        // Mise à jour initiale
-        updateSpecifications();
+    // Ajouter un champ caché pour chaque ID à supprimer
+    imagesToRemove.forEach(imageId => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'remove_image_ids';
+        hiddenInput.value = imageId;
+        container.appendChild(hiddenInput);
     });
 
-    // Fonctions pour la prévisualisation d'image
-    function previewImage(input) {
-        const preview = document.getElementById('preview');
-        const previewContainer = document.getElementById('image-preview');
-        const fileName = document.getElementById('file-name');
-        const fileSize = document.getElementById('file-size');
-        const imageError = document.getElementById('image-error');
+    console.log("🔄 Champs cachés mis à jour. IDs:", imagesToRemove);
+}
 
-        // Cacher les erreurs précédentes
-        imageError.classList.add('hidden');
-        imageError.textContent = '';
+// Gestion de l'affichage des spécifications par type de produit
+document.addEventListener('DOMContentLoaded', function() {
+    const productTypeRadios = document.querySelectorAll('input[name="product_type"]');
+    const electronicsSpecs = document.getElementById('electronics-specs');
+    const decorationSpecs = document.getElementById('decoration-specs');
+    const sheetSpecs = document.getElementById('sheet-specs');
 
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
+    function updateSpecifications() {
+        const selectedType = document.querySelector('input[name="product_type"]:checked');
 
-            // Validation du type de fichier
-            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-            if (!validTypes.includes(file.type)) {
-                imageError.textContent = 'Format non supporté. Utilisez JPG, PNG, GIF ou WebP.';
-                imageError.classList.remove('hidden');
-                input.value = '';
-                return;
+        electronicsSpecs.classList.add('hidden');
+        decorationSpecs.classList.add('hidden');
+        sheetSpecs.classList.add('hidden');
+
+        document.querySelectorAll('.product-type-option').forEach(option => {
+            option.classList.remove('border-primary', 'bg-blue-50', 'ring-2', 'ring-primary');
+            option.classList.add('border-gray-300');
+            const icon = option.querySelector('.material-symbols-outlined');
+            icon.classList.remove('text-green-600', 'text-purple-600');
+            icon.classList.add('text-gray-400');
+        });
+
+        if (selectedType) {
+            const selectedOption = selectedType.closest('.product-type-option');
+            selectedOption.classList.remove('border-gray-300');
+            selectedOption.classList.add('border-primary', 'bg-blue-50', 'ring-2', 'ring-primary');
+
+            const icon = selectedOption.querySelector('.material-symbols-outlined');
+            icon.classList.remove('text-gray-400');
+
+            if (selectedType.value === 'ELECTRONICS') {
+                electronicsSpecs.classList.remove('hidden');
+                icon.classList.add('text-green-600');
+                updateElectronicsFields();
+            } else if (selectedType.value === 'DECORATION') {
+                decorationSpecs.classList.remove('hidden');
+                icon.classList.add('text-purple-600');
+                updateDecorationSpecs();
             }
-
-            // Validation de la taille (10MB max)
-            if (file.size > 10 * 1024 * 1024) {
-                imageError.textContent = 'Fichier trop volumineux (max 10MB).';
-                imageError.classList.remove('hidden');
-                input.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                preview.src = e.target.result;
-                fileName.textContent = file.name.length > 30 ? file.name.substring(0, 30) + '...' : file.name;
-                fileSize.textContent = formatFileSize(file.size);
-                previewContainer.classList.remove('hidden');
-            }
-
-            reader.readAsDataURL(file);
         }
     }
 
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    function updateElectronicsFields() {
+        const category = document.getElementById('electronics_category').value;
+        const allFields = document.querySelectorAll('.electronics-field');
+
+        allFields.forEach(field => {
+            const fieldCategories = field.getAttribute('data-categories').split(',');
+            if (fieldCategories.includes('all') || fieldCategories.includes(category)) {
+                field.style.display = 'block';
+            } else {
+                field.style.display = 'none';
+            }
+        });
     }
 
-    function removeImage() {
-        const input = document.getElementById('image');
-        const previewContainer = document.getElementById('image-preview');
-        const imageError = document.getElementById('image-error');
+    function updateDecorationSpecs() {
+        const decorationType = document.getElementById('decoration_type').value;
+        const needsCustomQuote = document.getElementById('needs_custom_quote').checked;
+        const pricePerSqmContainer = document.getElementById('price-per-sqm-container');
+        const customQuoteInfo = document.getElementById('custom-quote-info');
+        const priceInput = document.getElementById('price');
 
-        input.value = '';
+        if (decorationType === 'SHEET') {
+            sheetSpecs.classList.remove('hidden');
+        } else {
+            sheetSpecs.classList.add('hidden');
+        }
+
+        if (decorationType === 'CARPET') {
+            pricePerSqmContainer.classList.remove('hidden');
+        } else {
+            pricePerSqmContainer.classList.add('hidden');
+        }
+
+        if (needsCustomQuote) {
+            customQuoteInfo.classList.remove('hidden');
+            priceInput.value = '0';
+            priceInput.disabled = true;
+            priceInput.placeholder = 'Prix fixé à 0 (sur devis)';
+        } else {
+            customQuoteInfo.classList.add('hidden');
+            priceInput.disabled = false;
+            priceInput.placeholder = '0.00';
+        }
+    }
+
+    productTypeRadios.forEach(radio => {
+        radio.addEventListener('change', updateSpecifications);
+    });
+
+    document.getElementById('electronics_category').addEventListener('change', updateElectronicsFields);
+    document.getElementById('decoration_type').addEventListener('change', updateDecorationSpecs);
+    document.getElementById('needs_custom_quote').addEventListener('change', updateDecorationSpecs);
+
+    updateSpecifications();
+});
+
+// Fonction pour prévisualiser l'image principale
+function previewMainImage(input) {
+    const preview = document.getElementById('main-preview');
+    const previewContainer = document.getElementById('main-image-preview');
+    const fileName = document.getElementById('main-file-name');
+    const fileSize = document.getElementById('main-file-size');
+
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+        if (!validTypes.includes(file.type)) {
+            alert('Format non supporté. Utilisez JPG, PNG, GIF ou WebP.');
+            input.value = '';
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Fichier trop volumineux (max 10MB).');
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            fileName.textContent = file.name.length > 30 ? file.name.substring(0, 30) + '...' : file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            previewContainer.classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Gestion des images supplémentaires dynamiques
+let additionalImageCount = 1;
+const MAX_ADDITIONAL_IMAGES = 5;
+
+function addAdditionalImageField() {
+    if (additionalImageCount >= MAX_ADDITIONAL_IMAGES) {
+        alert(`Vous ne pouvez pas ajouter plus de ${MAX_ADDITIONAL_IMAGES} images supplémentaires.`);
+        return;
+    }
+
+    const container = document.getElementById('additional-images-container');
+    const newField = document.createElement('div');
+    newField.className = 'additional-image-field border border-gray-300 rounded-lg p-4 bg-green-50';
+    newField.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+            <label class="block text-sm font-medium text-gray-700">Nouvelle image supplémentaire ${additionalImageCount + 1}</label>
+            <button type="button" onclick="removeAdditionalImageField(this)" class="text-red-600 hover:text-red-800 text-sm flex items-center gap-1">
+                <span class="material-symbols-outlined text-base">delete</span>
+                Supprimer
+            </button>
+        </div>
+        <input type="file" name="additional_images" class="block w-full text-xs sm:text-sm text-gray-500 file:mr-2 sm:file:mr-4 file:py-2 sm:file:py-3 file:px-3 sm:file:px-4 file:rounded-lg file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700 transition-colors border border-gray-300 rounded-lg" accept="image/*" onchange="previewAdditionalImage(this, ${additionalImageCount})">
+        <div id="additional-preview-${additionalImageCount}" class="mt-3 hidden p-3 bg-white rounded-lg border">
+            <p class="text-sm font-medium text-gray-700 mb-2">Aperçu :</p>
+            <div class="flex items-center space-x-4">
+                <img id="additional-img-${additionalImageCount}" class="h-16 w-16 object-cover rounded-lg border border-gray-300">
+                <div>
+                    <p id="additional-file-name-${additionalImageCount}" class="text-sm font-medium text-gray-900"></p>
+                    <p id="additional-file-size-${additionalImageCount}" class="text-xs text-gray-500"></p>
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(newField);
+    additionalImageCount++;
+}
+
+function removeAdditionalImageField(button) {
+    const field = button.closest('.additional-image-field');
+    field.remove();
+    reorganizeAdditionalImageFields();
+}
+
+function reorganizeAdditionalImageFields() {
+    const container = document.getElementById('additional-images-container');
+    const fields = container.querySelectorAll('.additional-image-field');
+    additionalImageCount = fields.length;
+    fields.forEach((field, index) => {
+        const label = field.querySelector('label');
+        label.textContent = `Nouvelle image supplémentaire ${index + 1}`;
+        const input = field.querySelector('input[type="file"]');
+        input.setAttribute('onchange', `previewAdditionalImage(this, ${index})`);
+        const previewContainer = field.querySelector(`[id^="additional-preview-"]`);
+        const previewImg = field.querySelector(`[id^="additional-img-"]`);
+        const fileName = field.querySelector(`[id^="additional-file-name-"]`);
+        const fileSize = field.querySelector(`[id^="additional-file-size-"]`);
+        if (previewContainer) previewContainer.id = `additional-preview-${index}`;
+        if (previewImg) previewImg.id = `additional-img-${index}`;
+        if (fileName) fileName.id = `additional-file-name-${index}`;
+        if (fileSize) fileSize.id = `additional-file-size-${index}`;
+    });
+}
+
+function previewAdditionalImage(input, index) {
+    const preview = document.getElementById(`additional-img-${index}`);
+    const previewContainer = document.getElementById(`additional-preview-${index}`);
+    const fileName = document.getElementById(`additional-file-name-${index}`);
+    const fileSize = document.getElementById(`additional-file-size-${index}`);
+
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            alert('Format non supporté. Utilisez JPG, PNG, GIF ou WebP.');
+            input.value = '';
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Fichier trop volumineux (max 10MB).');
+            input.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            fileName.textContent = file.name.length > 30 ? file.name.substring(0, 30) + '...' : file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            previewContainer.classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
+    } else {
         previewContainer.classList.add('hidden');
-        imageError.classList.add('hidden');
     }
+}
+
+// Validation avant soumission - VERSION SIMPLIFIÉE
+document.querySelector('form').addEventListener('submit', function(e) {
+    console.log("=== AVANT SOUMISSION ===");
+    console.log("Images à supprimer:", imagesToRemove);
+
+    // Vérifier les champs cachés
+    const hiddenFields = document.querySelectorAll('input[name="remove_image_ids"]');
+    console.log("Champs cachés trouvés:", hiddenFields.length);
+    hiddenFields.forEach((field, index) => {
+        console.log(`Champ ${index + 1}:`, field.name, "=", field.value);
+    });
+
+    e.preventDefault();
+
+    // Validation des champs de base
+    const name = document.getElementById('name').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const price = document.getElementById('price').value;
+    const stock = document.getElementById('stock').value;
+    const productType = document.querySelector('input[name="product_type"]:checked');
+
+    let errorMessages = [];
+    if (!name) errorMessages.push('Le nom est requis');
+    if (!description) errorMessages.push('La description est requise');
+    if (!stock || isNaN(stock) || parseInt(stock) < 0) errorMessages.push('Le stock doit être un nombre positif ou zéro');
+    if (!productType) errorMessages.push('Le type de produit est requis');
+
+    if (productType) {
+        const needsCustomQuote = document.getElementById('needs_custom_quote') ? document.getElementById('needs_custom_quote').checked : false;
+        if (productType.value === 'DECORATION' && needsCustomQuote) {
+            // Pas de validation de prix pour les produits sur devis
+        } else {
+            if (!price || isNaN(price) || parseFloat(price) <= 0) {
+                errorMessages.push('Le prix doit être un nombre positif');
+            }
+        }
+    }
+
+    if (errorMessages.length > 0) {
+        alert('ERREURS:\n' + errorMessages.join('\n'));
+        return false;
+    }
+
+    // Si tout est valide, soumettre
+    const submitButton = document.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Modification en cours...';
+    submitButton.disabled = true;
+
+    setTimeout(() => {
+        this.submit();
+    }, 100);
+});
+
+// Optimisation pour mobile
+if (window.innerWidth <= 768) {
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.style.fontSize = '16px';
+        });
+    });
+}
 </script>
+
+
+
+<style>
+.existing-image-field.marked-for-deletion,
+.existing-image-field.to-be-deleted {
+    background-color: #fef2f2 !important;
+    border: 2px dashed #ef4444 !important;
+    opacity: 0.6;
+}
+.existing-image-field {
+    transition: all 0.3s ease;
+}
+</style>
 {% endblock %}

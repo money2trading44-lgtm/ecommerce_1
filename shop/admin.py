@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Category, Product, RepairRequest, Cart, CartItem, Order, CustomQuoteRequest
+from .models import Category, Product, RepairRequest, Cart, CartItem, Order, CustomQuoteRequest,ProductImage
 from django import forms
 from .supabase_storage import upload_to_supabase
 
@@ -19,22 +19,35 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = '__all__'
 
+
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1  # Nombre de formulaires vides affichés
+    fields = ['image_url', 'is_primary', 'created_at']
+    readonly_fields = ['created_at']
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'image_url':
+            kwargs['help_text'] = 'URL de l\'image sur Supabase'
+        return super().formfield_for_dbfield(db_field, **kwargs)
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     form = ProductForm
-    list_display = ['name', 'price', 'category', 'product_type', 'electronics_category', 'decoration_type', 'needs_custom_quote', 'on_sale', 'stock']
+    inlines = [ProductImageInline]  # AJOUTEZ CETTE LIGNE
+    list_display = ['name', 'price', 'category', 'product_type', 'electronics_category', 'decoration_type', 'needs_custom_quote', 'on_sale', 'stock', 'image_preview']
     list_filter = ['category', 'product_type', 'electronics_category', 'decoration_type', 'needs_custom_quote','on_sale']
     search_fields = ['name', 'description']
-    readonly_fields = ['created_at']
+    readonly_fields = ['created_at', 'image_preview']
     fieldsets = (
         ('Informations générales', {
-            'fields': ('name', 'description', 'price', 'category', 'product_type', 'stock', 'image')
+            'fields': ('name', 'description', 'price', 'category', 'product_type', 'stock', 'image_upload', 'image_url', 'image_preview')
         }),
         ('Promotions', {
             'fields': ('on_sale', 'discount_percentage'),
             'classes': ('collapse',)
         }),
-        ('Décoration & Aménagement', {  # NOUVEAU FIELDSET
+        ('Décoration & Aménagement', {
             'fields': ('decoration_type', 'needs_custom_quote', 'price_per_sqm'),
             'classes': ('collapse',)
         }),
@@ -43,7 +56,7 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Spécifications Électronique', {
-            'fields': ('phone_brand', 'electronics_category', 'storage', 'screen_size',
+            'fields': ('phone_brand', 'electronics_category', 'phone_category', 'storage', 'screen_size',
                        'processor', 'ram', 'camera', 'battery', 'operating_system', 'connectivity'),
             'classes': ('collapse',)
         }),
@@ -53,6 +66,12 @@ class ProductAdmin(admin.ModelAdmin):
         })
     )
 
+    def image_preview(self, obj):
+        if obj.image_url:
+            return format_html('<img src="{}" style="max-height: 200px; max-width: 200px;" />', obj.image_url)
+        return "Aucune image"
+    image_preview.short_description = "Aperçu de l'image"
+
     def save_model(self, request, obj, form, change):
         uploaded_file = form.cleaned_data.get('image_upload')
         if uploaded_file:
@@ -61,7 +80,6 @@ class ProductAdmin(admin.ModelAdmin):
                 obj.image_url = supabase_url
 
         super().save_model(request, obj, form, change)
-
 
 
 @admin.register(RepairRequest)
@@ -145,3 +163,18 @@ class CustomQuoteRequestAdmin(admin.ModelAdmin):
 
     contact_actions.short_description = 'Actions de contact'
     contact_actions.allow_tags = True
+
+
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ['product', 'image_url', 'is_primary', 'created_at']
+    list_filter = ['is_primary', 'created_at']
+    search_fields = ['product__name', 'image_url']
+    list_editable = ['is_primary']
+
+    def image_preview(self, obj):
+        if obj.image_url:
+            return format_html('<img src="{}" style="max-height: 100px; max-width: 100px;" />', obj.image_url)
+        return "Aucune image"
+
+    image_preview.short_description = "Aperçu"

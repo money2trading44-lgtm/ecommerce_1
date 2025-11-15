@@ -14,7 +14,7 @@ urlpatterns = [
     path('dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('products/', views.admin_products, name='admin_products'),
     path('products/add/', views.admin_add_product, name='admin_add_product'),
-    path('products/edit/<int:product_id>/',views.admin_edit_product,name='admin_edit_product'),
+    path('products/edit/<slug:slug>/',views.admin_edit_product,name='admin_edit_product'),  # MODIFIÉ
     path('orders/', views.admin_orders, name='admin_orders'),
     path('repairs/', views.admin_repairs, name='admin_repairs'),
     path('orders/<int:order_id>/', admin_order_detail, name='admin_order_detail'),
@@ -33,5 +33,4 @@ urlpatterns = [
     path('repairs/<int:repair_id>/complete/', views.admin_repair_complete, name='admin_repair_complete'),
     path('repairs/<int:repair_id>/delete/', views.admin_repair_delete, name='admin_repair_delete'),
     path('orders/<int:order_id>/delete/', views.admin_delete_order, name='delete_order'),
-
 ]
