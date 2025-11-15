@@ -109,10 +109,10 @@ WSGI_APPLICATION = 'ecommerce_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',  # ← IMPORTANT: change à 'neondb'
-        'USER': 'neondb_owner',
-        'PASSWORD': 'npg_mhSvUpyxTM25',
-        'HOST': 'ep-summer-cloud-a83c4hsq-pooler.eastus2.azure.neon.tech',
+        'NAME': os.environ.get('NEON_DB_NAME'),
+        'USER': os.environ.get('NEON_DB_USER'),
+        'PASSWORD': os.environ.get('NEON_DB_PASSWORD'),
+        'HOST': os.environ.get('NEON_DB_HOST'),
         'PORT': '5432',
         'OPTIONS': {
             'sslmode': 'require',
@@ -122,9 +122,9 @@ DATABASES = {
 }
 
 # --- SUPA BASE CONFIGURATION ---
-SUPABASE_URL = 'https://xvhcmeshxeevpeuwzhzj.supabase.co'
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
-SUPABASE_BUCKET_NAME = 'dsd-trading-images'
+SUPABASE_BUCKET_NAME = os.environ.get('SUPABASE_BUCKET_NAME')
 
 # Configuration simple - on gérera l'upload via le code
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
@@ -163,18 +163,11 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --- WINIPAYER CONFIG ---
-WINIPAYER_MERCHANT_APPLY_KEY ='qO1T8YInhYsMSkkGyrKe'
-WINIPAYER_API_KEY = os.environ.get('WINIPAYER_API_KEY','')
 WINIPAYER_MERCHANT_APPLY = os.environ.get('WINIPAYER_MERCHANT_APPLY', '')
 WINIPAYER_MERCHANT_TOKEN = os.environ.get('WINIPAYER_MERCHANT_TOKEN', '')
 WINIPAYER_MODE = os.environ.get("WINIPAYER_MODE", 'test')  # test ou prod
-
-if WINIPAYER_MODE == 'prod':
-    WINIPAYER_BASE_URL = "https://api-v2.winipayer.com"
-    WINIPAYER_CHECKOUT_URL = "https://checkout-v2.winipayer.com"
-else:
-    WINIPAYER_BASE_URL = "https://api-v2.winipayer.com"  # Même URL pour test et prod
-    WINIPAYER_CHECKOUT_URL = "https://checkout-v2.winipayer.com"
+WINIPAYER_BASE_URL = "https://api-v2.winipayer.com"
+WINIPAYER_CHECKOUT_URL = "https://checkout-v2.winipayer.com"
 
 
 # 🔥 Configuration pour servir les médias en debug

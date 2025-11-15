@@ -39,7 +39,6 @@ def delete_from_supabase(image_url):
         path = image_url.split(f"/{bucket_name}/")[-1]
 
         supabase.storage.from_(bucket_name).remove([path])
-        print(f"✅ Fichier supprimé de Supabase: {path}")
         return True
 
     except Exception as e:
