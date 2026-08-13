@@ -106,20 +106,29 @@ WSGI_APPLICATION = 'ecommerce_project.wsgi.application'
 # --- DATABASE ---
 # settings.py - REMPLACE ta configuration DATABASES par :
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('NEON_DB_NAME'),
-        'USER': os.environ.get('NEON_DB_USER'),
-        'PASSWORD': os.environ.get('NEON_DB_PASSWORD'),
-        'HOST': os.environ.get('NEON_DB_HOST'),
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-            'channel_binding': 'require',
-        },
+if os.environ.get('NEON_DB_HOST'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('NEON_DB_NAME'),
+            'USER': os.environ.get('NEON_DB_USER'),
+            'PASSWORD': os.environ.get('NEON_DB_PASSWORD'),
+            'HOST': os.environ.get('NEON_DB_HOST'),
+            'PORT': '5432',
+            'OPTIONS': {
+                'sslmode': 'require',
+                'channel_binding': 'require',
+            },
+        }
     }
-}
+else:
+    # Pas d'identifiants Neon en local -> base SQLite locale
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # --- SUPA BASE CONFIGURATION ---
 SUPABASE_URL = os.environ.get('SUPABASE_URL')

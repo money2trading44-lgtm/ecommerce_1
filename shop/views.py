@@ -1530,7 +1530,7 @@ def admin_order_export(request, order_id):
         company_data = [
             ["DSD General Trading", f"Date: {order.created_at.strftime('%d/%m/%Y')}"],
             ["Abidjan, Côte d'Ivoire", f"Heure: {order.created_at.strftime('%H:%M')}"],
-            ["Tél: +225 07 67 49 58 04", f"Statut: {order.get_status_display()}"],
+            ["Tél: +225 07 12 14 71 66", f"Statut: {order.get_status_display()}"],
             ["Email: dsdgeneraltrading20@gmail.com", f"Ref: {order.order_number}"],
         ]
 
@@ -1649,7 +1649,7 @@ def admin_order_export(request, order_id):
         <para alignment="center">
         <font size="8" color="gray">
         DSD General Trading - Abidjan, Côte d'Ivoire<br/>
-        Tél: +225 07 67 49 58 04 - Email: dsdgeneraltrading20@gmail.com<br/>
+        Tél: +225 07 12 14 71 66 - Email: dsdgeneraltrading20@gmail.com<br/>
         Ce document a une valeur informative et constitue une preuve d'achat.
         </font>
         </para>
@@ -1701,7 +1701,7 @@ def export_html_fallback(request, order):
             <div>
                 <strong>Tech & Home</strong><br>
                 Abidjan, Côte d'Ivoire<br>
-                Tél: +225 07 07 07 07 07<br>
+                Tél: +225 07 12 14 71 66<br>
                 Email: contact@techandhome.ci
             </div>
             <div style="text-align: right;">
